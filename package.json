@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && cp -r migrations .next/migrations",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postbuild": "cp -r migrations .next/migrations"
+    "lint": "next lint",    
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
