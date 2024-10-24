@@ -1,7 +1,7 @@
 import { LoadingButton } from '@mui/lab';
 import { Box, styled } from '@mui/material';
 
-const Container = styled(Box)(({ theme }) => ({
+const Container = styled(Box)(() => ({
   width: '100%',
   display: 'flex',
   justifyContent: 'center',

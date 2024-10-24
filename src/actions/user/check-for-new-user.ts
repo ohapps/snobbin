@@ -1,7 +1,6 @@
 import { db } from "@/db";
 import { snobsTable } from "@/db/schema";
 import { Session } from "@auth0/nextjs-auth0";
-import { eq } from "drizzle-orm";
 import { getUserFromSession } from "./get-user-from-session";
 
 export const checkForNewUser = async (session: Session) => {

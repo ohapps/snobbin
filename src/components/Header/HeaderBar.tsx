@@ -7,13 +7,13 @@ import MainNavigation from './MainNavigation';
 import NavigationMenu from './NavigationMenu';
 import UserMenu from './UserMenu';
 
-export const HeaderItemsWrapper = styled('div')(({ theme }) => ({
+export const HeaderItemsWrapper = styled('div')(() => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 }));
 
-export const Toolbar = styled(MuiToolbar)(({ theme }) => ({
+export const Toolbar = styled(MuiToolbar)(() => ({
   justifyContent: 'space-between',
 }));
 
