@@ -28,6 +28,7 @@ const EditProfileForm = ({ snob }: { snob: Snob }) => {
       firstName: snob.firstName,
       lastName: snob.lastName,
     },
+    mode: 'onChange',
     resolver: zodResolver(ProfileSchema),
   });
 
