@@ -4,8 +4,7 @@ import { Session } from "@auth0/nextjs-auth0";
 import { getUserFromSession } from "./get-user-from-session";
 
 export const checkForNewUser = async (session: Session) => {
-
-    const snob = getUserFromSession(session);
+    const snob = await getUserFromSession(session);
 
     if (!snob) {
         await db.insert(snobsTable).values({

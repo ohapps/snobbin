@@ -11,7 +11,7 @@ export type Profile = z.infer<typeof ProfileSchema>;
 export interface Snob {
     id: string;
     email: string;
-    firstName?: string;
-    lastName?: string;
-    pictureUrl?: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    pictureUrl?: string | null;
 }

@@ -1,9 +1,43 @@
 {
-  "id": "b32e9696-eca1-478c-86a4-ff5e98281203",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "9c91ff90-16ea-49a2-a5a6-6df73e493964",
+  "prevId": "b32e9696-eca1-478c-86a4-ff5e98281203",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.snob_group_invites": {
+      "name": "snob_group_invites",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.snob_group_members": {
       "name": "snob_group_members",
       "schema": "",

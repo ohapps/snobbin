@@ -2,8 +2,8 @@ import { styled, TextField, TextFieldProps } from '@mui/material';
 import { Controller, useFormContext } from 'react-hook-form';
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  marginBottom: theme.spacing(2),
+  marginTop: theme.spacing(1.5),
+  marginBottom: theme.spacing(1.5),
 }));
 
 export type ControlledTextFieldProps = {
