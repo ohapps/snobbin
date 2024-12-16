@@ -25,8 +25,8 @@ const EditProfileForm = ({ snob }: { snob: Snob }) => {
   const methods = useForm<Profile>({
     defaultValues: {
       email: snob.email,
-      firstName: snob.firstName,
-      lastName: snob.lastName,
+      firstName: snob.firstName ?? '',
+      lastName: snob.lastName ?? '',
     },
     mode: 'onChange',
     resolver: zodResolver(ProfileSchema),

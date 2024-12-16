@@ -32,7 +32,7 @@ export const TextField = styled(MuiTextField)(({ theme }) => ({
   },
 }));
 
-export const InviteContainer = styled(Box)(({ theme }) => ({
+export const InviteContainer = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
 }));

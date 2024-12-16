@@ -14,13 +14,13 @@ const Content = styled(Box)(({ theme }) => ({
   maxWidth: theme.spacing(150),
 }));
 
-const Header = styled(Box)(({ theme }) => ({
+const Header = styled(Box)(() => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
 }));
 
-const Title = styled(Typography)(({ theme }) => ({}));
+const Title = styled(Typography)(() => ({}));
 
 const BottomDrawer = ({
   open,

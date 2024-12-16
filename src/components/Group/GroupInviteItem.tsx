@@ -7,7 +7,7 @@ import { SnobGroupInvite } from '@/types/snobGroup';
 import ConfirmModal from '../Modal/ConfirmModal';
 import { deleteGroupInvite } from '@/actions/group/delete-group-invite';
 
-export const InviteContainer = styled(Box)(({ theme }) => ({
+export const InviteContainer = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
 }));

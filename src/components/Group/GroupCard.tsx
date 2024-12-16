@@ -24,7 +24,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   },
 }));
 
-const CardContent = styled(MuiCardContent)(({ theme }) => ({
+const CardContent = styled(MuiCardContent)(() => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
@@ -38,11 +38,11 @@ const Info = styled(Box)(({ theme }) => ({
   paddingLeft: theme.spacing(1),
 }));
 
-const Title = styled(Typography)(({ theme }) => ({
+const Title = styled(Typography)(() => ({
   fontWeight: 'bold',
 }));
 
-const Description = styled(Typography)(({ theme }) => ({}));
+const Description = styled(Typography)(() => ({}));
 
 const Avatar = styled(MuiAvatar)(({ theme }) => ({
   width: theme.spacing(6),

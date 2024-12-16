@@ -3,7 +3,6 @@ import { snobGroupMembersTable, snobGroupsTable } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getCurrentUser } from "../user/get-current-user";
 import { SnobGroup } from "@/types/snobGroup";
-import { getGroupMembers } from "./get-group-members";
 import { convertGroupEntityToModel } from "./convert-group-entity-to-model";
 
 export const getCurrentUserGroups = async (): Promise<SnobGroup[]> => {
