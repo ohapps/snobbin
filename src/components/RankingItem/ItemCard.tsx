@@ -6,11 +6,9 @@ import {
   Card as MuiCard,
   Typography,
   styled,
-  useTheme,
 } from '@mui/material';
 import { useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import useCurrentGroupMember from '@/hooks/useCurrentGroupMember';
 import { SnobGroup } from '@/types/snobGroup';
 import { RankingItem } from '@/types/rankings';
 import Grid from '@mui/material/Grid2';
