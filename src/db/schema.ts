@@ -45,3 +45,46 @@ export const snobGroupInvitesTable = pgTable('snob_group_invites', {
 
 export type InsertSnobGroupInvites = typeof snobGroupInvitesTable.$inferInsert;
 export type SelectSnobGroupInvites = typeof snobGroupInvitesTable.$inferSelect;
+
+export const snobGroupAttributesTable = pgTable('snob_group_attributes', {
+    id: uuid('id').primaryKey(),
+    groupId: uuid('group_id').notNull().references(() => snobGroupsTable.id),
+    name: text('name').notNull()
+});
+
+export type InsertSnobGroupAttributes = typeof snobGroupAttributesTable.$inferInsert;
+export type SelectSnobGroupAttributes = typeof snobGroupAttributesTable.$inferSelect;
+
+export const rankingItemsTable = pgTable('ranking_items', {
+    id: uuid('id').primaryKey(),
+    groupId: uuid('group_id').notNull().references(() => snobGroupsTable.id),
+    description: text('description').notNull(),
+    ranked: boolean('ranked').notNull(),
+    averageRanking: numeric('averageRanking'),
+    imageId: text('image_id'),
+    imageUrl: text('image_url'),
+});
+
+export type InsertRankingItems = typeof rankingItemsTable.$inferInsert;
+export type SelectRankingItems = typeof rankingItemsTable.$inferSelect;
+
+export const rankingItemAttributesTable = pgTable('ranking_item_attributes', {
+    id: uuid('id').primaryKey(),
+    itemId: uuid('item_id').notNull().references(() => rankingItemsTable.id),
+    attributeId: uuid('attribute_id').notNull().references(() => snobGroupAttributesTable.id),
+    attributeValue: text('attribute_value').notNull()
+});
+
+export type InsertRankingItemAttributes = typeof rankingItemAttributesTable.$inferInsert;
+export type SelectRankingItemAttributes = typeof rankingItemAttributesTable.$inferSelect;
+
+export const rankingsTable = pgTable('rankings', {
+    id: uuid('id').primaryKey(),
+    itemId: uuid('item_id').notNull().references(() => rankingItemsTable.id),
+    groupMemberId: uuid('group_member_id').notNull().references(() => snobGroupMembersTable.id),
+    ranking: numeric('ranking').notNull(),
+    notes: text('notes')
+});
+
+export type InsertRankings = typeof rankingsTable.$inferInsert;
+export type SelectRankings = typeof rankingsTable.$inferSelect;

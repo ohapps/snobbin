@@ -18,6 +18,7 @@ export enum SnobGroupRole {
 }
 
 export type SnobGroupMember = {
+    id: string;
     snob: Snob;
     role: SnobGroupRole;
 }

@@ -15,6 +15,20 @@
       "when": 1731555899666,
       "tag": "0001_graceful_carmella_unuscione",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1734665775374,
+      "tag": "0002_loving_pretty_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1736999358522,
+      "tag": "0003_aspiring_war_machine",
+      "breakpoints": true
     }
   ]
 }
