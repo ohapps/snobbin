@@ -11,7 +11,7 @@ import { useAtom } from 'jotai';
 import { selectedRankingItem } from '@/atoms/app';
 import { PagingNavigation } from './PagingNavigation';
 
-const NewItemButton = styled(Button)(({ theme }) => ({
+const NewItemButton = styled(Button)(() => ({
   fontSize: 12,
   height: '40px',
 }));

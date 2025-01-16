@@ -29,7 +29,7 @@ export const Title = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.h6.fontSize,
 }));
 
-export const AttributeContainer = styled(Box)(({ theme }) => ({
+export const AttributeContainer = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
 }));
@@ -45,8 +45,8 @@ export const AttributeValue = styled(Box)(({ theme }) => ({
 
 const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
   const [expanded, setExpanded] = useState(false);
-  const theme = useTheme();
-  const groupMember = useCurrentGroupMember(group);
+  // const theme = useTheme();
+  // const groupMember = useCurrentGroupMember(group);
 
   // const getAttributeValue = (id: string) => {
   //   return (
