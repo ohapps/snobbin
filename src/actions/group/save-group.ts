@@ -5,7 +5,7 @@ import { SnobGroup, SnobGroupRole, SnobGroupSchema } from "@/types/snobGroup";
 import { getCurrentUser } from "../user/get-current-user";
 import { db } from "@/db";
 import { snobGroupsTable, snobGroupMembersTable, snobGroupAttributesTable } from "@/db/schema";
-import { and, eq, not, notInArray } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
 import { generateNewId } from "@/utils/generate-new-id";
 import { getGroupForUser } from "./get-group-for-user";
 import { Snob } from "@/types/snob";

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { snobGroupAttributesTable, snobGroupMembersTable, snobGroupsTable } from "@/db/schema";
+import { snobGroupMembersTable, snobGroupsTable } from "@/db/schema";
 import { AccessDeniedError } from "@/types/errors";
 import { SnobGroupRole } from "@/types/snobGroup";
 import { eq, and, inArray } from "drizzle-orm";

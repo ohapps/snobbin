@@ -16,7 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { SnobGroupAttribute } from '@/types/snobGroup';
 import { useFormContext } from 'react-hook-form';
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(() => ({
   marginTop: '10px',
   marginBottom: '10px',
 }));
@@ -28,7 +28,7 @@ const AttributeList = styled(List)(({ theme }) => ({
   overflowY: 'auto',
 }));
 
-const AttributeItem = styled(ListItem)(({ theme }) => ({
+const AttributeItem = styled(ListItem)(() => ({
   padding: '0px 10px 0px 10px',
 }));
 
@@ -38,7 +38,7 @@ const newAttribute: SnobGroupAttribute = {
 };
 
 const GroupAttributes = () => {
-  const { watch, setValue, formState } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const groupAttributes = watch('attributes') as SnobGroupAttribute[];
   const [selectedAttribute, setSelectedAttribute] =
     useState<SnobGroupAttribute>(newAttribute);
