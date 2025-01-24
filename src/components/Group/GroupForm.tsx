@@ -11,6 +11,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import StarIcon from '@mui/icons-material/Star';
 import { saveGroup } from '@/actions/group/save-group';
 import { useSnackbar } from 'notistack';
+import GroupAttributes from './GroupAttributes';
 
 const GroupForm = ({
   group,
@@ -31,6 +32,7 @@ const GroupForm = ({
       increments: group.increments,
       rankIcon: group.rankIcon,
       rankingsRequired: group.rankingsRequired,
+      attributes: group.attributes ?? [],
     },
     mode: 'onChange',
     resolver: zodResolver(SnobGroupSchema),
@@ -95,6 +97,9 @@ const GroupForm = ({
                 <FavoriteIcon fontSize="small" />
               </MenuItem>
             </ControlledSelect>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <GroupAttributes />
           </Grid>
           <Grid size={12}>
             <FullSubmitButton

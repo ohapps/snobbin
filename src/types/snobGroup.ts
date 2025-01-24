@@ -10,6 +10,10 @@ export const SnobGroupSchema = z.object({
     increments: z.coerce.number().min(0, 'increments must be greater than or equal to 0'),
     rankIcon: z.string().min(1, 'rank icon is required'),
     rankingsRequired: z.coerce.number().min(0, 'rankings required must be greater than or equal to 0'),
+    attributes: z.array(z.object({
+        id: z.string().uuid().optional(),
+        name: z.string().min(1, 'attribute name is required').max(50, 'attribute name must be less than or equal to 50 characters')
+    }))
 });
 
 export enum SnobGroupRole {
@@ -37,9 +41,15 @@ export type SnobGroupInvite = {
     groupName: string;
 };
 
+export type SnobGroupAttribute = {
+    id?: string,
+    name: string
+}
+
 export type SnobGroup = {
     members: SnobGroupMember[];
     invites: SnobGroupInvite[];
+    attributes: SnobGroupAttribute[];
 } & z.infer<typeof SnobGroupSchema>;
 
 export const newSnobGroup: SnobGroup = {
@@ -53,5 +63,6 @@ export const newSnobGroup: SnobGroup = {
     rankingsRequired: 1,
     members: [],
     invites: [],
+    attributes: []
 }
 
