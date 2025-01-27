@@ -21,9 +21,17 @@ export const RankingItemSchema = z.object({
     id: z.string().optional(),
     groupId: z.string().uuid(),
     description: z.string().min(1, 'description is required').max(100, 'description must be less than or equal to 100 characters'),
-    imageId: z.string().uuid().optional(),
+    imageId: z.string().optional(),
     imageUrl: z.string().url().optional(),
 });
+
+export type RankItemUpdate = z.infer<typeof RankingItemSchema>;
+
+export type RankingItemAttribute = {
+    id: string;
+    attributeId: string;
+    attributeValue: string;
+}
 
 export type RankingItem = {
     id: string;
@@ -34,6 +42,7 @@ export type RankingItem = {
     imageId: string | null;
     imageUrl: string | null;
     rankings: Ranking[];
+    attributes: RankingItemAttribute[];
 }
 
 export const defaultNewRankingItem: RankingItem = {
@@ -44,7 +53,8 @@ export const defaultNewRankingItem: RankingItem = {
     ranked: false,
     imageId: null,
     imageUrl: null,
-    rankings: []
+    rankings: [],
+    attributes: []
 }
 
 export enum RankingItemSoryBy {

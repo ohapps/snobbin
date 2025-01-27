@@ -3,6 +3,7 @@ import { eq, and, ilike, SQL, sql, asc, desc } from "drizzle-orm";
 import { rankingItemsTable } from "@/db/schema";
 import { PaginatedResults, RankingItemSortDirection, RankingItemSoryBy } from "@/types/rankings";
 import { getRankings } from "./get-rankings";
+import { getRankingAttributes } from "./get-ranking-attributes";
 
 const getSortBy = (sortBy: string, sortDirection: string) => {
     if (sortBy === RankingItemSoryBy.DESCRIPTION) {
@@ -30,13 +31,11 @@ export const getItems = async (
         filters.push(ilike(rankingItemsTable.description, `%${keyword}%`));
     }
 
-    // Get total count
     const [{ count }] = await db
         .select({ count: sql<number>`count(*)` })
         .from(rankingItemsTable)
         .where(and(...filters));
 
-    // Get paginated items
     const offset = (page - 1) * pageSize;
     const items = await db
         .select()
@@ -55,7 +54,8 @@ export const getItems = async (
             averageRanking: item.averageRanking ? parseFloat(item.averageRanking) : null,
             imageId: item.imageId,
             imageUrl: item.imageUrl,
-            rankings: await getRankings(item.id)
+            rankings: await getRankings(item.id),
+            attributes: await getRankingAttributes(item.id)
         }))),
         total: count,
         pageSize

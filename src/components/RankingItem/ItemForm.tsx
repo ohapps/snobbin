@@ -2,12 +2,20 @@ import { RankingItem, RankingItemSchema } from '@/types/rankings';
 import { SnobGroup } from '@/types/snobGroup';
 import Grid from '@mui/material/Grid2';
 import { useSnackbar } from 'notistack';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import FullSubmitButton from '../Form/FullSubmitButton';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ControlledTextField from '../Form/ControlledTextField';
 import { saveItem } from '@/actions/items/save-item';
+import { styled, TextField } from '@mui/material';
+import ImageUploadButton from '../Image/ImageUploadButton';
+import { getImageOrPlaceholder } from '@/types/image';
+
+const StyledTextField = styled(TextField)(() => ({
+  marginTop: '10px',
+  marginBottom: '10px',
+}));
 
 const ItemForm = ({
   rankingItem,
@@ -30,18 +38,23 @@ const ItemForm = ({
     resolver: zodResolver(RankingItemSchema),
   });
 
-  // const [attributes, setAttributes] = useState(
-  //   rankingItem.attributes.map((attr) => ({
-  //     id: attr.id,
-  //     attributeId: attr.attributeId,
-  //     attributeValue: attr.attributeValue,
-  //   })) ?? []
-  // );
-  // const [image, setImage] = useState(getImageOrPlaceholder(rankingItem));
+  const [attributes, setAttributes] = useState(
+    rankingItem?.attributes?.map((attr) => ({
+      id: attr.id,
+      attributeId: attr.attributeId,
+      attributeValue: attr.attributeValue,
+    })) ?? []
+  );
+  const [image, setImage] = useState(getImageOrPlaceholder(rankingItem));
 
   const onSubmit = async (data: RankingItem) => {
     startTransition(async () => {
-      const results = await saveItem(data);
+      const results = await saveItem({
+        ...data,
+        attributes,
+        imageId: image.publicId,
+        imageUrl: image.url,
+      });
       if (results.success) {
         enqueueSnackbar('Item saved successfully', { variant: 'success' });
         onSave();
@@ -51,34 +64,34 @@ const ItemForm = ({
     });
   };
 
-  // const getAttributeValue = (id: string) => {
-  //   return (
-  //     attributes?.find((attr) => attr.attributeId === id)?.attributeValue ?? ''
-  //   );
-  // };
+  const getAttributeValue = (id: string) => {
+    return (
+      attributes?.find((attr) => attr.attributeId === id)?.attributeValue ?? ''
+    );
+  };
 
-  // const setAttributeValue = (id: string, value: string) => {
-  //   const existingAttribute = attributes?.find(
-  //     (attr) => attr.attributeId === id
-  //   );
-  //   if (existingAttribute) {
-  //     const otherAttributes = attributes?.filter(
-  //       (attr) => attr.attributeId !== id
-  //     );
-  //     setAttributes([
-  //       ...otherAttributes,
-  //       {
-  //         ...existingAttribute,
-  //         attributeValue: value,
-  //       },
-  //     ]);
-  //   } else {
-  //     setAttributes([
-  //       ...attributes,
-  //       { id: '', attributeId: id, attributeValue: value },
-  //     ]);
-  //   }
-  // };
+  const setAttributeValue = (id: string, value: string) => {
+    const existingAttribute = attributes?.find(
+      (attr) => attr.attributeId === id
+    );
+    if (existingAttribute) {
+      const otherAttributes = attributes?.filter(
+        (attr) => attr.attributeId !== id
+      );
+      setAttributes([
+        ...otherAttributes,
+        {
+          ...existingAttribute,
+          attributeValue: value,
+        },
+      ]);
+    } else {
+      setAttributes([
+        ...attributes,
+        { id: '', attributeId: id, attributeValue: value },
+      ]);
+    }
+  };
 
   return (
     <FormProvider {...methods}>
@@ -91,23 +104,23 @@ const ItemForm = ({
           <Grid size={{ xs: 12, md: 6 }}>
             <ControlledTextField name="description" label="Description" />
           </Grid>
-          {/* {rankingGroup.attributes?.map((attr) => (
-        <Grid item xs={12} md={6} key={attr.id}>
-          <StyledTextField
-            id={attr.id}
-            label={attr.name}
-            value={getAttributeValue(attr.id)}
-            fullWidth
-            autoFocus
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setAttributeValue(attr.id, event.target.value)
-            }
-          />
-        </Grid>
-      ))} */}
-          {/* <Grid item xs={12} md={6}>
-        <ImageUploadButton image={image} setImage={setImage} />
-      </Grid> */}
+          {rankingGroup.attributes?.map((attr) => (
+            <Grid size={{ xs: 12, md: 6 }} key={attr.id}>
+              <StyledTextField
+                id={attr.id}
+                label={attr.name}
+                value={getAttributeValue(attr.id ?? '')}
+                fullWidth
+                autoFocus
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setAttributeValue(attr.id ?? '', event.target.value)
+                }
+              />
+            </Grid>
+          ))}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <ImageUploadButton image={image} setImage={setImage} />
+          </Grid>
           <Grid size={{ xs: 12 }}>
             <FullSubmitButton
               loading={isPending}
