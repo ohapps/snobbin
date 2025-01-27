@@ -16,7 +16,7 @@ const ModalBody = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   padding: theme.spacing(2),
   backgroundColor: theme.palette.background.default,
-  position: 'absolute' as 'absolute',
+  position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',

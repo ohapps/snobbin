@@ -2,7 +2,7 @@ import { RankingItem } from '@/types/rankings';
 import { SnobGroup } from '@/types/snobGroup';
 import { Rating, Typography, styled } from '@mui/material';
 
-export const Container = styled('div')(({ theme }) => ({
+export const Container = styled('div')(() => ({
   display: 'flex',
 }));
 

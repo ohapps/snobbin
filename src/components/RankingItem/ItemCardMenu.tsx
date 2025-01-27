@@ -101,7 +101,7 @@ const ItemCardMenu = ({ item }: { item: RankingItem }) => {
           <LoadingButton
             onClick={handleDelete}
             variant="contained"
-            // loading={loading}
+            loading={isDeleting}
           >
             Yes
           </LoadingButton>

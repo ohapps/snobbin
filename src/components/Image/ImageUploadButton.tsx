@@ -1,4 +1,4 @@
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import {
   CldUploadButton,
   CloudinaryUploadWidgetInfo,
@@ -14,7 +14,6 @@ const ImageUploadButton = ({
   image: ItemImage;
   setImage: (image: ItemImage) => void;
 }) => {
-  const theme = useTheme();
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
       <ImagePreview image={image} />
