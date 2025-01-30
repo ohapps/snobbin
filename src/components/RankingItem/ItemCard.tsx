@@ -32,18 +32,20 @@ export const Title = styled(Typography)(({ theme }) => ({
   fontSize: theme.typography.h6.fontSize,
 }));
 
-export const AttributeContainer = styled(Box)(() => ({
+export const AttributeContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'row',
+  paddingTop: theme.spacing(1),
 }));
 
 export const AttributeLabel = styled(Box)(({ theme }) => ({
   fontWeight: theme.typography.fontWeightBold,
-  paddingTop: theme.spacing(1),
+  minWidth: theme.spacing(10),
 }));
 
 export const AttributeValue = styled(Box)(({ theme }) => ({
   minHeight: theme.spacing(1),
+  paddingLeft: theme.spacing(1),
 }));
 
 const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
@@ -73,11 +75,15 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
             <ItemCardMenu item={item} />
           )}
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Title>{item.description}</Title>
+        <Grid
+          size={{ xs: 12, md: 4 }}
+          display={'flex'}
+          justifyContent={'center'}
+        >
           <ImagePreview image={getImageOrPlaceholder(item)} />
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Title>{item.description}</Title>
           <ItemRating group={group} item={item} />
           {group.attributes?.map((attr) => (
             <AttributeContainer key={attr.id}>

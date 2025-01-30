@@ -31,8 +31,8 @@ const ImagePreview = ({ image }: { image: ItemImage }) => {
   return (
     <>
       <CldImage
-        width="150"
-        height="150"
+        width="200"
+        height="200"
         crop="fill"
         src={image.publicId}
         alt="item image"

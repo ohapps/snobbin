@@ -24,7 +24,7 @@ export const getItems = async (
     sortBy: string,
     sortDirection: string
 ): Promise<PaginatedResults> => {
-    const pageSize = 3;
+    const pageSize = 20;
     const filters: SQL[] = [eq(rankingItemsTable.groupId, groupId)];
 
     if (keyword) {

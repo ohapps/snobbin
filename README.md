@@ -32,7 +32,11 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- [ ] Setup custom domain in Vercel
-- [ ] Fix ranking item card layout
+- [x] Setup custom domain in Vercel
+- [x] Fix ranking item card layout
 - [ ] Fix sorting layout
 - [ ] Load Brewgene data into database
+- [ ] Add logo
+- [ ] Cleanup Activity Screen
+- [ ] Add email functionality
+- [ ] Add websocket events for real-time updates
