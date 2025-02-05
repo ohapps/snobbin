@@ -1,20 +1,14 @@
 'use client';
 
-import { defaultNewRankingItem, PaginatedResults } from '@/types/rankings';
+import { PaginatedResults } from '@/types/rankings';
 import { SnobGroup } from '@/types/snobGroup';
-import { Box, Button, styled } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import ItemListSort from './ItemListSort';
 import SearchBox from './SearchBox';
 import ItemListPage from './ItemListPage';
-import { useAtom } from 'jotai';
-import { selectedRankingItem } from '@/atoms/app';
 import { PagingNavigation } from './PagingNavigation';
-
-const NewItemButton = styled(Button)(() => ({
-  fontSize: 12,
-  height: '40px',
-}));
+import SortByMenu from './SortByMenu';
+import NewItemButton from './NewItemButton';
 
 const ItemList = ({
   group,
@@ -23,34 +17,41 @@ const ItemList = ({
   group: SnobGroup;
   paginatedResults: PaginatedResults;
 }) => {
-  const [, setSelectedRankingItem] = useAtom(selectedRankingItem);
-
-  const newItem = () => {
-    setSelectedRankingItem(defaultNewRankingItem);
-  };
-
   return (
     <Box>
       <Grid container>
         <Grid
           size={{ md: 6, xs: 12 }}
-          display={'flex'}
-          sx={{ justifyContent: { xs: 'flex-end', md: 'flex-start' } }}
-          alignItems={'center'}
           paddingBottom={2}
+          display={'flex'}
+          alignItems={'center'}
         >
-          <ItemListSort total={paginatedResults.total} />
+          <Typography variant="h5">{paginatedResults.total} items</Typography>
         </Grid>
         <Grid
           size={{ md: 6, xs: 12 }}
           display={'flex'}
+          sx={{ justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
           paddingBottom={2}
-          justifyContent={'flex-end'}
         >
           <SearchBox />
-          <NewItemButton variant="contained" size="small" onClick={newItem}>
-            New Item
-          </NewItemButton>
+        </Grid>
+        <Grid
+          size={{ md: 6, xs: 12 }}
+          display={'flex'}
+          justifyContent={'flex-start'}
+          alignItems={'center'}
+          paddingBottom={2}
+        >
+          <SortByMenu />
+        </Grid>
+        <Grid
+          size={{ md: 6, xs: 12 }}
+          display={'flex'}
+          sx={{ justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
+          paddingBottom={2}
+        >
+          <NewItemButton />
         </Grid>
       </Grid>
       <ItemListPage group={group} items={paginatedResults.items} />

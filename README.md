@@ -35,8 +35,13 @@ npx drizzle-kit migrate
 - [x] Setup custom domain in Vercel
 - [x] Fix ranking item card layout
 - [ ] Fix sorting layout
+- [ ] Cleanup source code
 - [ ] Load Brewgene data into database
 - [ ] Add logo
 - [ ] Cleanup Activity Screen
 - [ ] Add email functionality
 - [ ] Add websocket events for real-time updates
+
+## Schema
+
+![DB Schema](/docs/QuickDBD-export.png)

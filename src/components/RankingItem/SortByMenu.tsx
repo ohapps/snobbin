@@ -1,16 +1,23 @@
 import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
 import { RankingItemSortDirection, RankingItemSoryBy } from '@/types/rankings';
 import { enumToDisplay } from '@/utils/enum-to-display';
-import { Button, Menu, MenuItem } from '@mui/material';
+import { Box, Button, Menu, MenuItem, styled, Typography } from '@mui/material';
 import { useState } from 'react';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
-const ItemListSort = ({ total }: { total: number }) => {
+const SortByButton = styled(Button)(({ theme }) => ({
+  fontSize: 12,
+  height: theme.spacing(4.5),
+  marginLeft: theme.spacing(1),
+  marginRight: theme.spacing(1),
+}));
+
+const SortByMenu = () => {
   const updateQueryParams = useUpdateQueryParams();
   const [sortBy, setSortBy] = useState(RankingItemSoryBy.AVERAGE_RANKING);
   const [sortDirection, setSortDirection] = useState(
-    RankingItemSortDirection.DESC
+    RankingItemSortDirection.ASC
   );
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -25,27 +32,28 @@ const ItemListSort = ({ total }: { total: number }) => {
     setSortBy(sortBy);
     setSortDirection(sortDirection);
     setAnchorEl(null);
-    updateQueryParams({ sortBy: sortBy, sortDirection: sortDirection });
+    updateQueryParams({ sortBy, sortDirection });
   };
 
   return (
-    <>
-      <Button
-        id="sort-button"
-        aria-controls={open ? 'sort-menu' : undefined}
+    <Box display="flex" alignItems="center">
+      <Typography>Sorted By:</Typography>
+      <SortByButton
+        id="sort-by-button"
+        aria-controls={open ? 'sort-by-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
-        variant="outlined"
+        variant="contained"
+        endIcon={<KeyboardArrowDownIcon />}
       >
-        {total.toLocaleString()} items sorted by {enumToDisplay(sortBy)}{' '}
-        {enumToDisplay(sortDirection)}
-      </Button>
+        {enumToDisplay(sortBy)} {enumToDisplay(sortDirection)}
+      </SortByButton>
       <Menu
-        id="sort-menu"
+        id="sort-by-menu"
         anchorEl={anchorEl}
         open={open}
-        onClose={() => handleClose(sortBy, sortDirection)}
+        onClose={() => setAnchorEl(null)}
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
@@ -58,7 +66,7 @@ const ItemListSort = ({ total }: { total: number }) => {
             )
           }
         >
-          sort by description asc
+          description asc
         </MenuItem>
         <MenuItem
           onClick={() =>
@@ -68,7 +76,7 @@ const ItemListSort = ({ total }: { total: number }) => {
             )
           }
         >
-          sort by description desc
+          description desc
         </MenuItem>
         <MenuItem
           onClick={() =>
@@ -78,7 +86,7 @@ const ItemListSort = ({ total }: { total: number }) => {
             )
           }
         >
-          sort by average ranking asc
+          average ranking asc
         </MenuItem>
         <MenuItem
           onClick={() =>
@@ -88,11 +96,11 @@ const ItemListSort = ({ total }: { total: number }) => {
             )
           }
         >
-          sort by average ranking desc
+          average ranking desc
         </MenuItem>
       </Menu>
-    </>
+    </Box>
   );
 };
 
-export default ItemListSort;
+export default SortByMenu;
