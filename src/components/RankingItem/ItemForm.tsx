@@ -102,11 +102,13 @@ const ItemForm = ({
       >
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <ControlledTextField name="description" label="Description" />
+            <ImageUploadButton image={image} setImage={setImage} />
           </Grid>
-          {rankingGroup.attributes?.map((attr) => (
-            <Grid size={{ xs: 12, md: 6 }} key={attr.id}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <ControlledTextField name="description" label="Description" />
+            {rankingGroup.attributes?.map((attr) => (
               <StyledTextField
+                key={attr.id}
                 id={attr.id}
                 label={attr.name}
                 value={getAttributeValue(attr.id ?? '')}
@@ -116,10 +118,7 @@ const ItemForm = ({
                   setAttributeValue(attr.id ?? '', event.target.value)
                 }
               />
-            </Grid>
-          ))}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <ImageUploadButton image={image} setImage={setImage} />
+            ))}
           </Grid>
           <Grid size={{ xs: 12 }}>
             <FullSubmitButton

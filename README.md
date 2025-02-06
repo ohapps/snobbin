@@ -34,7 +34,8 @@ npx drizzle-kit migrate
 
 - [x] Setup custom domain in Vercel
 - [x] Fix ranking item card layout
-- [ ] Fix sorting layout
+- [x] Fix sorting layout
+- [ ] Fix item drawer layout
 - [ ] Cleanup source code
 - [ ] Load Brewgene data into database
 - [ ] Add logo
