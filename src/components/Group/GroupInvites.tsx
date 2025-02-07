@@ -14,7 +14,7 @@ import { useSnackbar } from 'notistack';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { GroupInviteStatus, SnobGroup } from '@/types/snobGroup';
 import GroupInviteItem from './GroupInviteItem';
-import { sendGroupInvite } from '@/actions/group/send-group-invite';
+import { sendGroupInvite } from '@/server/actions/group/send-group-invite';
 
 export const Title = styled(Typography)(({ theme }) => ({
   fontWeight: theme.typography.fontWeightBold,

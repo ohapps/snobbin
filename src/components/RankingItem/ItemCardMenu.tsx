@@ -16,7 +16,7 @@ import { useSnackbar } from 'notistack';
 import { RankingItem } from '@/types/rankings';
 import { useAtom } from 'jotai';
 import { selectedRankingItem } from '@/atoms/app';
-import { deleteItem } from '@/actions/items/delete-item';
+import { deleteItem } from '@/server/actions/items/delete-item';
 
 const Menu = styled(MuiMenu)(({ theme }) => ({
   '& .MuiMenu-paper': {

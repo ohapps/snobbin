@@ -5,18 +5,20 @@ import FullSubmitButton from '../Form/FullSubmitButton';
 import { Snob, Profile, ProfileSchema } from '@/types/snob';
 import ControlledTextField from '../Form/ControlledTextField';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { saveProfile } from '@/actions/profile/save-profile';
+import { saveProfile } from '@/server/actions/profile/save-profile';
 import { useTransition } from 'react';
 import { useSnackbar } from 'notistack';
-import { Card, Divider, styled } from '@mui/material';
-import PageTitle from '../Page/PageTitle';
+import { Box, Card, Divider, styled, Typography } from '@mui/material';
 
 const Container = styled(Card)(({ theme }) => ({
-  padding: theme.spacing(2),
   maxWidth: theme.breakpoints.values.sm,
   marginTop: theme.spacing(2),
   marginLeft: 'auto',
   marginRight: 'auto',
+}));
+
+export const Title = styled(Typography)(({ theme }) => ({
+  padding: theme.spacing(2),
 }));
 
 const EditProfileForm = ({ snob }: { snob: Snob }) => {
@@ -47,25 +49,27 @@ const EditProfileForm = ({ snob }: { snob: Snob }) => {
 
   return (
     <Container>
-      <PageTitle title="Edit Profile" />
+      <Title variant="h5">Edit Profile</Title>
       <Divider sx={{ mb: 2 }} />
-      <FormProvider {...methods}>
-        <form
-          onSubmit={methods.handleSubmit(onSave)}
-          noValidate
-          autoComplete="off"
-        >
-          <ControlledTextField name="email" label="Email" disabled />
-          <ControlledTextField name="firstName" label="First Name" />
-          <ControlledTextField name="lastName" label="Last Name" />
-          <FullSubmitButton
-            loading={isPending}
-            disabled={!methods.formState.isValid || isPending}
+      <Box padding={2}>
+        <FormProvider {...methods}>
+          <form
+            onSubmit={methods.handleSubmit(onSave)}
+            noValidate
+            autoComplete="off"
           >
-            SAVE PROFILE
-          </FullSubmitButton>
-        </form>
-      </FormProvider>
+            <ControlledTextField name="email" label="Email" disabled />
+            <ControlledTextField name="firstName" label="First Name" />
+            <ControlledTextField name="lastName" label="Last Name" />
+            <FullSubmitButton
+              loading={isPending}
+              disabled={!methods.formState.isValid || isPending}
+            >
+              SAVE PROFILE
+            </FullSubmitButton>
+          </form>
+        </FormProvider>
+      </Box>
     </Container>
   );
 };

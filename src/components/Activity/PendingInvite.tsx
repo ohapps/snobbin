@@ -10,8 +10,8 @@ import RejectIcon from '@mui/icons-material/ThumbDownAlt';
 import { useSnackbar } from 'notistack';
 import { SnobGroupInvite } from '@/types/snobGroup';
 import { useTransition } from 'react';
-import { acceptGroupInvite } from '@/actions/group/accept-group-invite';
-import { declineGroupInvite } from '@/actions/group/decline-group-invite';
+import { acceptGroupInvite } from '@/server/actions/group/accept-group-invite';
+import { declineGroupInvite } from '@/server/actions/group/decline-group-invite';
 
 const PendingInvite = ({ invite }: { invite: SnobGroupInvite }) => {
   const [loading, startTransition] = useTransition();

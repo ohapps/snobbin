@@ -7,7 +7,7 @@ import FullSubmitButton from '../Form/FullSubmitButton';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ControlledTextField from '../Form/ControlledTextField';
-import { saveItem } from '@/actions/items/save-item';
+import { saveItem } from '@/server/actions/items/save-item';
 import { styled, TextField } from '@mui/material';
 import ImageUploadButton from '../Image/ImageUploadButton';
 import { getImageOrPlaceholder } from '@/types/image';

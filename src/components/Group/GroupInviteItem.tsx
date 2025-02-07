@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react';
 import PersonIcon from '@mui/icons-material/Person';
 import { SnobGroupInvite } from '@/types/snobGroup';
 import ConfirmModal from '../Modal/ConfirmModal';
-import { deleteGroupInvite } from '@/actions/group/delete-group-invite';
+import { deleteGroupInvite } from '@/server/actions/group/delete-group-invite';
 
 export const InviteContainer = styled(Box)(() => ({
   display: 'flex',

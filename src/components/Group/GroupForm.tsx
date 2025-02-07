@@ -9,7 +9,7 @@ import ControlledSelect from '../Form/ControlledSelect';
 import { MenuItem } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import StarIcon from '@mui/icons-material/Star';
-import { saveGroup } from '@/actions/group/save-group';
+import { saveGroup } from '@/server/actions/group/save-group';
 import { useSnackbar } from 'notistack';
 import GroupAttributes from './GroupAttributes';
 

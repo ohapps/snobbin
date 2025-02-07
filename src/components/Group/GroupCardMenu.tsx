@@ -17,7 +17,7 @@ import { LoadingButton } from '@mui/lab';
 import { SnobGroup } from '@/types/snobGroup';
 import { selectedSnobGroup } from '@/atoms/app';
 import { useAtom } from 'jotai';
-import { deleteGroup } from '@/actions/group/delete-group';
+import { deleteGroup } from '@/server/actions/group/delete-group';
 
 const Menu = styled(MuiMenu)(({ theme }) => ({
   '& .MuiMenu-paper': {

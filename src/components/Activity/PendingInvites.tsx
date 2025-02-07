@@ -17,17 +17,17 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 const Title = styled(Typography)(({ theme }) => ({
   fontWeight: 'bold',
-  paddingBottom: theme.spacing(2),
+  padding: theme.spacing(2),
 }));
 
 const PendingInvites = ({ invites }: { invites: SnobGroupInvite[] }) => {
   return (
     <Card>
-      <CardContent>
+      <CardContent sx={{ padding: 0 }}>
         <Title>Pending Invites</Title>
         <Divider />
         {invites.length === 0 && (
-          <Typography sx={{ padding: 1 }}>No pending invites</Typography>
+          <Typography sx={{ padding: 2 }}>No pending invites</Typography>
         )}
         <List>
           {invites.map((invite) => (

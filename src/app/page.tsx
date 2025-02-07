@@ -1,6 +1,6 @@
 import UserInfo from '@/components/User/UserInfo';
-import { db } from '@/db';
-import { snobsTable } from '@/db/schema';
+import { db } from '@/server/db';
+import { snobsTable } from '@/server/db/schema';
 
 export default async function Home() {
   const snobs = await db.select().from(snobsTable);

@@ -7,7 +7,7 @@ import { SnobGroup } from '@/types/snobGroup';
 import { RankingItem } from '@/types/rankings';
 import OtherRanking from './OtherRanking';
 import Grid from '@mui/material/Grid2';
-import { saveRanking } from '@/actions/items/save-ranking';
+import { saveRanking } from '@/server/actions/items/save-ranking';
 
 const ItemRankings = ({
   group,

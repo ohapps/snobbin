@@ -1,4 +1,4 @@
-import { checkForNewUser } from '@/actions/user/check-for-new-user';
+import { checkForNewUser } from '@/server/utils/user/check-for-new-user';
 import { getSession } from '@auth0/nextjs-auth0';
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 import { redirect } from 'next/navigation';
