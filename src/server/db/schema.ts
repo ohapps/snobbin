@@ -60,7 +60,7 @@ export const rankingItemsTable = pgTable('ranking_items', {
     groupId: uuid('group_id').notNull().references(() => snobGroupsTable.id),
     description: text('description').notNull(),
     ranked: boolean('ranked').notNull(),
-    averageRanking: numeric('averageRanking'),
+    averageRanking: numeric('average_ranking'),
     imageId: text('image_id'),
     imageUrl: text('image_url'),
 });

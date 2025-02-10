@@ -33,6 +33,9 @@ npx drizzle-kit migrate
 ## Tasks
 
 - [ ] Load Brewgene data into database
+- [ ] Add default sort to items screen
+- [ ] Fix ability to add/edit attributes before saving
+- [ ] Add created/updated dates to ranking item tables to track recent items
 - [ ] Add loading screens
 - [ ] Add logo
 - [ ] Add email functionality

@@ -1,0 +1,1 @@
+ALTER TABLE "ranking_items" RENAME COLUMN "averageRanking" TO "average_ranking";
