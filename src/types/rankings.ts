@@ -59,12 +59,8 @@ export const defaultNewRankingItem: RankingItem = {
 
 export enum RankingItemSoryBy {
     DESCRIPTION = 'DESCRIPTION',
-    AVERAGE_RANKING = 'AVERAGE_RANKING'
-}
-
-export enum RankingItemSortDirection {
-    ASC = 'ASC',
-    DESC = 'DESC'
+    AVERAGE_RANKING = 'AVERAGE_RANKING',
+    MOST_RECENT = 'MOST_RECENT'
 }
 
 export interface PaginatedResults {

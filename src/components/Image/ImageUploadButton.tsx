@@ -24,7 +24,7 @@ const ImageUploadButton = ({
             const info = res.info as CloudinaryUploadWidgetInfo;
             setImage({
               publicId: info.public_id,
-              url: info.url,
+              url: info.secure_url,
             });
           }
         }}

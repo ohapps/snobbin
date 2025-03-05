@@ -1,5 +1,5 @@
 import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
-import { RankingItemSortDirection, RankingItemSoryBy } from '@/types/rankings';
+import { RankingItemSoryBy } from '@/types/rankings';
 import { enumToDisplay } from '@/utils/enum-to-display';
 import { Box, Button, Menu, MenuItem, styled, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -14,10 +14,7 @@ const SortByButton = styled(Button)(({ theme }) => ({
 
 const SortByMenu = () => {
   const updateQueryParams = useUpdateQueryParams();
-  const [sortBy, setSortBy] = useState(RankingItemSoryBy.AVERAGE_RANKING);
-  const [sortDirection, setSortDirection] = useState(
-    RankingItemSortDirection.ASC
-  );
+  const [sortBy, setSortBy] = useState(RankingItemSoryBy.MOST_RECENT);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -25,14 +22,10 @@ const SortByMenu = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = (
-    sortBy: RankingItemSoryBy,
-    sortDirection: RankingItemSortDirection
-  ) => {
+  const handleClose = (sortBy: RankingItemSoryBy) => {
     setSortBy(sortBy);
-    setSortDirection(sortDirection);
     setAnchorEl(null);
-    updateQueryParams({ sortBy, sortDirection });
+    updateQueryParams({ sortBy });
   };
 
   return (
@@ -47,7 +40,7 @@ const SortByMenu = () => {
         variant="contained"
         endIcon={<KeyboardArrowDownIcon />}
       >
-        {enumToDisplay(sortBy)} {enumToDisplay(sortDirection)}
+        {enumToDisplay(sortBy)}
       </SortByButton>
       <Menu
         id="sort-by-menu"
@@ -58,46 +51,11 @@ const SortByMenu = () => {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem
-          onClick={() =>
-            handleClose(
-              RankingItemSoryBy.DESCRIPTION,
-              RankingItemSortDirection.ASC
-            )
-          }
-        >
-          description asc
-        </MenuItem>
-        <MenuItem
-          onClick={() =>
-            handleClose(
-              RankingItemSoryBy.DESCRIPTION,
-              RankingItemSortDirection.DESC
-            )
-          }
-        >
-          description desc
-        </MenuItem>
-        <MenuItem
-          onClick={() =>
-            handleClose(
-              RankingItemSoryBy.AVERAGE_RANKING,
-              RankingItemSortDirection.ASC
-            )
-          }
-        >
-          average ranking asc
-        </MenuItem>
-        <MenuItem
-          onClick={() =>
-            handleClose(
-              RankingItemSoryBy.AVERAGE_RANKING,
-              RankingItemSortDirection.DESC
-            )
-          }
-        >
-          average ranking desc
-        </MenuItem>
+        {Object.values(RankingItemSoryBy).map((sortBy) => (
+          <MenuItem key={sortBy} onClick={() => handleClose(sortBy)}>
+            {enumToDisplay(sortBy)}
+          </MenuItem>
+        ))}
       </Menu>
     </Box>
   );

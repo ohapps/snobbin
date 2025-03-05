@@ -13,7 +13,6 @@ const GroupPage = async ({
     page: string;
     keyword: string;
     sortBy: string;
-    sortDirection: string;
   };
 }) => {
   const page = parseInt(searchParams.page, 10) || 1;
@@ -22,8 +21,7 @@ const GroupPage = async ({
     params.groupId,
     page,
     searchParams.keyword,
-    searchParams.sortBy,
-    searchParams.sortDirection
+    searchParams.sortBy
   );
   return (
     <PageContainer>

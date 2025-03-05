@@ -1,28 +1,27 @@
 import { db } from "@/server/db";
 import { eq, and, ilike, SQL, sql, asc, desc } from "drizzle-orm";
 import { rankingItemsTable } from "@/server/db/schema";
-import { PaginatedResults, RankingItemSortDirection, RankingItemSoryBy } from "@/types/rankings";
+import { PaginatedResults, RankingItemSoryBy } from "@/types/rankings";
 import { getRankings } from "./get-rankings";
 import { getRankingAttributes } from "./get-ranking-attributes";
 
-const getSortBy = (sortBy: string, sortDirection: string) => {
+const getSortBy = (sortBy: string) => {
     if (sortBy === RankingItemSoryBy.DESCRIPTION) {
-        return sortDirection === RankingItemSortDirection.ASC ? asc(rankingItemsTable.description) : desc(rankingItemsTable.description);
+        return asc(rankingItemsTable.description);
     }
 
     if (sortBy === RankingItemSoryBy.AVERAGE_RANKING) {
-        return sortDirection === RankingItemSortDirection.ASC ? asc(rankingItemsTable.averageRanking) : desc(rankingItemsTable.averageRanking);
+        return desc(rankingItemsTable.averageRanking);
     }
 
-    return asc(rankingItemsTable.description);
+    return desc(rankingItemsTable.createdDate);
 }
 
 export const getItems = async (
     groupId: string,
     page: number,
     keyword: string,
-    sortBy: string,
-    sortDirection: string
+    sortBy: string
 ): Promise<PaginatedResults> => {
     const pageSize = 20;
     const filters: SQL[] = [eq(rankingItemsTable.groupId, groupId)];
@@ -42,7 +41,7 @@ export const getItems = async (
         .from(rankingItemsTable)
         .where(and(...filters))
         .limit(pageSize)
-        .orderBy(getSortBy(sortBy, sortDirection), asc(rankingItemsTable.id))
+        .orderBy(getSortBy(sortBy), asc(rankingItemsTable.id))
         .offset(offset);
 
     return {

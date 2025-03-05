@@ -8,14 +8,18 @@ import { rankingItemAttributesTable, rankingItemsTable } from "@/server/db/schem
 import { generateNewId } from "@/utils/generate-new-id";
 import { eq } from "drizzle-orm";
 import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
+import { getCurrentUser } from "@/server/utils/user/get-current-user";
 
 const createOrUpdateRankingItem = async (item: RankItemUpdate): Promise<string> => {
+    const snob = await getCurrentUser();
     if (item.id) {
         await db.update(rankingItemsTable)
             .set({
                 description: item.description,
                 imageId: item.imageId,
                 imageUrl: item.imageUrl,
+                updatedDate: new Date(),
+                updatedBy: snob.id
             })
             .where(eq(rankingItemsTable.id, item.id));
         return item.id;
@@ -27,7 +31,11 @@ const createOrUpdateRankingItem = async (item: RankItemUpdate): Promise<string> 
             description: item.description,
             imageId: item.imageId,
             imageUrl: item.imageUrl,
-            ranked: false
+            ranked: false,
+            createdDate: new Date(),
+            createdBy: snob.id,
+            updatedDate: new Date(),
+            updatedBy: snob.id
         });
         return id;
     }

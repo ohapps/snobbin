@@ -1,4 +1,4 @@
-import { boolean, numeric, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const snobsTable = pgTable('snobs', {
     id: text('id').primaryKey(),
@@ -63,6 +63,10 @@ export const rankingItemsTable = pgTable('ranking_items', {
     averageRanking: numeric('average_ranking'),
     imageId: text('image_id'),
     imageUrl: text('image_url'),
+    createdDate: timestamp('created_date').notNull().defaultNow(),
+    updatedDate: timestamp('updated_date').notNull().defaultNow(),
+    createdBy: text('created_by').references(() => snobsTable.id),
+    updatedBy: text('updated_by').references(() => snobsTable.id)
 });
 
 export type InsertRankingItems = typeof rankingItemsTable.$inferInsert;
@@ -83,7 +87,9 @@ export const rankingsTable = pgTable('rankings', {
     itemId: uuid('item_id').notNull().references(() => rankingItemsTable.id),
     groupMemberId: uuid('group_member_id').notNull().references(() => snobGroupMembersTable.id),
     ranking: numeric('ranking').notNull(),
-    notes: text('notes')
+    notes: text('notes'),
+    createdDate: timestamp('created_date').notNull().defaultNow(),
+    updatedDate: timestamp('updated_date').notNull().defaultNow(),
 });
 
 export type InsertRankings = typeof rankingsTable.$inferInsert;

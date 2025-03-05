@@ -37,7 +37,8 @@ export const saveRanking = async (data: RankingUpdate): Promise<ActionResponse> 
             await db.update(rankingsTable)
                 .set({
                     ranking: validatedData.data.ranking.toString(),
-                    notes: validatedData.data.notes
+                    notes: validatedData.data.notes,
+                    updatedDate: new Date()
                 })
                 .where(eq(rankingsTable.id, validatedData.data.id));
         } else {
@@ -46,7 +47,9 @@ export const saveRanking = async (data: RankingUpdate): Promise<ActionResponse> 
                 itemId: rankingItem.id,
                 groupMemberId: groupMember.id,
                 ranking: validatedData.data.ranking.toString(),
-                notes: validatedData.data.notes
+                notes: validatedData.data.notes,
+                createdDate: new Date(),
+                updatedDate: new Date()
             });
         }
 
