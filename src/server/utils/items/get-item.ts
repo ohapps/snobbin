@@ -10,5 +10,5 @@ export const getItem = async (itemId: string): Promise<RankingItem> => {
         throw new Error('Ranking item not found');
     }
 
-    return items[0] as RankingItem;
+    return items[0] as unknown as RankingItem;
 }

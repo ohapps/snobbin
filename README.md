@@ -32,7 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add default sort to items screen
 - Fix ability to add/edit attributes before saving
 - Fix formatting of items to add comma
 - Configure ESlint
