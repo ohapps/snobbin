@@ -45,6 +45,14 @@ export type RankingItem = {
     attributes: RankingItemAttribute[];
 }
 
+export type RecentRankingItem = {
+    id: string;
+    groupId: string;
+    groupDescription: string;
+    description: string;
+    createdDate: Date;
+}
+
 export const defaultNewRankingItem: RankingItem = {
     id: '',
     groupId: '',
