@@ -6,7 +6,7 @@ import { RecentRankingItem } from "@/types/rankings";
 
 export const getRecentItems = async (): Promise<RecentRankingItem[]> => {
     const snob = await getCurrentUser();
-    var fiveDaysAgo = new Date(new Date().setDate(new Date().getDate() - 5));
+    const fiveDaysAgo = new Date(new Date().setDate(new Date().getDate() - 5));
     const items = await db.select().from(rankingItemsTable)
         .innerJoin(snobGroupsTable, eq(snobGroupsTable.id, rankingItemsTable.groupId))
         .innerJoin(snobGroupMembersTable, eq(snobGroupMembersTable.groupId, snobGroupsTable.id))
