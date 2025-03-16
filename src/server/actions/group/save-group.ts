@@ -10,7 +10,6 @@ import { generateNewId } from "@/utils/generate-new-id";
 import { Snob } from "@/types/snob";
 import { getGroupForUser } from "@/server/utils/group/get-group-for-user";
 import { logAndReturnError } from "@/server/utils/log-and-return-error";
-import { group } from "console";
 
 export const saveGroup = async (data: SnobGroup): Promise<ActionResponse> => {
     try {
@@ -29,7 +28,7 @@ export const saveGroup = async (data: SnobGroup): Promise<ActionResponse> => {
             and(eq(snobGroupAttributesTable.groupId, updatedGroupId), notInArray(snobGroupAttributesTable.id, attributesIds))
         );
 
-        for (let attribute of validatedData.data.attributes) {
+        for (const attribute of validatedData.data.attributes) {
             await updateOrCreateAttribute(attribute, updatedGroupId);
         }
 
