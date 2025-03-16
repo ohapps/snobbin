@@ -20,7 +20,7 @@ export const Text = styled(Typography)(({ theme }) => ({
 const GroupMembers = ({ group }: { group: SnobGroup }) => {
   return (
     <Box p={2}>
-      <Accordion>
+      <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           Group Members ({group.members.length})
         </AccordionSummary>

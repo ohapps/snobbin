@@ -9,6 +9,7 @@ import ItemListPage from './ItemListPage';
 import { PagingNavigation } from './PagingNavigation';
 import SortByMenu from './SortByMenu';
 import NewItemButton from './NewItemButton';
+import { formatNumber } from '@/utils/format-number';
 
 const ItemList = ({
   group,
@@ -26,7 +27,9 @@ const ItemList = ({
           display={'flex'}
           alignItems={'center'}
         >
-          <Typography variant="h5">{paginatedResults.total} items</Typography>
+          <Typography variant="h5">
+            {formatNumber(paginatedResults.total)} items
+          </Typography>
         </Grid>
         <Grid
           size={{ md: 6, xs: 12 }}

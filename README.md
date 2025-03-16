@@ -32,11 +32,10 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add recent items to activity screen and make landing page
-- Fix ability to add/edit attributes before saving
-- Fix formatting of items to add comma
-- add abilityt to search by attributes
 - Add loading screens
+- add ability to search by attributes
+- Hide group sections on mobile
+- add support for PWA
 - Configure ESlint
 - Configure prettier
 - Configure Husky

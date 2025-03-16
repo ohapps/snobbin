@@ -11,7 +11,7 @@ export const SnobGroupSchema = z.object({
     rankIcon: z.string().min(1, 'rank icon is required'),
     rankingsRequired: z.coerce.number().min(0, 'rankings required must be greater than or equal to 0'),
     attributes: z.array(z.object({
-        id: z.string().uuid().optional(),
+        id: z.string().uuid(),
         name: z.string().min(1, 'attribute name is required').max(50, 'attribute name must be less than or equal to 50 characters')
     }))
 });
@@ -42,7 +42,7 @@ export type SnobGroupInvite = {
 };
 
 export type SnobGroupAttribute = {
-    id?: string,
+    id: string,
     name: string
 }
 

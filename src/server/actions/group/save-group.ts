@@ -1,7 +1,7 @@
 'use server';
 
 import { ActionResponse } from "@/types/actions";
-import { SnobGroup, SnobGroupRole, SnobGroupSchema } from "@/types/snobGroup";
+import { SnobGroup, SnobGroupAttribute, SnobGroupRole, SnobGroupSchema } from "@/types/snobGroup";
 import { getCurrentUser } from "../../utils/user/get-current-user";
 import { db } from "@/server/db";
 import { snobGroupsTable, snobGroupMembersTable, snobGroupAttributesTable } from "@/server/db/schema";
@@ -10,6 +10,7 @@ import { generateNewId } from "@/utils/generate-new-id";
 import { Snob } from "@/types/snob";
 import { getGroupForUser } from "@/server/utils/group/get-group-for-user";
 import { logAndReturnError } from "@/server/utils/log-and-return-error";
+import { group } from "console";
 
 export const saveGroup = async (data: SnobGroup): Promise<ActionResponse> => {
     try {
@@ -28,19 +29,9 @@ export const saveGroup = async (data: SnobGroup): Promise<ActionResponse> => {
             and(eq(snobGroupAttributesTable.groupId, updatedGroupId), notInArray(snobGroupAttributesTable.id, attributesIds))
         );
 
-        validatedData.data.attributes.forEach(async (attribute) => {
-            if (!attribute.id) {
-                await db.insert(snobGroupAttributesTable).values({
-                    id: generateNewId(),
-                    groupId: updatedGroupId,
-                    name: attribute.name
-                });
-            } else {
-                await db.update(snobGroupAttributesTable)
-                    .set({ name: attribute.name })
-                    .where(eq(snobGroupAttributesTable.id, attribute.id));
-            }
-        });
+        for (let attribute of validatedData.data.attributes) {
+            await updateOrCreateAttribute(attribute, updatedGroupId);
+        }
 
         return { success: true };
     } catch (error) {
@@ -81,5 +72,25 @@ const updateOrCreateGroup = async (data: SnobGroup, snob: Snob): Promise<string>
         });
 
         return newGroup[0].id;
+    }
+}
+
+const updateOrCreateAttribute = async (attribute: SnobGroupAttribute, groupId: string) => {
+    const rows = await db.select()
+        .from(snobGroupAttributesTable)
+        .where(and(
+            eq(snobGroupAttributesTable.id, attribute.id),
+            eq(snobGroupAttributesTable.groupId, groupId),
+        ));
+    if (rows.length === 0) {
+        await db.insert(snobGroupAttributesTable).values({
+            id: generateNewId(),
+            groupId,
+            name: attribute.name
+        });
+    } else {
+        await db.update(snobGroupAttributesTable)
+            .set({ name: attribute.name })
+            .where(eq(snobGroupAttributesTable.id, attribute.id));
     }
 }

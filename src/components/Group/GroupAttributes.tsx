@@ -15,6 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { SnobGroupAttribute } from '@/types/snobGroup';
 import { useFormContext } from 'react-hook-form';
+import { generateNewId } from '@/utils/generate-new-id';
 
 const StyledTextField = styled(TextField)(() => ({
   marginTop: '10px',
@@ -32,16 +33,18 @@ const AttributeItem = styled(ListItem)(() => ({
   padding: '0px 10px 0px 10px',
 }));
 
-const newAttribute: SnobGroupAttribute = {
-  id: undefined,
-  name: '',
+const newAttribute = (): SnobGroupAttribute => {
+  return {
+    id: generateNewId(),
+    name: '',
+  };
 };
 
 const GroupAttributes = () => {
   const { watch, setValue } = useFormContext();
   const groupAttributes = watch('attributes') as SnobGroupAttribute[];
   const [selectedAttribute, setSelectedAttribute] =
-    useState<SnobGroupAttribute>(newAttribute);
+    useState<SnobGroupAttribute>(newAttribute());
 
   const handleSave = () => {
     const newAttributes = groupAttributes.filter(
@@ -49,7 +52,7 @@ const GroupAttributes = () => {
         attribute.id === '' || attribute.id !== selectedAttribute.id
     );
     setValue('attributes', [...newAttributes, selectedAttribute]);
-    setSelectedAttribute(newAttribute);
+    setSelectedAttribute(newAttribute());
   };
 
   const handleDelete = (attribute: SnobGroupAttribute) => {

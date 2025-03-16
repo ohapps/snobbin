@@ -64,7 +64,7 @@ const GroupInvites = ({ group }: { group: SnobGroup }) => {
 
   return (
     <Box pt={2}>
-      <Accordion>
+      <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           Pending Invites ({pendingInvites.length})
         </AccordionSummary>
