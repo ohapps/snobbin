@@ -40,7 +40,7 @@ const ItemList = ({
           <SearchBox />
         </Grid>
         <Grid
-          size={{ md: 6, xs: 12 }}
+          size={{ md: 6, xs: 9 }}
           display={'flex'}
           justifyContent={'flex-start'}
           alignItems={'center'}
@@ -49,9 +49,9 @@ const ItemList = ({
           <SortByMenu />
         </Grid>
         <Grid
-          size={{ md: 6, xs: 12 }}
+          size={{ md: 6, xs: 3 }}
           display={'flex'}
-          sx={{ justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
+          sx={{ justifyContent: 'flex-end' }}
           paddingBottom={2}
         >
           <NewItemButton />

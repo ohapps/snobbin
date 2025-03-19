@@ -12,11 +12,11 @@ interface Props {
 const GroupDetails = ({ group, paginatedResults }: Props) => {
   return (
     <Grid container spacing={4}>
-      <Grid size={{ xs: 12, sm: 4 }}>
-        <GroupCard group={group} expanded />
-      </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
         <ItemList group={group} paginatedResults={paginatedResults} />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <GroupCard group={group} expanded />
       </Grid>
     </Grid>
   );

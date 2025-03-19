@@ -32,7 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Hide group sections on mobile
 - add support for PWA
 - Configure ESlint
 - Configure prettier
