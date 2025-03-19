@@ -32,15 +32,15 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add loading screens
-- add ability to search by attributes
 - Hide group sections on mobile
 - add support for PWA
 - Configure ESlint
 - Configure prettier
 - Configure Husky
 - Add logo
+- Add auto select on filling out attributes
 - Fix layout of activity screen on mobile
+- Add loading screens
 - Add tests
 - Add email functionality
 - Add websocket events for real-time updates

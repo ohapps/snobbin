@@ -1,21 +1,20 @@
 import { db } from "@/server/db";
-import { eq, and, ilike, SQL, sql, asc, desc } from "drizzle-orm";
-import { rankingItemsTable } from "@/server/db/schema";
+import { eq, and, ilike, SQL, sql, asc, desc, or } from "drizzle-orm";
+import { rankingItemAttributesTable, rankingItemsTable } from "@/server/db/schema";
 import { PaginatedResults, RankingItemSoryBy } from "@/types/rankings";
 import { getRankings } from "./get-rankings";
 import { getRankingAttributes } from "./get-ranking-attributes";
 
-const getSortBy = (sortBy: string) => {
-    if (sortBy === RankingItemSoryBy.DESCRIPTION) {
-        return asc(rankingItemsTable.description);
+const getSortBy = (sortBy: string): SQL => {
+    switch (sortBy) {
+        case RankingItemSoryBy.DESCRIPTION:
+            return asc(rankingItemsTable.description);
+        case RankingItemSoryBy.AVERAGE_RANKING:
+            return desc(rankingItemsTable.averageRanking);
+        default:
+            return desc(rankingItemsTable.createdDate);
     }
-
-    if (sortBy === RankingItemSoryBy.AVERAGE_RANKING) {
-        return desc(rankingItemsTable.averageRanking);
-    }
-
-    return desc(rankingItemsTable.createdDate);
-}
+};
 
 export const getItems = async (
     groupId: string,
@@ -27,21 +26,52 @@ export const getItems = async (
     const filters: SQL[] = [eq(rankingItemsTable.groupId, groupId)];
 
     if (keyword) {
-        filters.push(ilike(rankingItemsTable.description, `%${keyword}%`));
+        const keywordFilter = or(
+            ilike(rankingItemsTable.description, `%${keyword}%`),
+            ilike(rankingItemAttributesTable.attributeValue, `%${keyword}%`)
+        );
+        if (keywordFilter) {
+            filters.push(keywordFilter);
+        }
     }
 
     const [{ count }] = await db
-        .select({ count: sql<number>`count(*)` })
+        .select({ count: sql<number>`count(distinct(ranking_items.id))` })
         .from(rankingItemsTable)
+        .leftJoin(
+            rankingItemAttributesTable,
+            eq(rankingItemsTable.id, rankingItemAttributesTable.itemId)
+        )
         .where(and(...filters));
 
     const offset = (page - 1) * pageSize;
     const items = await db
-        .select()
+        .select({
+            id: rankingItemsTable.id,
+            groupId: rankingItemsTable.groupId,
+            description: rankingItemsTable.description,
+            ranked: rankingItemsTable.ranked,
+            averageRanking: rankingItemsTable.averageRanking,
+            imageId: rankingItemsTable.imageId,
+            imageUrl: rankingItemsTable.imageUrl
+        })
         .from(rankingItemsTable)
+        .leftJoin(
+            rankingItemAttributesTable,
+            eq(rankingItemsTable.id, rankingItemAttributesTable.itemId)
+        )
         .where(and(...filters))
         .limit(pageSize)
         .orderBy(getSortBy(sortBy), asc(rankingItemsTable.id))
+        .groupBy(
+            rankingItemsTable.id,
+            rankingItemsTable.groupId,
+            rankingItemsTable.description,
+            rankingItemsTable.ranked,
+            rankingItemsTable.averageRanking,
+            rankingItemsTable.imageId,
+            rankingItemsTable.imageUrl
+        )
         .offset(offset);
 
     return {
