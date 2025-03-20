@@ -26,6 +26,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 const CardContent = styled(MuiCardContent)(() => ({
   display: 'flex',
+  flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
   padding: 0,
@@ -35,14 +36,21 @@ const CardContent = styled(MuiCardContent)(() => ({
 }));
 
 const Info = styled(Box)(({ theme }) => ({
-  paddingLeft: theme.spacing(1),
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: theme.spacing(2),
 }));
 
-const Title = styled(Typography)(() => ({
+const Title = styled(Typography)(({ theme }) => ({
+  paddingLeft: theme.spacing(1),
   fontWeight: 'bold',
 }));
 
-const Description = styled(Typography)(() => ({}));
+const Description = styled(Typography)(() => ({
+  whiteSpace: 'pre-wrap',
+  textWrap: 'balance',
+}));
 
 const Avatar = styled(MuiAvatar)(({ theme }) => ({
   width: theme.spacing(6),
@@ -55,9 +63,9 @@ const CardLink = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
   display: 'flex',
   color: theme.palette.grey[800],
-  paddingRight: theme.spacing(2),
   flex: 1,
-  padding: theme.spacing(4),
+  padding: theme.spacing(2),
+  paddingRight: 0,
 }));
 
 interface Props {
@@ -71,11 +79,13 @@ const GroupCard = ({ group, expanded = false }: Props) => {
     <Card>
       <CardContent>
         <CardLink href={`${AppRoutes.GROUPS}/${group.id}`}>
-          <Avatar>{getGroupInitials(group)}</Avatar>
-          <Info>
-            <Title>{group.name}</Title>
+          <Box flexDirection="column">
+            <Info>
+              <Avatar>{getGroupInitials(group)}</Avatar>
+              <Title>{group.name}</Title>
+            </Info>
             <Description>{group.description}</Description>
-          </Info>
+          </Box>
         </CardLink>
         {groupMember?.role === SnobGroupRole.ADMIN && (
           <GroupCardMenu group={group} />

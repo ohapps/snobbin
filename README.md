@@ -32,17 +32,21 @@ npx drizzle-kit migrate
 
 ## Tasks
 
+- show added date for ranking items
 - add support for PWA
+- Add logo
 - Configure ESlint
 - Configure prettier
 - Configure Husky
-- Add logo
 - Add auto select on filling out attributes
 - Fix layout of activity screen on mobile
+- Implement data loading pattern for pagination query
 - Add loading screens
 - Add tests
 - Add email functionality
 - Add websocket events for real-time updates
+- Add Sentry
+- Add Google Analytics
 
 ## Schema
 

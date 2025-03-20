@@ -48,7 +48,7 @@ export type RankingItem = {
 export type RecentRankingItem = {
     id: string;
     groupId: string;
-    groupDescription: string;
+    groupName: string;
     description: string;
     createdDate: Date;
 }

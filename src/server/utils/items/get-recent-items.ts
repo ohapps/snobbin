@@ -20,7 +20,7 @@ export const getRecentItems = async (): Promise<RecentRankingItem[]> => {
         return {
             id: item.ranking_items.id,
             groupId: item.ranking_items.groupId,
-            groupDescription: item.snob_groups.description,
+            groupName: item.snob_groups.name,
             description: item.ranking_items.description,
             createdDate: item.ranking_items.createdDate
         }

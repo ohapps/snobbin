@@ -21,7 +21,7 @@ const RecentItems = ({ recentItems }: { recentItems: RecentRankingItem[] }) => {
         {recentItems.map((item) => (
           <Box key={item.id} padding={1}>
             <StyledLink href={`/groups/${item.groupId}`}>
-              {item.groupDescription} - {item.description}
+              {item.groupName} - {item.description}
             </StyledLink>
           </Box>
         ))}
