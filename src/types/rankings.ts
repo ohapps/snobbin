@@ -41,6 +41,7 @@ export type RankingItem = {
     averageRanking: number | null;
     imageId: string | null;
     imageUrl: string | null;
+    createdDate: Date | null;
     rankings: Ranking[];
     attributes: RankingItemAttribute[];
 }
@@ -61,6 +62,7 @@ export const defaultNewRankingItem: RankingItem = {
     ranked: false,
     imageId: null,
     imageUrl: null,
+    createdDate: null,
     rankings: [],
     attributes: []
 }

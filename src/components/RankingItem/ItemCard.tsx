@@ -93,6 +93,12 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
               </AttributeValue>
             </AttributeContainer>
           ))}
+          <AttributeContainer>
+            <AttributeLabel>Added</AttributeLabel>
+            <AttributeValue>
+              {item.createdDate?.toLocaleDateString()}
+            </AttributeValue>
+          </AttributeContainer>
         </Grid>
         <Grid size={{ xs: 12 }}>
           <Accordion

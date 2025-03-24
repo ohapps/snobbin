@@ -43,6 +43,7 @@ npx drizzle-kit migrate
 - Implement data loading pattern for pagination query
 - Add loading screens
 - Add tests
+- Add logging library
 - Add email functionality
 - Add websocket events for real-time updates
 - Add Sentry

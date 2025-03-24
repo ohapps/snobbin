@@ -11,6 +11,11 @@ const StyledLink = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
+const SubText = styled(Box)(({ theme }) => ({
+  paddingLeft: theme.spacing(1),
+  fontStyle: 'italic',
+}));
+
 const RecentItems = ({ recentItems }: { recentItems: RecentRankingItem[] }) => {
   return (
     <CardContainer title="Recent Items">
@@ -23,6 +28,7 @@ const RecentItems = ({ recentItems }: { recentItems: RecentRankingItem[] }) => {
             <StyledLink href={`/groups/${item.groupId}`}>
               {item.groupName} - {item.description}
             </StyledLink>
+            <SubText>added {item.createdDate.toLocaleDateString()}</SubText>
           </Box>
         ))}
       </List>
