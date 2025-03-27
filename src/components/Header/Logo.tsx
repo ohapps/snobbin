@@ -1,15 +1,16 @@
-import { styled, Typography } from '@mui/material';
+import { Box, styled } from '@mui/material';
+import Image from 'next/image';
+import logoImage from '../../../public/logo.png';
 
-export const LogoText = styled(Typography)(({ theme }) => ({
+export const LogoContainer = styled(Box)(({ theme }) => ({
   marginRight: theme.spacing(4),
-  fontWeight: theme.typography.fontWeightBold,
 }));
 
 const Logo = () => {
   return (
-    <LogoText variant="h6" noWrap>
-      Snobbin
-    </LogoText>
+    <LogoContainer>
+      <Image src={logoImage} alt="logo" width={150} height={25} />
+    </LogoContainer>
   );
 };
 

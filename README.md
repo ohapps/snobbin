@@ -32,7 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- show added date for ranking items
 - add support for PWA
 - Add logo
 - Configure ESlint
