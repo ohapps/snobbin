@@ -33,11 +33,11 @@ npx drizzle-kit migrate
 ## Tasks
 
 - add support for PWA
-- Add logo
 - Configure ESlint
 - Configure prettier
 - Configure Husky
 - Add auto select on filling out attributes
+- Add read more to snob group description to cutoff long descriptions
 - Fix layout of activity screen on mobile
 - Implement data loading pattern for pagination query
 - Add loading screens
@@ -47,6 +47,7 @@ npx drizzle-kit migrate
 - Add websocket events for real-time updates
 - Add Sentry
 - Add Google Analytics
+- Add user management
 
 ## Schema
 

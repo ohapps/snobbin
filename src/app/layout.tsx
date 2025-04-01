@@ -19,6 +19,13 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: 'Snobbin',
   description: 'Snobbin',
+  generator: 'Next.js',
+  manifest: '/manifest.json',
+  themeColor: [{ media: '(prefers-color-scheme: dark)', color: '#fff' }],
+  icons: [
+    { rel: 'apple-touch-icon', url: '/icons-128.png' },
+    { rel: 'icon', url: '/icons-128.png' },
+  ],
 };
 
 export default function RootLayout({

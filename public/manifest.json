@@ -1,0 +1,16 @@
+{
+  "name": "Snobbin",
+  "short_name": "Snobbin",
+  "theme_color": "#00ff00",
+  "background_color": "#1976d2",
+  "display": "browser",
+  "orientation": "any",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    { "src": "/icons-128.png", "type": "image/png", "sizes": "128x128" },
+    { "src": "/icons-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icons-256.png", "type": "image/png", "sizes": "256x256" },
+    { "src": "/icons-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}
