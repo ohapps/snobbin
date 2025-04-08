@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { SnackbarProvider } from 'notistack';
+import { SnackbarProvider } from "notistack";
 
 const AlertInitializer = ({ children }: { children: React.ReactNode }) => {
   return <SnackbarProvider maxSnack={3}>{children}</SnackbarProvider>;

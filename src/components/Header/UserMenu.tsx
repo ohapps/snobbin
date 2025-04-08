@@ -1,28 +1,28 @@
-import React from 'react';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import LogoutIcon from '@mui/icons-material/Logout';
-import ProfileIcon from '@mui/icons-material/Person';
-import { AppRoutes } from '@/config/appRoutes';
-import { Link, styled } from '@mui/material';
-import { useUser } from '@auth0/nextjs-auth0/client';
-import { getCurrentUserInitials } from '@/utils/get-current-user-initials';
+import React from "react";
+import Avatar from "@mui/material/Avatar";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import LogoutIcon from "@mui/icons-material/Logout";
+import ProfileIcon from "@mui/icons-material/Person";
+import { AppRoutes } from "@/config/appRoutes";
+import { Link, styled } from "@mui/material";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { getCurrentUserInitials } from "@/utils/get-current-user-initials";
 
 export const NavLink = styled(Link)(({ theme }) => ({
-  textDecoration: 'none',
+  textDecoration: "none",
   color: theme.palette.common.black,
   width: theme.spacing(12),
 }));
 
-export const Container = styled('div')(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
-    display: 'none',
+export const Container = styled("div")(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    display: "none",
   },
-  [theme.breakpoints.up('sm')]: {
-    display: 'block',
+  [theme.breakpoints.up("sm")]: {
+    display: "block",
   },
 }));
 
@@ -45,11 +45,11 @@ const UserMenu = () => {
         onClick={handleClick}
         size="small"
         sx={{ ml: 2 }}
-        aria-controls={open ? 'account-menu' : undefined}
+        aria-controls={open ? "account-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
       >
-        <Avatar sx={{ width: 32, height: 32, fontSize: '12px' }}>
+        <Avatar sx={{ width: 32, height: 32, fontSize: "12px" }}>
           {getCurrentUserInitials(user)}
         </Avatar>
       </IconButton>

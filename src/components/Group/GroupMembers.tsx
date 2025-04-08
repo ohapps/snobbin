@@ -6,12 +6,12 @@ import {
   Box,
   Typography,
   styled,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import PersonIcon from '@mui/icons-material/Person';
-import { SnobGroup } from '@/types/snobGroup';
-import { getSnobIdentifier } from '@/utils/get-snob-identifier';
-import GroupInvites from './GroupInvites';
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PersonIcon from "@mui/icons-material/Person";
+import { SnobGroup } from "@/types/snobGroup";
+import { getSnobIdentifier } from "@/utils/get-snob-identifier";
+import GroupInvites from "./GroupInvites";
 
 export const Text = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(1),
@@ -28,7 +28,7 @@ const GroupMembers = ({ group }: { group: SnobGroup }) => {
           {group.members.map((member) => (
             <Box
               key={member.snob.id}
-              sx={{ display: 'flex', alignItems: 'center' }}
+              sx={{ display: "flex", alignItems: "center" }}
             >
               <Avatar sx={{ width: 30, height: 30 }}>
                 <PersonIcon />

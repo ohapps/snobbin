@@ -1,9 +1,9 @@
-import { Ranking } from '@/types/rankings';
-import { SnobGroup } from '@/types/snobGroup';
-import { getGroupMemberForRanking } from '@/utils/get-group-member-for-ranking';
-import { getSnobIdentifier } from '@/utils/get-snob-identifier';
-import { Divider, Rating, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Ranking } from "@/types/rankings";
+import { SnobGroup } from "@/types/snobGroup";
+import { getGroupMemberForRanking } from "@/utils/get-group-member-for-ranking";
+import { getSnobIdentifier } from "@/utils/get-snob-identifier";
+import { Divider, Rating, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 
 const OtherRanking = ({
   group,
@@ -23,7 +23,7 @@ const OtherRanking = ({
       </Grid>
       <Grid
         size={{ xs: 12, md: 6 }}
-        sx={{ display: 'flex', flexDirection: 'row' }}
+        sx={{ display: "flex", flexDirection: "row" }}
       >
         <Rating
           value={ranking.ranking}
@@ -34,7 +34,7 @@ const OtherRanking = ({
         <Typography pl={1}>({ranking.ranking} stars)</Typography>
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <Typography sx={{ fontStyle: 'italic' }}>{ranking.notes}</Typography>
+        <Typography sx={{ fontStyle: "italic" }}>{ranking.notes}</Typography>
       </Grid>
     </Grid>
   );

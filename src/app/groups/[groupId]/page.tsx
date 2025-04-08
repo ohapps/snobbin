@@ -1,8 +1,8 @@
-import { getItems } from '@/server/utils/items/get-items';
-import GroupDetails from '@/components/Group/GroupDetails';
-import PageContainer from '@/components/Page/PageContainer';
-import ItemDrawer from '@/components/RankingItem/ItemDrawer';
-import { getGroupForCurrentUser } from '@/server/utils/group/get-group-for-current-user';
+import { getItems } from "@/server/utils/items/get-items";
+import GroupDetails from "@/components/Group/GroupDetails";
+import PageContainer from "@/components/Page/PageContainer";
+import ItemDrawer from "@/components/RankingItem/ItemDrawer";
+import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
 
 const GroupPage = async ({
   params,
@@ -21,7 +21,7 @@ const GroupPage = async ({
     params.groupId,
     page,
     searchParams.keyword,
-    searchParams.sortBy
+    searchParams.sortBy,
   );
   return (
     <PageContainer>

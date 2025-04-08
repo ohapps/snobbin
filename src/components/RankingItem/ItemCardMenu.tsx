@@ -8,18 +8,18 @@ import {
   DialogTitle,
   DialogActions,
   Button,
-} from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useState, useTransition } from 'react';
-import { LoadingButton } from '@mui/lab';
-import { useSnackbar } from 'notistack';
-import { RankingItem } from '@/types/rankings';
-import { useAtom } from 'jotai';
-import { selectedRankingItem } from '@/atoms/app';
-import { deleteItem } from '@/server/actions/items/delete-item';
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useState, useTransition } from "react";
+import { LoadingButton } from "@mui/lab";
+import { useSnackbar } from "notistack";
+import { RankingItem } from "@/types/rankings";
+import { useAtom } from "jotai";
+import { selectedRankingItem } from "@/atoms/app";
+import { deleteItem } from "@/server/actions/items/delete-item";
 
 const Menu = styled(MuiMenu)(({ theme }) => ({
-  '& .MuiMenu-paper': {
+  "& .MuiMenu-paper": {
     minWidth: theme.spacing(20),
   },
 }));
@@ -62,10 +62,10 @@ const ItemCardMenu = ({ item }: { item: RankingItem }) => {
     startTransition(async () => {
       const results = await deleteItem(item.id);
       if (results.success) {
-        enqueueSnackbar('Item deleted successfully', { variant: 'success' });
+        enqueueSnackbar("Item deleted successfully", { variant: "success" });
         closeConfirm();
       } else {
-        enqueueSnackbar('Failed to delete item', { variant: 'error' });
+        enqueueSnackbar("Failed to delete item", { variant: "error" });
       }
     });
   };
@@ -75,8 +75,8 @@ const ItemCardMenu = ({ item }: { item: RankingItem }) => {
       <IconButton
         aria-label="more"
         id="item-edit-button"
-        aria-controls={open ? 'item-edit-menu' : undefined}
-        aria-expanded={open ? 'true' : undefined}
+        aria-controls={open ? "item-edit-menu" : undefined}
+        aria-expanded={open ? "true" : undefined}
         aria-haspopup="true"
         onClick={handleClick}
       >
@@ -85,7 +85,7 @@ const ItemCardMenu = ({ item }: { item: RankingItem }) => {
       <Menu
         id="item-edit-menu"
         MenuListProps={{
-          'aria-labelledby': 'item-edit-button',
+          "aria-labelledby": "item-edit-button",
         }}
         anchorEl={anchorEl}
         open={open}

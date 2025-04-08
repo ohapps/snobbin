@@ -1,7 +1,7 @@
-version: '3.3'
+version: "3.3"
 services:
   postgres:
-    container_name: 'postgres-snobbin-db'
+    container_name: "postgres-snobbin-db"
     image: postgres
     restart: always
     environment:
@@ -9,9 +9,9 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: snobbin
     ports:
-      - '5434:5432'
+      - "5434:5432"
     volumes:
       - postgresdata:/var/lib/postgresql/data
-  
+
 volumes:
   postgresdata:

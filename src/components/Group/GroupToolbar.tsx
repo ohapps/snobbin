@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Box, Button, styled } from '@mui/material';
-import PageTitle from '../Page/PageTitle';
-import { useAtom } from 'jotai';
-import { selectedSnobGroup } from '@/atoms/app';
-import { newSnobGroup } from '@/types/snobGroup';
+import { Box, Button, styled } from "@mui/material";
+import PageTitle from "../Page/PageTitle";
+import { useAtom } from "jotai";
+import { selectedSnobGroup } from "@/atoms/app";
+import { newSnobGroup } from "@/types/snobGroup";
 
 export const NewGroupButton = styled(Button)(({ theme }) => ({
   fontSize: 12,
@@ -19,7 +19,7 @@ const GroupToolbar = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
       <PageTitle title="My Groups" />
       <NewGroupButton variant="contained" size="small" onClick={newGroup}>
         New Group

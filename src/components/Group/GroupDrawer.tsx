@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { selectedSnobGroup } from '@/atoms/app';
-import { useAtom } from 'jotai';
-import BottomDrawer from '../Drawer/BottomDrawer';
-import GroupForm from './GroupForm';
+import { selectedSnobGroup } from "@/atoms/app";
+import { useAtom } from "jotai";
+import BottomDrawer from "../Drawer/BottomDrawer";
+import GroupForm from "./GroupForm";
 
 const GroupDrawer = () => {
   const [group, setGroup] = useAtom(selectedSnobGroup);
@@ -14,7 +14,7 @@ const GroupDrawer = () => {
 
   return (
     <BottomDrawer
-      title={`${group?.id ? 'Edit' : 'New'} Group`}
+      title={`${group?.id ? "Edit" : "New"} Group`}
       open={!!group}
       close={closeDrawer}
     >

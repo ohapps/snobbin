@@ -1,11 +1,11 @@
-import { selectedRankingItem } from '@/atoms/app';
-import { defaultNewRankingItem } from '@/types/rankings';
-import { Button, styled } from '@mui/material';
-import { useAtom } from 'jotai';
+import { selectedRankingItem } from "@/atoms/app";
+import { defaultNewRankingItem } from "@/types/rankings";
+import { Button, styled } from "@mui/material";
+import { useAtom } from "jotai";
 
 const NewButton = styled(Button)(() => ({
   fontSize: 12,
-  height: '40px',
+  height: "40px",
 }));
 
 const NewItemButton = () => {

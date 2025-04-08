@@ -57,12 +57,8 @@
           "name": "ranking_items_group_id_snob_groups_id_fk",
           "tableFrom": "ranking_items",
           "tableTo": "snob_groups",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -111,12 +107,8 @@
           "name": "rankings_item_id_ranking_items_id_fk",
           "tableFrom": "rankings",
           "tableTo": "ranking_items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -124,12 +116,8 @@
           "name": "rankings_group_member_id_snob_group_members_id_fk",
           "tableFrom": "rankings",
           "tableTo": "snob_group_members",
-          "columnsFrom": [
-            "group_member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["group_member_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -312,9 +300,7 @@
         "snobs_email_unique": {
           "name": "snobs_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       }
     }

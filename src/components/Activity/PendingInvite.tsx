@@ -4,14 +4,14 @@ import {
   ListItemAvatar,
   ListItemText,
   Typography,
-} from '@mui/material';
-import AcceptIcon from '@mui/icons-material/Check';
-import RejectIcon from '@mui/icons-material/ThumbDownAlt';
-import { useSnackbar } from 'notistack';
-import { SnobGroupInvite } from '@/types/snobGroup';
-import { useTransition } from 'react';
-import { acceptGroupInvite } from '@/server/actions/group/accept-group-invite';
-import { declineGroupInvite } from '@/server/actions/group/decline-group-invite';
+} from "@mui/material";
+import AcceptIcon from "@mui/icons-material/Check";
+import RejectIcon from "@mui/icons-material/ThumbDownAlt";
+import { useSnackbar } from "notistack";
+import { SnobGroupInvite } from "@/types/snobGroup";
+import { useTransition } from "react";
+import { acceptGroupInvite } from "@/server/actions/group/accept-group-invite";
+import { declineGroupInvite } from "@/server/actions/group/decline-group-invite";
 
 const PendingInvite = ({ invite }: { invite: SnobGroupInvite }) => {
   const [loading, startTransition] = useTransition();
@@ -21,11 +21,11 @@ const PendingInvite = ({ invite }: { invite: SnobGroupInvite }) => {
     startTransition(async () => {
       const results = await acceptGroupInvite(invite.id);
       if (results.success) {
-        enqueueSnackbar('Invite accepted successfully', {
-          variant: 'success',
+        enqueueSnackbar("Invite accepted successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar('Failed to accept invite', { variant: 'error' });
+        enqueueSnackbar("Failed to accept invite", { variant: "error" });
       }
     });
   };
@@ -34,11 +34,11 @@ const PendingInvite = ({ invite }: { invite: SnobGroupInvite }) => {
     startTransition(async () => {
       const results = await declineGroupInvite(invite.id);
       if (results.success) {
-        enqueueSnackbar('Invite declined successfully', {
-          variant: 'success',
+        enqueueSnackbar("Invite declined successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar('Failed to decline invite', { variant: 'error' });
+        enqueueSnackbar("Failed to decline invite", { variant: "error" });
       }
     });
   };

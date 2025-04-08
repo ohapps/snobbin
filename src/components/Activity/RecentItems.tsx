@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { RecentRankingItem } from '@/types/rankings';
-import { Typography, List, Box, styled } from '@mui/material';
-import Link from 'next/link';
-import CardContainer from '../Card/CardContainer';
+import { RecentRankingItem } from "@/types/rankings";
+import { Typography, List, Box, styled } from "@mui/material";
+import Link from "next/link";
+import CardContainer from "../Card/CardContainer";
 
 const StyledLink = styled(Link)(({ theme }) => ({
   padding: theme.spacing(1),
-  textDecoration: 'none',
+  textDecoration: "none",
   color: theme.palette.primary.main,
 }));
 
 const SubText = styled(Box)(({ theme }) => ({
   paddingLeft: theme.spacing(1),
-  fontStyle: 'italic',
+  fontStyle: "italic",
 }));
 
 const RecentItems = ({ recentItems }: { recentItems: RecentRankingItem[] }) => {

@@ -1,6 +1,6 @@
-import { Box, styled } from '@mui/material';
-import Image from 'next/image';
-import logoImage from '../../../public/logo.png';
+import { Box, styled } from "@mui/material";
+import Image from "next/image";
+import logoImage from "../../../public/logo.png";
 
 export const LogoContainer = styled(Box)(({ theme }) => ({
   marginRight: theme.spacing(4),

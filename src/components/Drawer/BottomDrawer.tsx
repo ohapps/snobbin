@@ -1,23 +1,23 @@
-import { Box, Drawer, IconButton, Typography, styled } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import React from 'react';
+import { Box, Drawer, IconButton, Typography, styled } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import React from "react";
 
 const Container = styled(Box)(({ theme }) => ({
   borderTopColor: theme.palette.primary.main,
-  borderTopStyle: 'solid',
+  borderTopStyle: "solid",
   borderTopWidth: 4,
   padding: theme.spacing(2),
 }));
 
 const Content = styled(Box)(({ theme }) => ({
-  margin: 'auto',
+  margin: "auto",
   maxWidth: theme.spacing(150),
 }));
 
 const Header = styled(Box)(() => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
 }));
 
 const Title = styled(Typography)(() => ({}));

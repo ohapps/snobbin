@@ -1,12 +1,12 @@
-import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
-import { PaginatedResults } from '@/types/rankings';
-import { Box, Pagination, styled } from '@mui/material';
-import { useSearchParams } from 'next/navigation';
+import { useUpdateQueryParams } from "@/hooks/useUpdateQueryParams";
+import { PaginatedResults } from "@/types/rankings";
+import { Box, Pagination, styled } from "@mui/material";
+import { useSearchParams } from "next/navigation";
 
 const PaginationContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
-  display: 'flex',
-  justifyContent: 'center',
+  display: "flex",
+  justifyContent: "center",
 }));
 
 export const PagingNavigation = ({
@@ -16,11 +16,11 @@ export const PagingNavigation = ({
 }) => {
   const updateQueryParams = useUpdateQueryParams();
   const searchParams = useSearchParams();
-  const page = searchParams.get('page')
-    ? parseInt(searchParams.get('page') as string, 10)
+  const page = searchParams.get("page")
+    ? parseInt(searchParams.get("page") as string, 10)
     : 1;
   const pageCount = Math.ceil(
-    paginatedResults.total / paginatedResults.pageSize
+    paginatedResults.total / paginatedResults.pageSize,
   );
 
   const setPage = (page: number) => {

@@ -1,8 +1,8 @@
-import Grid from '@mui/material/Grid2';
-import GroupCard from './GroupCard';
-import { SnobGroup } from '@/types/snobGroup';
-import ItemList from '../RankingItem/ItemList';
-import { PaginatedResults } from '@/types/rankings';
+import Grid from "@mui/material/Grid2";
+import GroupCard from "./GroupCard";
+import { SnobGroup } from "@/types/snobGroup";
+import ItemList from "../RankingItem/ItemList";
+import { PaginatedResults } from "@/types/rankings";
 
 interface Props {
   group: SnobGroup;

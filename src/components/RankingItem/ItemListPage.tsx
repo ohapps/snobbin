@@ -1,7 +1,7 @@
-import { RankingItem } from '@/types/rankings';
-import { SnobGroup } from '@/types/snobGroup';
-import { Stack } from '@mui/material';
-import ItemCard from './ItemCard';
+import { RankingItem } from "@/types/rankings";
+import { SnobGroup } from "@/types/snobGroup";
+import { Stack } from "@mui/material";
+import ItemCard from "./ItemCard";
 
 const ItemListPage = ({
   group,

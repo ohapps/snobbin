@@ -1,18 +1,18 @@
-import { AppRoutes } from '@/config/appRoutes';
-import { Link, styled } from '@mui/material';
+import { AppRoutes } from "@/config/appRoutes";
+import { Link, styled } from "@mui/material";
 
 export const NavLink = styled(Link)(({ theme }) => ({
   margin: theme.spacing(2),
-  textDecoration: 'none',
+  textDecoration: "none",
   color: theme.palette.common.white,
 }));
 
-export const Container = styled('div')(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
-    display: 'none',
+export const Container = styled("div")(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    display: "none",
   },
-  [theme.breakpoints.up('sm')]: {
-    display: 'block',
+  [theme.breakpoints.up("sm")]: {
+    display: "block",
   },
 }));
 

@@ -1,20 +1,20 @@
-import { RankingItem, RankingItemSchema } from '@/types/rankings';
-import { SnobGroup } from '@/types/snobGroup';
-import Grid from '@mui/material/Grid2';
-import { useSnackbar } from 'notistack';
-import { useState, useTransition } from 'react';
-import FullSubmitButton from '../Form/FullSubmitButton';
-import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import ControlledTextField from '../Form/ControlledTextField';
-import { saveItem } from '@/server/actions/items/save-item';
-import { styled, TextField } from '@mui/material';
-import ImageUploadButton from '../Image/ImageUploadButton';
-import { getImageOrPlaceholder } from '@/types/image';
+import { RankingItem, RankingItemSchema } from "@/types/rankings";
+import { SnobGroup } from "@/types/snobGroup";
+import Grid from "@mui/material/Grid2";
+import { useSnackbar } from "notistack";
+import { useState, useTransition } from "react";
+import FullSubmitButton from "../Form/FullSubmitButton";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import ControlledTextField from "../Form/ControlledTextField";
+import { saveItem } from "@/server/actions/items/save-item";
+import { styled, TextField } from "@mui/material";
+import ImageUploadButton from "../Image/ImageUploadButton";
+import { getImageOrPlaceholder } from "@/types/image";
 
 const StyledTextField = styled(TextField)(() => ({
-  marginTop: '10px',
-  marginBottom: '10px',
+  marginTop: "10px",
+  marginBottom: "10px",
 }));
 
 const ItemForm = ({
@@ -34,7 +34,7 @@ const ItemForm = ({
       groupId: rankingGroup.id,
       description: rankingItem.description,
     },
-    mode: 'onChange',
+    mode: "onChange",
     resolver: zodResolver(RankingItemSchema),
   });
 
@@ -43,7 +43,7 @@ const ItemForm = ({
       id: attr.id,
       attributeId: attr.attributeId,
       attributeValue: attr.attributeValue,
-    })) ?? []
+    })) ?? [],
   );
   const [image, setImage] = useState(getImageOrPlaceholder(rankingItem));
 
@@ -56,27 +56,27 @@ const ItemForm = ({
         imageUrl: image.url,
       });
       if (results.success) {
-        enqueueSnackbar('Item saved successfully', { variant: 'success' });
+        enqueueSnackbar("Item saved successfully", { variant: "success" });
         onSave();
       } else {
-        enqueueSnackbar('Failed to save item', { variant: 'error' });
+        enqueueSnackbar("Failed to save item", { variant: "error" });
       }
     });
   };
 
   const getAttributeValue = (id: string) => {
     return (
-      attributes?.find((attr) => attr.attributeId === id)?.attributeValue ?? ''
+      attributes?.find((attr) => attr.attributeId === id)?.attributeValue ?? ""
     );
   };
 
   const setAttributeValue = (id: string, value: string) => {
     const existingAttribute = attributes?.find(
-      (attr) => attr.attributeId === id
+      (attr) => attr.attributeId === id,
     );
     if (existingAttribute) {
       const otherAttributes = attributes?.filter(
-        (attr) => attr.attributeId !== id
+        (attr) => attr.attributeId !== id,
       );
       setAttributes([
         ...otherAttributes,
@@ -88,7 +88,7 @@ const ItemForm = ({
     } else {
       setAttributes([
         ...attributes,
-        { id: '', attributeId: id, attributeValue: value },
+        { id: "", attributeId: id, attributeValue: value },
       ]);
     }
   };
@@ -111,11 +111,11 @@ const ItemForm = ({
                 key={attr.id}
                 id={attr.id}
                 label={attr.name}
-                value={getAttributeValue(attr.id ?? '')}
+                value={getAttributeValue(attr.id ?? "")}
                 fullWidth
                 autoFocus
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setAttributeValue(attr.id ?? '', event.target.value)
+                  setAttributeValue(attr.id ?? "", event.target.value)
                 }
               />
             ))}

@@ -1,17 +1,17 @@
-import { SnobGroup, SnobGroupSchema } from '@/types/snobGroup';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Grid from '@mui/material/Grid2';
-import { FormProvider, useForm } from 'react-hook-form';
-import ControlledTextField from '../Form/ControlledTextField';
-import FullSubmitButton from '../Form/FullSubmitButton';
-import { useTransition } from 'react';
-import ControlledSelect from '../Form/ControlledSelect';
-import { MenuItem } from '@mui/material';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import StarIcon from '@mui/icons-material/Star';
-import { saveGroup } from '@/server/actions/group/save-group';
-import { useSnackbar } from 'notistack';
-import GroupAttributes from './GroupAttributes';
+import { SnobGroup, SnobGroupSchema } from "@/types/snobGroup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Grid from "@mui/material/Grid2";
+import { FormProvider, useForm } from "react-hook-form";
+import ControlledTextField from "../Form/ControlledTextField";
+import FullSubmitButton from "../Form/FullSubmitButton";
+import { useTransition } from "react";
+import ControlledSelect from "../Form/ControlledSelect";
+import { MenuItem } from "@mui/material";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import StarIcon from "@mui/icons-material/Star";
+import { saveGroup } from "@/server/actions/group/save-group";
+import { useSnackbar } from "notistack";
+import GroupAttributes from "./GroupAttributes";
 
 const GroupForm = ({
   group,
@@ -34,7 +34,7 @@ const GroupForm = ({
       rankingsRequired: group.rankingsRequired,
       attributes: group.attributes ?? [],
     },
-    mode: 'onChange',
+    mode: "onChange",
     resolver: zodResolver(SnobGroupSchema),
   });
 
@@ -42,12 +42,12 @@ const GroupForm = ({
     startTransition(async () => {
       const results = await saveGroup(data);
       if (results.success) {
-        enqueueSnackbar('Group saved successfully', {
-          variant: 'success',
+        enqueueSnackbar("Group saved successfully", {
+          variant: "success",
         });
         onSave();
       } else {
-        enqueueSnackbar('Failed to save group', { variant: 'error' });
+        enqueueSnackbar("Failed to save group", { variant: "error" });
       }
     });
   };
@@ -86,14 +86,14 @@ const GroupForm = ({
               type="number"
             />
             <ControlledSelect name="increments" label="Increments">
-              <MenuItem value={'0.5'}>.5</MenuItem>
-              <MenuItem value={'1'}>1</MenuItem>
+              <MenuItem value={"0.5"}>.5</MenuItem>
+              <MenuItem value={"1"}>1</MenuItem>
             </ControlledSelect>
             <ControlledSelect name="rankIcon" label="Rank Icon">
-              <MenuItem value={'star'}>
+              <MenuItem value={"star"}>
                 <StarIcon fontSize="small" />
               </MenuItem>
-              <MenuItem value={'favorite'}>
+              <MenuItem value={"favorite"}>
                 <FavoriteIcon fontSize="small" />
               </MenuItem>
             </ControlledSelect>

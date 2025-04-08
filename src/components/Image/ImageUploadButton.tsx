@@ -1,11 +1,11 @@
-import { Box } from '@mui/material';
+import { Box } from "@mui/material";
 import {
   CldUploadButton,
   CloudinaryUploadWidgetInfo,
   CloudinaryUploadWidgetResults,
-} from 'next-cloudinary';
-import ImagePreview from './ImagePreview';
-import { ItemImage } from '@/types/image';
+} from "next-cloudinary";
+import ImagePreview from "./ImagePreview";
+import { ItemImage } from "@/types/image";
 
 const ImageUploadButton = ({
   image,
@@ -28,7 +28,7 @@ const ImageUploadButton = ({
             });
           }
         }}
-        signatureEndpoint={'/api/sign-image'}
+        signatureEndpoint={"/api/sign-image"}
         uploadPreset="snobbin"
         className="image_upload_button"
       >

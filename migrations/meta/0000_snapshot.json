@@ -145,9 +145,7 @@
         "snobs_email_unique": {
           "name": "snobs_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       }
     }

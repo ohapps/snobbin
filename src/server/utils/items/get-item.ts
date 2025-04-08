@@ -4,11 +4,14 @@ import { RankingItem } from "@/types/rankings";
 import { eq } from "drizzle-orm";
 
 export const getItem = async (itemId: string): Promise<RankingItem> => {
-    const items = await db.select().from(rankingItemsTable).where(eq(rankingItemsTable.id, itemId));
+  const items = await db
+    .select()
+    .from(rankingItemsTable)
+    .where(eq(rankingItemsTable.id, itemId));
 
-    if (!items || items.length === 0) {
-        throw new Error('Ranking item not found');
-    }
+  if (!items || items.length === 0) {
+    throw new Error("Ranking item not found");
+  }
 
-    return items[0] as unknown as RankingItem;
-}
+  return items[0] as unknown as RankingItem;
+};

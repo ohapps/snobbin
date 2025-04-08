@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import BottomDrawer from '@/components/Drawer/BottomDrawer';
-import ItemForm from './ItemForm';
-import { SnobGroup } from '@/types/snobGroup';
-import { useAtom } from 'jotai';
-import { selectedRankingItem } from '@/atoms/app';
+import BottomDrawer from "@/components/Drawer/BottomDrawer";
+import ItemForm from "./ItemForm";
+import { SnobGroup } from "@/types/snobGroup";
+import { useAtom } from "jotai";
+import { selectedRankingItem } from "@/atoms/app";
 
 const ItemDrawer = ({ group }: { group: SnobGroup }) => {
   const [rankingItem, setSelectedRankingItem] = useAtom(selectedRankingItem);
@@ -15,7 +15,7 @@ const ItemDrawer = ({ group }: { group: SnobGroup }) => {
 
   return (
     <BottomDrawer
-      title={`${rankingItem?.id ? 'Edit' : 'New'} Item`}
+      title={`${rankingItem?.id ? "Edit" : "New"} Item`}
       open={!!rankingItem}
       close={closeDrawer}
     >

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from "@mui/material";
 
 const LoadingPage = () => {
   return (

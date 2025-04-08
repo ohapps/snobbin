@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { styled, Typography } from '@mui/material';
+import { styled, Typography } from "@mui/material";
 
 export const Title = styled(Typography)(({ theme }) => ({
   paddingBottom: theme.spacing(2),

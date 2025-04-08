@@ -6,25 +6,25 @@ import {
   Card as MuiCard,
   Typography,
   styled,
-} from '@mui/material';
-import { useState } from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { SnobGroup, SnobGroupRole } from '@/types/snobGroup';
-import { RankingItem } from '@/types/rankings';
-import Grid from '@mui/material/Grid2';
-import ItemRankings from './ItemRankings';
-import ItemRating from './ItemRating';
-import useCurrentGroupMember from '@/hooks/useCurrentGroupMember';
-import ItemCardMenu from './ItemCardMenu';
-import ImagePreview from '../Image/ImagePreview';
-import { getImageOrPlaceholder } from '@/types/image';
+} from "@mui/material";
+import { useState } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { SnobGroup, SnobGroupRole } from "@/types/snobGroup";
+import { RankingItem } from "@/types/rankings";
+import Grid from "@mui/material/Grid2";
+import ItemRankings from "./ItemRankings";
+import ItemRating from "./ItemRating";
+import useCurrentGroupMember from "@/hooks/useCurrentGroupMember";
+import ItemCardMenu from "./ItemCardMenu";
+import ImagePreview from "../Image/ImagePreview";
+import { getImageOrPlaceholder } from "@/types/image";
 
 export const Card = styled(MuiCard)(({ theme }) => ({
   backgroundColor: theme.palette.grey[200],
   padding: theme.spacing(2),
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
 }));
 
 export const Title = styled(Typography)(({ theme }) => ({
@@ -33,8 +33,8 @@ export const Title = styled(Typography)(({ theme }) => ({
 }));
 
 export const AttributeContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'row',
+  display: "flex",
+  flexDirection: "row",
   paddingTop: theme.spacing(1),
 }));
 
@@ -55,7 +55,7 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
   const getAttributeValue = (id: string) => {
     return (
       item.attributes?.find((attr) => attr.attributeId === id)
-        ?.attributeValue ?? ''
+        ?.attributeValue ?? ""
     );
   };
 
@@ -65,10 +65,10 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
         <Grid
           size={{ xs: 12 }}
           sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginTop: '-10px',
-            marginBottom: '-40px',
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: "-10px",
+            marginBottom: "-40px",
           }}
         >
           {groupMember?.role === SnobGroupRole.ADMIN && (
@@ -77,8 +77,8 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
         </Grid>
         <Grid
           size={{ xs: 12, md: 4 }}
-          display={'flex'}
-          justifyContent={'center'}
+          display={"flex"}
+          justifyContent={"center"}
         >
           <ImagePreview image={getImageOrPlaceholder(item)} />
         </Grid>
@@ -89,7 +89,7 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
             <AttributeContainer key={attr.id}>
               <AttributeLabel>{attr.name}</AttributeLabel>
               <AttributeValue>
-                {getAttributeValue(attr.id ?? '')}
+                {getAttributeValue(attr.id ?? "")}
               </AttributeValue>
             </AttributeContainer>
           ))}

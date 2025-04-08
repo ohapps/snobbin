@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
-import { IconButton, InputAdornment, TextField, styled } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
+import { IconButton, InputAdornment, TextField, styled } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useUpdateQueryParams } from "@/hooks/useUpdateQueryParams";
 
 const SearchTextField = styled(TextField)(({ theme }) => ({
   background: theme.palette.common.white,
@@ -12,10 +12,10 @@ const SearchTextField = styled(TextField)(({ theme }) => ({
 
 const SearchBox = () => {
   const updateQueryParams = useUpdateQueryParams();
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState("");
 
   const handleSearch = () => {
-    updateQueryParams({ keyword: keyword, page: '1' });
+    updateQueryParams({ keyword: keyword, page: "1" });
   };
 
   useEffect(() => {
@@ -39,13 +39,13 @@ const SearchBox = () => {
         ),
         endAdornment: (
           <InputAdornment position="end">
-            <IconButton onClick={() => setKeyword('')} disabled={!keyword}>
+            <IconButton onClick={() => setKeyword("")} disabled={!keyword}>
               <ClearIcon />
             </IconButton>
           </InputAdornment>
         ),
       }}
-      sx={{ background: 'white' }}
+      sx={{ background: "white" }}
     />
   );
 };

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   IconButton,
@@ -9,18 +9,18 @@ import {
   DialogTitle,
   DialogActions,
   Button,
-} from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useState, useTransition } from 'react';
-import { useSnackbar } from 'notistack';
-import { LoadingButton } from '@mui/lab';
-import { SnobGroup } from '@/types/snobGroup';
-import { selectedSnobGroup } from '@/atoms/app';
-import { useAtom } from 'jotai';
-import { deleteGroup } from '@/server/actions/group/delete-group';
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useState, useTransition } from "react";
+import { useSnackbar } from "notistack";
+import { LoadingButton } from "@mui/lab";
+import { SnobGroup } from "@/types/snobGroup";
+import { selectedSnobGroup } from "@/atoms/app";
+import { useAtom } from "jotai";
+import { deleteGroup } from "@/server/actions/group/delete-group";
 
 const Menu = styled(MuiMenu)(({ theme }) => ({
-  '& .MuiMenu-paper': {
+  "& .MuiMenu-paper": {
     minWidth: theme.spacing(20),
   },
 }));
@@ -60,10 +60,10 @@ const GroupCardMenu = ({ group }: { group: SnobGroup }) => {
       if (group.id) {
         const results = await deleteGroup(group.id);
         if (results.success) {
-          enqueueSnackbar('Group deleted successfully', { variant: 'success' });
+          enqueueSnackbar("Group deleted successfully", { variant: "success" });
           closeConfirm();
         } else {
-          enqueueSnackbar('Failed to delete group', { variant: 'error' });
+          enqueueSnackbar("Failed to delete group", { variant: "error" });
         }
       }
     });
@@ -74,8 +74,8 @@ const GroupCardMenu = ({ group }: { group: SnobGroup }) => {
       <IconButton
         aria-label="more"
         id="group-edit-button"
-        aria-controls={open ? 'group-edit-menu' : undefined}
-        aria-expanded={open ? 'true' : undefined}
+        aria-controls={open ? "group-edit-menu" : undefined}
+        aria-expanded={open ? "true" : undefined}
         aria-haspopup="true"
         onClick={handleClick}
       >
@@ -84,7 +84,7 @@ const GroupCardMenu = ({ group }: { group: SnobGroup }) => {
       <Menu
         id="group-edit-menu"
         MenuListProps={{
-          'aria-labelledby': 'group-edit-button',
+          "aria-labelledby": "group-edit-button",
         }}
         anchorEl={anchorEl}
         open={open}

@@ -8,59 +8,59 @@ import {
   ListItemText,
   TextField,
   styled,
-} from '@mui/material';
-import { useState } from 'react';
-import SaveIcon from '@mui/icons-material/Check';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import { SnobGroupAttribute } from '@/types/snobGroup';
-import { useFormContext } from 'react-hook-form';
-import { generateNewId } from '@/utils/generate-new-id';
+} from "@mui/material";
+import { useState } from "react";
+import SaveIcon from "@mui/icons-material/Check";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { SnobGroupAttribute } from "@/types/snobGroup";
+import { useFormContext } from "react-hook-form";
+import { generateNewId } from "@/utils/generate-new-id";
 
 const StyledTextField = styled(TextField)(() => ({
-  marginTop: '10px',
-  marginBottom: '10px',
+  marginTop: "10px",
+  marginBottom: "10px",
 }));
 
 const AttributeList = styled(List)(({ theme }) => ({
-  border: '1px solid ' + theme.palette.grey[400],
-  borderRadius: '5px',
-  height: '210px',
-  overflowY: 'auto',
+  border: "1px solid " + theme.palette.grey[400],
+  borderRadius: "5px",
+  height: "210px",
+  overflowY: "auto",
 }));
 
 const AttributeItem = styled(ListItem)(() => ({
-  padding: '0px 10px 0px 10px',
+  padding: "0px 10px 0px 10px",
 }));
 
 const newAttribute = (): SnobGroupAttribute => {
   return {
     id: generateNewId(),
-    name: '',
+    name: "",
   };
 };
 
 const GroupAttributes = () => {
   const { watch, setValue } = useFormContext();
-  const groupAttributes = watch('attributes') as SnobGroupAttribute[];
+  const groupAttributes = watch("attributes") as SnobGroupAttribute[];
   const [selectedAttribute, setSelectedAttribute] =
     useState<SnobGroupAttribute>(newAttribute());
 
   const handleSave = () => {
     const newAttributes = groupAttributes.filter(
       (attribute) =>
-        attribute.id === '' || attribute.id !== selectedAttribute.id
+        attribute.id === "" || attribute.id !== selectedAttribute.id,
     );
-    setValue('attributes', [...newAttributes, selectedAttribute]);
+    setValue("attributes", [...newAttributes, selectedAttribute]);
     setSelectedAttribute(newAttribute());
   };
 
   const handleDelete = (attribute: SnobGroupAttribute) => {
     setValue(
-      'attributes',
+      "attributes",
       groupAttributes.filter(
-        (attr) => !(attr.id === attribute.id && attr.name === attribute.name)
-      )
+        (attr) => !(attr.id === attribute.id && attr.name === attribute.name),
+      ),
     );
   };
 
@@ -78,7 +78,7 @@ const GroupAttributes = () => {
             <InputAdornment position="end">
               <IconButton
                 aria-label="save attribute"
-                disabled={selectedAttribute.name === ''}
+                disabled={selectedAttribute.name === ""}
                 onClick={handleSave}
                 edge="end"
               >

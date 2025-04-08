@@ -1,4 +1,4 @@
-import { ItemImage } from '@/types/image';
+import { ItemImage } from "@/types/image";
 import {
   Box,
   Button,
@@ -6,28 +6,28 @@ import {
   styled,
   useMediaQuery,
   useTheme,
-} from '@mui/material';
-import { CldImage } from 'next-cloudinary';
-import { useState } from 'react';
+} from "@mui/material";
+import { CldImage } from "next-cloudinary";
+import { useState } from "react";
 
 const ModalBody = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  flexDirection: 'column',
+  display: "flex",
+  justifyContent: "center",
+  flexDirection: "column",
   padding: theme.spacing(2),
   backgroundColor: theme.palette.background.default,
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  borderRadius: '5px',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  borderRadius: "5px",
 }));
 
 const ImagePreview = ({ image }: { image: ItemImage }) => {
   const theme = useTheme();
   const [modalOpen, setModalOpen] = useState(false);
-  const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const imageSize = smallScreen ? '300' : '400';
+  const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const imageSize = smallScreen ? "300" : "400";
   return (
     <>
       <CldImage
@@ -39,7 +39,7 @@ const ImagePreview = ({ image }: { image: ItemImage }) => {
         onClick={() => setModalOpen(true)}
         style={{
           border: `1px solid ${theme.palette.grey[400]}`,
-          cursor: 'pointer',
+          cursor: "pointer",
         }}
       />
       <Modal
@@ -58,7 +58,7 @@ const ImagePreview = ({ image }: { image: ItemImage }) => {
               alt="item image"
               style={{
                 border: `1px solid ${theme.palette.grey[400]}`,
-                cursor: 'pointer',
+                cursor: "pointer",
               }}
             />
           </Box>

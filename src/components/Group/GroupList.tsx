@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Grid from '@mui/material/Grid2';
-import GroupCard from './GroupCard';
-import { SnobGroup } from '@/types/snobGroup';
+import Grid from "@mui/material/Grid2";
+import GroupCard from "./GroupCard";
+import { SnobGroup } from "@/types/snobGroup";
 
 interface Props {
   groups: SnobGroup[];

@@ -5,27 +5,27 @@ import {
   Menu,
   MenuItem,
   styled,
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import { AppRoutes } from '@/config/appRoutes';
-import { useState } from 'react';
-import LogoutIcon from '@mui/icons-material/Logout';
-import ProfileIcon from '@mui/icons-material/Person';
-import GroupsIcon from '@mui/icons-material/People';
-import ActivityIcon from '@mui/icons-material/Assessment';
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import { AppRoutes } from "@/config/appRoutes";
+import { useState } from "react";
+import LogoutIcon from "@mui/icons-material/Logout";
+import ProfileIcon from "@mui/icons-material/Person";
+import GroupsIcon from "@mui/icons-material/People";
+import ActivityIcon from "@mui/icons-material/Assessment";
 
 export const NavLink = styled(Link)(({ theme }) => ({
-  textDecoration: 'none',
+  textDecoration: "none",
   color: theme.palette.common.black,
   width: theme.spacing(12),
 }));
 
-export const Container = styled('div')(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
-    display: 'block',
+export const Container = styled("div")(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    display: "block",
   },
-  [theme.breakpoints.up('sm')]: {
-    display: 'none',
+  [theme.breakpoints.up("sm")]: {
+    display: "none",
   },
 }));
 

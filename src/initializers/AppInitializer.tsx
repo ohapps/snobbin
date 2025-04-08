@@ -1,7 +1,7 @@
-import AlertInitializer from './AlertInitializer';
-import AuthInitializer from './AuthInitializer';
-import JotaiInitializer from './JotaiInitializer';
-import ThemeInitializer from './ThemeInitializer';
+import AlertInitializer from "./AlertInitializer";
+import AuthInitializer from "./AuthInitializer";
+import JotaiInitializer from "./JotaiInitializer";
+import ThemeInitializer from "./ThemeInitializer";
 
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   return (

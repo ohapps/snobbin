@@ -1,9 +1,9 @@
-import { RankingItem } from '@/types/rankings';
-import { SnobGroup } from '@/types/snobGroup';
-import { Rating, Typography, styled } from '@mui/material';
+import { RankingItem } from "@/types/rankings";
+import { SnobGroup } from "@/types/snobGroup";
+import { Rating, Typography, styled } from "@mui/material";
 
-export const Container = styled('div')(() => ({
-  display: 'flex',
+export const Container = styled("div")(() => ({
+  display: "flex",
 }));
 
 export const AverageText = styled(Typography)(({ theme }) => ({

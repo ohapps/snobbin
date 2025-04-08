@@ -1,10 +1,10 @@
-import { LoadingButton } from '@mui/lab';
-import { Box, styled } from '@mui/material';
+import { LoadingButton } from "@mui/lab";
+import { Box, styled } from "@mui/material";
 
 const Container = styled(Box)(() => ({
-  width: '100%',
-  display: 'flex',
-  justifyContent: 'center',
+  width: "100%",
+  display: "flex",
+  justifyContent: "center",
 }));
 
 const StyledButton = styled(LoadingButton)(({ theme }) => ({

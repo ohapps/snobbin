@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { LoadingButton } from '@mui/lab';
-import { Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { LoadingButton } from "@mui/lab";
+import { Button, Dialog, DialogActions, DialogTitle } from "@mui/material";
 
 const ConfirmModal = ({
   open,
   onCancel,
   onConfirm,
-  title = 'Are you sure?',
+  title = "Are you sure?",
   loading = false,
-  confirmText = 'Yes',
-  cancelText = 'Cancel',
+  confirmText = "Yes",
+  cancelText = "Cancel",
 }: {
   open: boolean;
   onCancel: () => void;

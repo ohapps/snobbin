@@ -1,15 +1,15 @@
-import { Avatar, Box, IconButton, Typography, styled } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Clear';
-import { useSnackbar } from 'notistack';
-import { useState, useTransition } from 'react';
-import PersonIcon from '@mui/icons-material/Person';
-import { SnobGroupInvite } from '@/types/snobGroup';
-import ConfirmModal from '../Modal/ConfirmModal';
-import { deleteGroupInvite } from '@/server/actions/group/delete-group-invite';
+import { Avatar, Box, IconButton, Typography, styled } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Clear";
+import { useSnackbar } from "notistack";
+import { useState, useTransition } from "react";
+import PersonIcon from "@mui/icons-material/Person";
+import { SnobGroupInvite } from "@/types/snobGroup";
+import ConfirmModal from "../Modal/ConfirmModal";
+import { deleteGroupInvite } from "@/server/actions/group/delete-group-invite";
 
 export const InviteContainer = styled(Box)(() => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
 }));
 
 export const Text = styled(Typography)(({ theme }) => ({
@@ -25,11 +25,11 @@ const GroupInviteItem = ({ invite }: { invite: SnobGroupInvite }) => {
     startTransition(async () => {
       const results = await deleteGroupInvite(invite);
       if (results.success) {
-        enqueueSnackbar('Group invite deleted successfully', {
-          variant: 'success',
+        enqueueSnackbar("Group invite deleted successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar('Failed to delete group invite', { variant: 'error' });
+        enqueueSnackbar("Failed to delete group invite", { variant: "error" });
       }
     });
   };

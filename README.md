@@ -32,10 +32,10 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- add support for PWA
 - Configure ESlint
 - Configure prettier
 - Configure Husky
+- Convert to mobile app
 - Add auto select on filling out attributes
 - Add read more to snob group description to cutoff long descriptions
 - Fix layout of activity screen on mobile

@@ -1,9 +1,9 @@
-import PendingInvites from '@/components/Activity/PendingInvites';
-import RecentItems from '@/components/Activity/RecentItems';
-import PageContainer from '@/components/Page/PageContainer';
-import { getPendingInvites } from '@/server/utils/group/get-pending-invites';
-import { getRecentItems } from '@/server/utils/items/get-recent-items';
-import Grid from '@mui/material/Grid2';
+import PendingInvites from "@/components/Activity/PendingInvites";
+import RecentItems from "@/components/Activity/RecentItems";
+import PageContainer from "@/components/Page/PageContainer";
+import { getPendingInvites } from "@/server/utils/group/get-pending-invites";
+import { getRecentItems } from "@/server/utils/items/get-recent-items";
+import Grid from "@mui/material/Grid2";
 
 const Page = async () => {
   const invites = await getPendingInvites();

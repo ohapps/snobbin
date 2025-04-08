@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { SnobGroupInvite } from '@/types/snobGroup';
-import { Typography, List } from '@mui/material';
-import PendingInvite from './PendingInvite';
-import CardContainer from '../Card/CardContainer';
+import { SnobGroupInvite } from "@/types/snobGroup";
+import { Typography, List } from "@mui/material";
+import PendingInvite from "./PendingInvite";
+import CardContainer from "../Card/CardContainer";
 
 const PendingInvites = ({ invites }: { invites: SnobGroupInvite[] }) => {
   return (
