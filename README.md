@@ -32,18 +32,16 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Configure ESlint
-- Configure prettier
-- Configure Husky
-- Convert to mobile app
 - Add auto select on filling out attributes
-- Add read more to snob group description to cutoff long descriptions
 - Fix layout of activity screen on mobile
-- Implement data loading pattern for pagination query
-- Add loading screens
+- Fix loading while searching
+- Add email functionality
+- Add ability to upload profile picture
+- Convert to mobile app - Capacitor
+- Convert to local first with offline support
 - Add tests
 - Add logging library
-- Add email functionality
+- Implement data loading pattern for pagination query
 - Add websocket events for real-time updates
 - Add Sentry
 - Add Google Analytics
