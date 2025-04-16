@@ -1,12 +1,8 @@
-import { selectedRankingItem } from "@/atoms/app";
-import { defaultNewRankingItem } from "@/types/rankings";
-import { Button, styled } from "@mui/material";
-import { useAtom } from "jotai";
-
-const NewButton = styled(Button)(() => ({
-  fontSize: 12,
-  height: "40px",
-}));
+import { selectedRankingItem } from '@/atoms/app';
+import { defaultNewRankingItem } from '@/types/rankings';
+import { Button } from '@mui/material';
+import { useAtom } from 'jotai';
+import AddIcon from '@mui/icons-material/Add';
 
 const NewItemButton = () => {
   const [, setSelectedRankingItem] = useAtom(selectedRankingItem);
@@ -16,9 +12,14 @@ const NewItemButton = () => {
   };
 
   return (
-    <NewButton variant="contained" size="small" onClick={newItem}>
-      New Item
-    </NewButton>
+    <Button
+      variant="contained"
+      size="small"
+      onClick={newItem}
+      startIcon={<AddIcon />}
+    >
+      New
+    </Button>
   );
 };
 

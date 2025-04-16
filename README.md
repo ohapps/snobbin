@@ -32,13 +32,12 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add auto select on filling out attributes
 - Fix layout of activity screen on mobile
 - Fix loading while searching
-- Add email functionality
-- Add ability to upload profile picture
 - Convert to mobile app - Capacitor
 - Convert to local first with offline support
+- Add ability to upload profile picture
+- Add email functionality
 - Add tests
 - Add logging library
 - Implement data loading pattern for pagination query
@@ -46,6 +45,7 @@ npx drizzle-kit migrate
 - Add Sentry
 - Add Google Analytics
 - Add user management
+- Add auto select on filling out attributes
 
 ## Schema
 
