@@ -32,7 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Fix layout of activity screen on mobile
 - Fix loading while searching
 - Convert to mobile app - Capacitor
 - Convert to local first with offline support
