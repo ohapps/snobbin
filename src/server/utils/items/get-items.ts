@@ -12,7 +12,7 @@ const getSortBy = (sortBy: string): SQL => {
   switch (sortBy) {
     case RankingItemSoryBy.DESCRIPTION:
       return asc(rankingItemsTable.description);
-    case RankingItemSoryBy.AVERAGE_RANKING:
+    case RankingItemSoryBy.RANKING:
       return desc(rankingItemsTable.averageRanking);
     default:
       return desc(rankingItemsTable.createdDate);

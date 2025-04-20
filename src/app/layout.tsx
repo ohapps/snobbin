@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import AppInitializer from "@/initializers/AppInitializer";
@@ -26,6 +26,10 @@ export const metadata: Metadata = {
     { rel: "apple-touch-icon", url: "/icons-128.png" },
     { rel: "icon", url: "/icons-128.png" },
   ],
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1976d2",
 };
 
 export default function RootLayout({

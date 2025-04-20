@@ -10,6 +10,9 @@ import { PagingNavigation } from "./PagingNavigation";
 import SortByMenu from "./SortByMenu";
 import NewItemButton from "./NewItemButton";
 import { formatNumber } from "@/utils/format-number";
+import { useUpdateQueryParams } from "@/hooks/useUpdateQueryParams";
+import { useTransition } from "react";
+import LoadingPage from "../Page/LoadingPage";
 
 const ItemList = ({
   group,
@@ -18,6 +21,15 @@ const ItemList = ({
   group: SnobGroup;
   paginatedResults: PaginatedResults;
 }) => {
+  const updateQueryParams = useUpdateQueryParams();
+  const [loading, startTransition] = useTransition();
+
+  const updateQuery = (newParams: Record<string, string>) => {
+    startTransition(() => {
+      updateQueryParams(newParams);
+    });
+  };
+
   return (
     <Box>
       <Grid container>
@@ -37,7 +49,7 @@ const ItemList = ({
           sx={{ justifyContent: { xs: "flex-start", md: "flex-end" } }}
           paddingBottom={2}
         >
-          <SearchBox />
+          <SearchBox updateQuery={updateQuery} />
         </Grid>
         <Grid
           size={{ md: 6, xs: 9 }}
@@ -46,7 +58,7 @@ const ItemList = ({
           alignItems={"center"}
           paddingBottom={2}
         >
-          <SortByMenu />
+          <SortByMenu updateQuery={updateQuery} />
         </Grid>
         <Grid
           size={{ md: 6, xs: 3 }}
@@ -57,8 +69,15 @@ const ItemList = ({
           <NewItemButton />
         </Grid>
       </Grid>
-      <ItemListPage group={group} items={paginatedResults.items} />
-      <PagingNavigation paginatedResults={paginatedResults} />
+      {loading ? (
+        <LoadingPage />
+      ) : (
+        <ItemListPage group={group} items={paginatedResults.items} />
+      )}
+      <PagingNavigation
+        paginatedResults={paginatedResults}
+        updateQuery={updateQuery}
+      />
     </Box>
   );
 };

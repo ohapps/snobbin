@@ -4,22 +4,20 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { IconButton, InputAdornment, TextField, styled } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useUpdateQueryParams } from "@/hooks/useUpdateQueryParams";
 
 const SearchTextField = styled(TextField)(({ theme }) => ({
   background: theme.palette.common.white,
 }));
 
-const SearchBox = () => {
-  const updateQueryParams = useUpdateQueryParams();
+const SearchBox = ({
+  updateQuery,
+}: {
+  updateQuery: (newParams: Record<string, string>) => void;
+}) => {
   const [keyword, setKeyword] = useState("");
 
-  const handleSearch = () => {
-    updateQueryParams({ keyword: keyword, page: "1" });
-  };
-
   useEffect(() => {
-    handleSearch();
+    updateQuery({ keyword: keyword, page: "1" });
   }, [keyword]);
 
   return (

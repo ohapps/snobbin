@@ -32,7 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Fix loading while searching
 - Convert to mobile app - Capacitor
 - Convert to local first with offline support
 - Add ability to upload profile picture

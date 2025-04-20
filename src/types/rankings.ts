@@ -75,7 +75,7 @@ export const defaultNewRankingItem: RankingItem = {
 
 export enum RankingItemSoryBy {
   DESCRIPTION = "DESCRIPTION",
-  AVERAGE_RANKING = "AVERAGE_RANKING",
+  RANKING = "RANKING",
   MOST_RECENT = "MOST_RECENT",
 }
 

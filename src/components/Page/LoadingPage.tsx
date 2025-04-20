@@ -2,13 +2,13 @@
 
 import { Box, CircularProgress } from "@mui/material";
 
-const LoadingPage = () => {
+const LoadingPage = ({ fullHeight = false }: { fullHeight?: boolean }) => {
   return (
     <Box
       display="flex"
       alignItems="center"
       justifyContent="center"
-      minHeight="100vh"
+      minHeight={fullHeight ? "100vh" : "200px"}
     >
       <CircularProgress size="3rem" />
     </Box>
