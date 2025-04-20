@@ -1,8 +1,8 @@
-import { RankingItemSoryBy } from '@/types/rankings';
-import { enumToDisplay } from '@/utils/enum-to-display';
-import { Box, Button, Menu, MenuItem, styled, Typography } from '@mui/material';
-import { useState } from 'react';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { RankingItemSoryBy } from "@/types/rankings";
+import { enumToDisplay } from "@/utils/enum-to-display";
+import { Box, Button, Menu, MenuItem, styled, Typography } from "@mui/material";
+import { useState } from "react";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const SortByButton = styled(Button)(({ theme }) => ({
   fontSize: 12,
@@ -35,9 +35,9 @@ const SortByMenu = ({
       <Typography>Sorted By:</Typography>
       <SortByButton
         id="sort-by-button"
-        aria-controls={open ? 'sort-by-menu' : undefined}
+        aria-controls={open ? "sort-by-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
         variant="contained"
         endIcon={<KeyboardArrowDownIcon />}
@@ -50,7 +50,7 @@ const SortByMenu = ({
         open={open}
         onClose={() => setAnchorEl(null)}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
+          "aria-labelledby": "basic-button",
         }}
       >
         {Object.values(RankingItemSoryBy).map((sortBy) => (
