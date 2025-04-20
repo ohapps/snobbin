@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from "@mui/material";
 
 const LoadingPage = ({ fullHeight = true }: { fullHeight?: boolean }) => {
   return (
@@ -8,7 +8,7 @@ const LoadingPage = ({ fullHeight = true }: { fullHeight?: boolean }) => {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      minHeight={fullHeight ? '100vh' : '200px'}
+      minHeight={fullHeight ? "100vh" : "200px"}
     >
       <CircularProgress size="3rem" />
     </Box>
