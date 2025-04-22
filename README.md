@@ -32,9 +32,11 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Convert to mobile app - Capacitor
 - Convert to local first with offline support
+- Convert to mobile app - Capacitor
+- Add user management
 - Add ability to upload profile picture
+- Add ability to upload snob group picture
 - Add email functionality
 - Add tests
 - Add logging library
@@ -42,7 +44,7 @@ npx drizzle-kit migrate
 - Add websocket events for real-time updates
 - Add Sentry
 - Add Google Analytics
-- Add user management
+
 - Add auto select on filling out attributes
 
 ## Schema
