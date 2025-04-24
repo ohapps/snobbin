@@ -35,6 +35,8 @@ npx drizzle-kit migrate
 - Convert to local first with offline support
 - Convert to mobile app - Capacitor
 - Add user management
+- Add global error page
+- Add not found page
 - Add ability to upload profile picture
 - Add ability to upload snob group picture
 - Add email functionality

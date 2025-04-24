@@ -10,6 +10,7 @@ const nextConfig = {
 };
 
 export default withPWA({
+  disable: process.env.NODE_ENV === "development", // Disable PWA in development mode
   dest: "public", // destination directory for the PWA files
   register: true, // register the PWA service worker
   skipWaiting: true, // skip waiting for service worker activation
