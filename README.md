@@ -32,20 +32,23 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Convert to local first with offline support
 - Convert to mobile app - Capacitor
+- Convert to local first with offline support
+- Default loading to last group
 - Add user management
 - Add global error page
 - Add not found page
 - Add ability to upload profile picture
 - Add ability to upload snob group picture
 - Add email functionality
+- Add public groups
 - Add tests
 - Add logging library
 - Implement data loading pattern for pagination query
 - Add websocket events for real-time updates
 - Add Sentry
 - Add Google Analytics
+- Investigage using untappd API for quicker search
 
 - Add auto select on filling out attributes
 
