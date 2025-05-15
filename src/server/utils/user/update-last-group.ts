@@ -5,11 +5,11 @@ import { snobsTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
 export const updateLastGroup = async (snobGroup: SnobGroup) => {
-    const snob = await getCurrentUser();
-    await db
-        .update(snobsTable)
-        .set({
-            lastGroupId: snobGroup.id,
-        })
-        .where(eq(snobsTable.id, snob.id));
-}
+  const snob = await getCurrentUser();
+  await db
+    .update(snobsTable)
+    .set({
+      lastGroupId: snobGroup.id,
+    })
+    .where(eq(snobsTable.id, snob.id));
+};
