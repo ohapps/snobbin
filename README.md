@@ -32,10 +32,19 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Convert to mobile app - Capacitor
+- Convert to mobile app
+  - Capacitor
+  - React Native - webview
+  - native Android - webview
+  - native ios - webview
 - Convert to local first with offline support
 - Default loading to last group
+- Add auto select on filling out attributes
+- Auto hide the group summary on mobile
 - Add user management
+- Make header sticky
+- Add group summary by attribute
+- Show rankings per user in group summary
 - Add global error page
 - Add not found page
 - Add ability to upload profile picture
@@ -49,8 +58,6 @@ npx drizzle-kit migrate
 - Add Sentry
 - Add Google Analytics
 - Investigage using untappd API for quicker search
-
-- Add auto select on filling out attributes
 
 ## Schema
 

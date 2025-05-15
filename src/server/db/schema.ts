@@ -7,17 +7,6 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const snobsTable = pgTable("snobs", {
-  id: text("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
-  pictureUrl: text("picture_url"),
-});
-
-export type InsertSnob = typeof snobsTable.$inferInsert;
-export type SelectSnob = typeof snobsTable.$inferSelect;
-
 export const snobGroupsTable = pgTable("snob_groups", {
   id: uuid("id").primaryKey(),
   name: text("name").notNull(),
@@ -32,6 +21,18 @@ export const snobGroupsTable = pgTable("snob_groups", {
 
 export type InsertSnobGroup = typeof snobGroupsTable.$inferInsert;
 export type SelectSnobGroup = typeof snobGroupsTable.$inferSelect;
+
+export const snobsTable = pgTable("snobs", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  pictureUrl: text("picture_url"),
+  lastGroupId: uuid("last_group_id").references(() => snobGroupsTable.id)
+});
+
+export type InsertSnob = typeof snobsTable.$inferInsert;
+export type SelectSnob = typeof snobsTable.$inferSelect;
 
 export const snobGroupMembersTable = pgTable("snob_group_members", {
   id: uuid("id").primaryKey(),

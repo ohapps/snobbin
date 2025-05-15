@@ -23,4 +23,5 @@ export interface Snob {
   firstName?: string | null;
   lastName?: string | null;
   pictureUrl?: string | null;
+  lastGroupId?: string | null;
 }

@@ -50,6 +50,13 @@
       "when": 1741061811728,
       "tag": "0006_dark_sunset_bain",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1747277045170,
+      "tag": "0007_wet_boom_boom",
+      "breakpoints": true
     }
   ]
 }
