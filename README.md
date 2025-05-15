@@ -38,7 +38,6 @@ npx drizzle-kit migrate
   - native Android - webview
   - native ios - webview
 - Convert to local first with offline support
-- Default loading to last group
 - Add auto select on filling out attributes
 - Auto hide the group summary on mobile
 - Add user management
