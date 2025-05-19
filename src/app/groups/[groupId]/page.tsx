@@ -4,6 +4,7 @@ import PageContainer from "@/components/Page/PageContainer";
 import ItemDrawer from "@/components/RankingItem/ItemDrawer";
 import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
 import { updateLastGroup } from "@/server/utils/user/update-last-group";
+import { getGroupAttributeSummary } from "@/server/utils/group/get-group-attribute-summary";
 
 const GroupPage = async ({
   params,
@@ -19,6 +20,7 @@ const GroupPage = async ({
   const page = parseInt(searchParams.page, 10) || 1;
   const group = await getGroupForCurrentUser(params.groupId);
   await updateLastGroup(group);
+  const attributeSummary = await getGroupAttributeSummary(group);
   const pageinatedResults = await getItems(
     params.groupId,
     page,
@@ -28,7 +30,7 @@ const GroupPage = async ({
   return (
     <PageContainer>
       <GroupDetails group={group} paginatedResults={pageinatedResults} />
-      <ItemDrawer group={group} />
+      <ItemDrawer group={group} snobGroupAttributes={attributeSummary} />
     </PageContainer>
   );
 };

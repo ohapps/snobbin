@@ -62,6 +62,12 @@ export type SnobGroupAttribute = {
   name: string;
 };
 
+export type SnobGroupAttributeSummary = {
+  attributeId: string;
+  attributeValue: string;
+  count: number;
+};
+
 export type SnobGroup = {
   members: SnobGroupMember[];
   invites: SnobGroupInvite[];

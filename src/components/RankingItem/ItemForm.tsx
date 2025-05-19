@@ -1,5 +1,5 @@
 import { RankingItem, RankingItemSchema } from "@/types/rankings";
-import { SnobGroup } from "@/types/snobGroup";
+import { SnobGroup, SnobGroupAttributeSummary } from "@/types/snobGroup";
 import Grid from "@mui/material/Grid2";
 import { useSnackbar } from "notistack";
 import { useState, useTransition } from "react";
@@ -8,23 +8,20 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ControlledTextField from "../Form/ControlledTextField";
 import { saveItem } from "@/server/actions/items/save-item";
-import { styled, TextField } from "@mui/material";
 import ImageUploadButton from "../Image/ImageUploadButton";
 import { getImageOrPlaceholder } from "@/types/image";
-
-const StyledTextField = styled(TextField)(() => ({
-  marginTop: "10px",
-  marginBottom: "10px",
-}));
+import ItemAttributes from "./ItemAttributes";
 
 const ItemForm = ({
   rankingItem,
   rankingGroup,
   onSave,
+  snobGroupAttributes,
 }: {
   rankingItem: RankingItem;
   rankingGroup: SnobGroup;
   onSave: () => void;
+  snobGroupAttributes: SnobGroupAttributeSummary[];
 }) => {
   const [isPending, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
@@ -64,35 +61,6 @@ const ItemForm = ({
     });
   };
 
-  const getAttributeValue = (id: string) => {
-    return (
-      attributes?.find((attr) => attr.attributeId === id)?.attributeValue ?? ""
-    );
-  };
-
-  const setAttributeValue = (id: string, value: string) => {
-    const existingAttribute = attributes?.find(
-      (attr) => attr.attributeId === id,
-    );
-    if (existingAttribute) {
-      const otherAttributes = attributes?.filter(
-        (attr) => attr.attributeId !== id,
-      );
-      setAttributes([
-        ...otherAttributes,
-        {
-          ...existingAttribute,
-          attributeValue: value,
-        },
-      ]);
-    } else {
-      setAttributes([
-        ...attributes,
-        { id: "", attributeId: id, attributeValue: value },
-      ]);
-    }
-  };
-
   return (
     <FormProvider {...methods}>
       <form
@@ -106,19 +74,12 @@ const ItemForm = ({
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <ControlledTextField name="description" label="Description" />
-            {rankingGroup.attributes?.map((attr) => (
-              <StyledTextField
-                key={attr.id}
-                id={attr.id}
-                label={attr.name}
-                value={getAttributeValue(attr.id ?? "")}
-                fullWidth
-                autoFocus
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setAttributeValue(attr.id ?? "", event.target.value)
-                }
-              />
-            ))}
+            <ItemAttributes
+              groupAttributes={rankingGroup.attributes}
+              itemAttributes={attributes}
+              setItemAttributes={setAttributes}
+              snobGroupAttributes={snobGroupAttributes}
+            />
           </Grid>
           <Grid size={{ xs: 12 }}>
             <FullSubmitButton

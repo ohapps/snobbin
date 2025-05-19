@@ -2,11 +2,17 @@
 
 import BottomDrawer from "@/components/Drawer/BottomDrawer";
 import ItemForm from "./ItemForm";
-import { SnobGroup } from "@/types/snobGroup";
+import { SnobGroup, SnobGroupAttributeSummary } from "@/types/snobGroup";
 import { useAtom } from "jotai";
 import { selectedRankingItem } from "@/atoms/app";
 
-const ItemDrawer = ({ group }: { group: SnobGroup }) => {
+const ItemDrawer = ({
+  group,
+  snobGroupAttributes,
+}: {
+  group: SnobGroup;
+  snobGroupAttributes: SnobGroupAttributeSummary[];
+}) => {
   const [rankingItem, setSelectedRankingItem] = useAtom(selectedRankingItem);
 
   const closeDrawer = () => {
@@ -24,6 +30,7 @@ const ItemDrawer = ({ group }: { group: SnobGroup }) => {
           rankingGroup={group}
           rankingItem={rankingItem}
           onSave={closeDrawer}
+          snobGroupAttributes={snobGroupAttributes}
         />
       )}
     </BottomDrawer>
