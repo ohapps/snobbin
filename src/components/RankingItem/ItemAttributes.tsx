@@ -1,13 +1,13 @@
-import { RankingItemAttribute } from '@/types/rankings';
+import { RankingItemAttribute } from "@/types/rankings";
 import {
   SnobGroupAttribute,
   SnobGroupAttributeSummary,
-} from '@/types/snobGroup';
-import { Autocomplete, styled, TextField } from '@mui/material';
+} from "@/types/snobGroup";
+import { Autocomplete, styled, TextField } from "@mui/material";
 
 const StyledTextField = styled(TextField)(() => ({
-  marginTop: '10px',
-  marginBottom: '10px',
+  marginTop: "10px",
+  marginBottom: "10px",
 }));
 
 const ItemAttributes = ({
@@ -30,17 +30,17 @@ const ItemAttributes = ({
   const getAttributeValue = (id: string) => {
     return (
       itemAttributes?.find((attr) => attr.attributeId === id)?.attributeValue ??
-      ''
+      ""
     );
   };
 
   const setAttributeValue = (id: string, value: string) => {
     const existingAttribute = itemAttributes?.find(
-      (attr) => attr.attributeId === id
+      (attr) => attr.attributeId === id,
     );
     if (existingAttribute) {
       const otherAttributes = itemAttributes?.filter(
-        (attr) => attr.attributeId !== id
+        (attr) => attr.attributeId !== id,
       );
       setItemAttributes([
         ...otherAttributes,
@@ -52,7 +52,7 @@ const ItemAttributes = ({
     } else {
       setItemAttributes([
         ...itemAttributes,
-        { id: '', attributeId: id, attributeValue: value },
+        { id: "", attributeId: id, attributeValue: value },
       ]);
     }
   };
@@ -64,18 +64,18 @@ const ItemAttributes = ({
           freeSolo
           key={attribute.id}
           id={attribute.id}
-          value={getAttributeValue(attribute.id ?? '')}
+          value={getAttributeValue(attribute.id ?? "")}
           onChange={(
             event: React.SyntheticEvent<Element, Event>,
-            newValue: string | null
+            newValue: string | null,
           ) => {
-            setAttributeValue(attribute.id ?? '', newValue ?? '');
+            setAttributeValue(attribute.id ?? "", newValue ?? "");
           }}
-          inputValue={getAttributeValue(attribute.id ?? '')}
+          inputValue={getAttributeValue(attribute.id ?? "")}
           onInputChange={(event, newInputValue) => {
-            setAttributeValue(attribute.id ?? '', newInputValue ?? '');
+            setAttributeValue(attribute.id ?? "", newInputValue ?? "");
           }}
-          options={getOptions(attribute.id ?? '')}
+          options={getOptions(attribute.id ?? "")}
           fullWidth
           renderInput={(params) => (
             <StyledTextField {...params} label={attribute.name} />
