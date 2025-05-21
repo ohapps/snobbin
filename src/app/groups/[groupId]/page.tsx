@@ -1,10 +1,10 @@
-import { getItems } from "@/server/utils/items/get-items";
-import GroupDetails from "@/components/Group/GroupDetails";
-import PageContainer from "@/components/Page/PageContainer";
-import ItemDrawer from "@/components/RankingItem/ItemDrawer";
-import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
-import { updateLastGroup } from "@/server/utils/user/update-last-group";
-import { getGroupAttributeSummary } from "@/server/utils/group/get-group-attribute-summary";
+import { getItems } from '@/server/utils/items/get-items';
+import GroupDetails from '@/components/Group/GroupDetails';
+import PageContainer from '@/components/Page/PageContainer';
+import ItemDrawer from '@/components/RankingItem/ItemDrawer';
+import { getGroupForCurrentUser } from '@/server/utils/group/get-group-for-current-user';
+import { updateLastGroup } from '@/server/utils/user/update-last-group';
+import { getGroupAttributeSummary } from '@/server/utils/group/get-group-attribute-summary';
 
 const GroupPage = async ({
   params,
@@ -25,11 +25,15 @@ const GroupPage = async ({
     params.groupId,
     page,
     searchParams.keyword,
-    searchParams.sortBy,
+    searchParams.sortBy
   );
   return (
     <PageContainer>
-      <GroupDetails group={group} paginatedResults={pageinatedResults} />
+      <GroupDetails
+        group={group}
+        paginatedResults={pageinatedResults}
+        attributeSummary={attributeSummary}
+      />
       <ItemDrawer group={group} snobGroupAttributes={attributeSummary} />
     </PageContainer>
   );

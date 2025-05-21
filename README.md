@@ -32,11 +32,9 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add auto select on filling out attributes
 - Auto hide the group summary on mobile
 - Add user management
 - Make header sticky
-- Add group summary by attribute
 - Show rankings per user in group summary
 - Add install button for PWA
 - Add offline support via PWA
