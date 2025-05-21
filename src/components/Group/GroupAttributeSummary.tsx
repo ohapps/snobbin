@@ -1,4 +1,4 @@
-import { SnobGroup, SnobGroupAttributeSummary } from '@/types/snobGroup';
+import { SnobGroup, SnobGroupAttributeSummary } from "@/types/snobGroup";
 import {
   Box,
   Accordion,
@@ -6,8 +6,8 @@ import {
   AccordionDetails,
   Typography,
   styled,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export const AttributeTitle = styled(Typography)(({ theme }) => ({
   fontWeight: theme.typography.fontWeightBold,
@@ -29,7 +29,7 @@ const GroupAttributeSummary = ({
     return attributeSummary
       .filter(
         (attr) =>
-          attr.attributeId === attributeId && Boolean(attr.attributeValue)
+          attr.attributeId === attributeId && Boolean(attr.attributeValue),
       )
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);

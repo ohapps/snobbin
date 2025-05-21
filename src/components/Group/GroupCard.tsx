@@ -1,39 +1,39 @@
-'use client';
+"use client";
 
-import { AppRoutes } from '@/config/appRoutes';
+import { AppRoutes } from "@/config/appRoutes";
 import {
   CardContent as MuiCardContent,
   Card as MuiCard,
   styled,
-} from '@mui/material';
-import Link from 'next/link';
-import { SnobGroup, SnobGroupRole } from '@/types/snobGroup';
-import useCurrentGroupMember from '@/hooks/useCurrentGroupMember';
-import GroupCardMenu from './GroupCardMenu';
-import GroupInfo from './GroupInfo';
+} from "@mui/material";
+import Link from "next/link";
+import { SnobGroup, SnobGroupRole } from "@/types/snobGroup";
+import useCurrentGroupMember from "@/hooks/useCurrentGroupMember";
+import GroupCardMenu from "./GroupCardMenu";
+import GroupInfo from "./GroupInfo";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   backgroundColor: theme.palette.grey[200],
   padding: 0,
-  ':hover': {
+  ":hover": {
     backgroundColor: theme.palette.grey[300],
   },
 }));
 
 const CardContent = styled(MuiCardContent)(() => ({
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
   padding: 0,
-  ':last-child': {
+  ":last-child": {
     paddingBottom: 0,
   },
 }));
 
 const CardLink = styled(Link)(({ theme }) => ({
-  textDecoration: 'none',
-  display: 'flex',
+  textDecoration: "none",
+  display: "flex",
   color: theme.palette.grey[800],
   flex: 1,
   padding: theme.spacing(2),
