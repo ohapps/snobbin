@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import Grid from '@mui/material/Grid2';
-import { SnobGroup, SnobGroupAttributeSummary } from '@/types/snobGroup';
-import ItemList from '../RankingItem/ItemList';
-import { PaginatedResults } from '@/types/rankings';
-import GroupSummary from './GroupSummary';
-import { Button, useMediaQuery, useTheme } from '@mui/material';
-import { useEffect, useState } from 'react';
+import Grid from "@mui/material/Grid2";
+import { SnobGroup, SnobGroupAttributeSummary } from "@/types/snobGroup";
+import ItemList from "../RankingItem/ItemList";
+import { PaginatedResults } from "@/types/rankings";
+import GroupSummary from "./GroupSummary";
+import { Button, useMediaQuery, useTheme } from "@mui/material";
+import { useEffect, useState } from "react";
 
 interface Props {
   group: SnobGroup;
@@ -16,7 +16,7 @@ interface Props {
 
 const GroupDetails = ({ group, paginatedResults, attributeSummary }: Props) => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [hideGroupSummary, setHideGroupSummary] = useState(true);
   const showLargeGroupSummary = !hideGroupSummary && !isSmallScreen;
   const showSmallGroupSummary = !hideGroupSummary && isSmallScreen;
@@ -30,9 +30,9 @@ const GroupDetails = ({ group, paginatedResults, attributeSummary }: Props) => {
       {showSmallGroupSummary && (
         <Grid
           size={{ xs: 12, md: 4 }}
-          display={'flex'}
-          flexDirection={'column'}
-          alignItems={'center'}
+          display={"flex"}
+          flexDirection={"column"}
+          alignItems={"center"}
         >
           <GroupSummary group={group} attributeSummary={attributeSummary} />
           <Button

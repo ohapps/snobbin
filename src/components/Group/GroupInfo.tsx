@@ -1,7 +1,7 @@
-import { SnobGroup } from '@/types/snobGroup';
-import { Box } from '@mui/material';
-import GroupDescription from './GroupDescription';
-import GroupTitle from './GroupTitle';
+import { SnobGroup } from "@/types/snobGroup";
+import { Box } from "@mui/material";
+import GroupDescription from "./GroupDescription";
+import GroupTitle from "./GroupTitle";
 
 const GroupInfo = ({
   group,
