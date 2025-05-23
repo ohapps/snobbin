@@ -32,16 +32,15 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Auto hide the group summary on mobile
-- Add user management
 - Make header sticky
+- Add user management
 - Show rankings per user in group summary
+- Add ability to upload profile picture
+- Add ability to upload snob group picture
 - Add install button for PWA
 - Add offline support via PWA
 - Add global error page
 - Add not found page
-- Add ability to upload profile picture
-- Add ability to upload snob group picture
 - Add email functionality
 - Add public groups
 - Add tests

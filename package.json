@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
+    "pre-commit": "yarn format && yarn lint",
     "prepare": "husky"
   },
   "dependencies": {

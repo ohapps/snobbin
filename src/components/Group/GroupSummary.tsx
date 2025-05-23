@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
 import {
   SnobGroup,
   SnobGroupAttributeSummary,
   SnobGroupRole,
-} from "@/types/snobGroup";
+} from '@/types/snobGroup';
 import {
   CardContent as MuiCardContent,
   Card as MuiCard,
   styled,
-} from "@mui/material";
-import GroupInfo from "./GroupInfo";
-import useCurrentGroupMember from "@/hooks/useCurrentGroupMember";
-import GroupCardMenu from "./GroupCardMenu";
-import GroupMembers from "./GroupMembers";
-import GroupInvites from "./GroupInvites";
-import GroupAttributeSummary from "./GroupAttributeSummary";
+} from '@mui/material';
+import GroupInfo from './GroupInfo';
+import useCurrentGroupMember from '@/hooks/useCurrentGroupMember';
+import GroupCardMenu from './GroupCardMenu';
+import GroupMembers from './GroupMembers';
+import GroupInvites from './GroupInvites';
+import GroupAttributeSummary from './GroupAttributeSummary';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   backgroundColor: theme.palette.grey[200],
@@ -23,10 +23,10 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const CardContent = styled(MuiCardContent)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
   padding: theme.spacing(2),
 }));
 
@@ -37,6 +37,7 @@ interface Props {
 
 const GroupSummary = ({ group, attributeSummary }: Props) => {
   const groupMember = useCurrentGroupMember(group);
+
   return (
     <Card>
       <CardContent>
