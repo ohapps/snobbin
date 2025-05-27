@@ -32,7 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Make header sticky
 - Add user management
 - Show rankings per user in group summary
 - Add ability to upload profile picture
@@ -47,9 +46,11 @@ npx drizzle-kit migrate
 - Add logging library
 - Implement data loading pattern for pagination query
 - Add websocket events for real-time updates
+- Add Auth0 production keys
 - Add Sentry
 - Add Google Analytics
 - Investigage using untappd API for quicker search
+- use AI to scrape the web for item information
 
 ## Schema
 
