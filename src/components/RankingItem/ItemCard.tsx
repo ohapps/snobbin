@@ -51,6 +51,9 @@ export const AttributeValue = styled(Box)(({ theme }) => ({
 const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
   const [expanded, setExpanded] = useState(false);
   const groupMember = useCurrentGroupMember(group);
+  const canEdit =
+    groupMember?.role === SnobGroupRole.ADMIN ||
+    groupMember?.snob?.id === item.createdBy;
 
   const getAttributeValue = (id: string) => {
     return (
@@ -71,9 +74,7 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
             marginBottom: "-40px",
           }}
         >
-          {groupMember?.role === SnobGroupRole.ADMIN && (
-            <ItemCardMenu item={item} />
-          )}
+          {canEdit && <ItemCardMenu item={item} />}
         </Grid>
         <Grid
           size={{ xs: 12, md: 4 }}

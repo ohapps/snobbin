@@ -58,6 +58,7 @@ export const getItems = async (
       imageId: rankingItemsTable.imageId,
       imageUrl: rankingItemsTable.imageUrl,
       createdDate: rankingItemsTable.createdDate,
+      createdBy: rankingItemsTable.createdBy,
     })
     .from(rankingItemsTable)
     .leftJoin(
@@ -76,6 +77,7 @@ export const getItems = async (
       rankingItemsTable.imageId,
       rankingItemsTable.imageUrl,
       rankingItemsTable.createdDate,
+      rankingItemsTable.createdBy,
     )
     .offset(offset);
 
@@ -94,6 +96,7 @@ export const getItems = async (
         rankings: await getRankings(item.id),
         attributes: await getRankingAttributes(item.id),
         createdDate: item.createdDate,
+        createdBy: item.createdBy,
       })),
     ),
     total: count,

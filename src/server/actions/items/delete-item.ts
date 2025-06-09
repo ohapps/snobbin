@@ -15,7 +15,11 @@ export const deleteItem = async (itemId: string): Promise<ActionResponse> => {
     const snob = await getCurrentUser();
     const rankingItem = await getItem(itemId);
 
-    await getGroupForUser(rankingItem.groupId, snob.id, [SnobGroupRole.ADMIN]);
+    if (rankingItem.createdBy !== snob.id) {
+      await getGroupForUser(rankingItem.groupId, snob.id, [
+        SnobGroupRole.ADMIN,
+      ]);
+    }
 
     await db.delete(rankingItemsTable).where(eq(rankingItemsTable.id, itemId));
 

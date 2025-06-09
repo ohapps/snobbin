@@ -90,7 +90,7 @@ export const rankingItemAttributesTable = pgTable("ranking_item_attributes", {
   id: uuid("id").primaryKey(),
   itemId: uuid("item_id")
     .notNull()
-    .references(() => rankingItemsTable.id),
+    .references(() => rankingItemsTable.id, { onDelete: "cascade" }),
   attributeId: uuid("attribute_id")
     .notNull()
     .references(() => snobGroupAttributesTable.id),
@@ -106,7 +106,7 @@ export const rankingsTable = pgTable("rankings", {
   id: uuid("id").primaryKey(),
   itemId: uuid("item_id")
     .notNull()
-    .references(() => rankingItemsTable.id),
+    .references(() => rankingItemsTable.id, { onDelete: "cascade" }),
   groupMemberId: uuid("group_member_id")
     .notNull()
     .references(() => snobGroupMembersTable.id),

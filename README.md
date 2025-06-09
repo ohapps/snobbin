@@ -32,7 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add user management
 - Show rankings per user in group summary
 - Add ability to upload profile picture
 - Add ability to upload snob group picture
@@ -44,6 +43,8 @@ npx drizzle-kit migrate
 - Add public groups
 - Add tests
 - Add logging library
+- Setup Github pipeline
+- Setup AI pull request reviews
 - Implement data loading pattern for pagination query
 - Add websocket events for real-time updates
 - Add Auth0 production keys

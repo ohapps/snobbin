@@ -1,7 +1,7 @@
 import { db } from "@/server/db";
 import { snobGroupMembersTable, snobGroupsTable } from "@/server/db/schema";
-import { eq, and } from "drizzle-orm";
-import { SnobGroup } from "@/types/snobGroup";
+import { eq, and, ne } from "drizzle-orm";
+import { SnobGroup, SnobGroupRole } from "@/types/snobGroup";
 import { convertGroupEntityToModel } from "./convert-group-entity-to-model";
 import { getCurrentUser } from "@/server/utils/user/get-current-user";
 
@@ -29,6 +29,7 @@ export const getCurrentUserGroups = async (): Promise<SnobGroup[]> => {
       and(
         eq(snobGroupMembersTable.snobId, snob.id),
         eq(snobGroupsTable.deleted, false),
+        ne(snobGroupMembersTable.role, SnobGroupRole.DISABLED),
       ),
     );
 

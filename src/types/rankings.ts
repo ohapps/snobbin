@@ -48,6 +48,7 @@ export type RankingItem = {
   imageId: string | null;
   imageUrl: string | null;
   createdDate: Date | null;
+  createdBy?: string | null;
   rankings: Ranking[];
   attributes: RankingItemAttribute[];
 };

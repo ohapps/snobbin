@@ -35,6 +35,7 @@ export const SnobGroupSchema = z.object({
 export enum SnobGroupRole {
   ADMIN = "ADMIN",
   MEMBER = "MEMBER",
+  DISABLED = "DISABLED",
 }
 
 export type SnobGroupMember = {

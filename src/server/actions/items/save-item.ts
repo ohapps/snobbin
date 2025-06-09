@@ -16,11 +16,15 @@ import { generateNewId } from "@/utils/generate-new-id";
 import { eq } from "drizzle-orm";
 import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
 import { getCurrentUser } from "@/server/utils/user/get-current-user";
+import { SnobGroupRole } from "@/types/snobGroup";
+import { getGroupForUser } from "@/server/utils/group/get-group-for-user";
+import { Snob } from "@/types/snob";
+import { getItem } from "../../utils/items/get-item";
 
 const createOrUpdateRankingItem = async (
   item: RankItemUpdate,
+  snob: Snob,
 ): Promise<string> => {
-  const snob = await getCurrentUser();
   if (item.id) {
     await db
       .update(rankingItemsTable)
@@ -62,9 +66,22 @@ export const saveItem = async (item: RankingItem): Promise<ActionResponse> => {
       );
     }
 
-    await getGroupForCurrentUser(item.groupId);
+    const snob = await getCurrentUser();
 
-    const itemId = await createOrUpdateRankingItem(validatedData.data);
+    if (item.id) {
+      // If updating, ensure the user is the creator or an admin of the group
+      const rankingItem = await getItem(item.id);
+      if (rankingItem.createdBy !== snob.id) {
+        await getGroupForUser(rankingItem.groupId, snob.id, [
+          SnobGroupRole.ADMIN,
+        ]);
+      }
+    } else {
+      // If creating, ensure the user is a member of the group
+      await getGroupForCurrentUser(item.groupId);
+    }
+
+    const itemId = await createOrUpdateRankingItem(validatedData.data, snob);
 
     item.attributes.forEach(async (attribute) => {
       if (!attribute.id) {
