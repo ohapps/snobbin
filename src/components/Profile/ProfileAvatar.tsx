@@ -1,5 +1,5 @@
-import { Snob } from '@/types/snob';
-import Avatar from '@mui/material/Avatar';
+import { Snob } from "@/types/snob";
+import Avatar from "@mui/material/Avatar";
 
 export default function ProfileAvatar({
   snob,
@@ -7,13 +7,13 @@ export default function ProfileAvatar({
   imaageOverrideUrl,
 }: {
   snob: Snob;
-  size: 'small' | 'large';
+  size: "small" | "large";
   imaageOverrideUrl?: string;
 }) {
   const style =
-    size === 'large'
-      ? { width: 120, height: 120, fontSize: '48px' }
-      : { width: 32, height: 32, fontSize: '12px' };
+    size === "large"
+      ? { width: 120, height: 120, fontSize: "48px" }
+      : { width: 32, height: 32, fontSize: "12px" };
 
   const fallbackText =
     snob.firstName && snob.lastName
@@ -23,7 +23,7 @@ export default function ProfileAvatar({
   return (
     <Avatar
       alt="profile picture"
-      src={imaageOverrideUrl ?? snob.pictureUrl ?? ''}
+      src={imaageOverrideUrl ?? snob.pictureUrl ?? ""}
       sx={style}
     >
       {fallbackText}
