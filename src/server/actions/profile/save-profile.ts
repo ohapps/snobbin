@@ -26,6 +26,7 @@ export const saveProfile = async (data: Profile): Promise<ActionResponse> => {
       .set({
         firstName: validatedData.data.firstName,
         lastName: validatedData.data.lastName,
+        pictureUrl: validatedData.data.pictureUrl,
       })
       .where(eq(snobsTable.id, snob.id));
 

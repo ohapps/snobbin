@@ -13,6 +13,7 @@ export const ProfileSchema = z.object({
     .string()
     .min(1, "Last name is required")
     .max(50, "Last name must be less than or equal to 50 characters"),
+  pictureUrl: z.string().url().optional(),
 });
 
 export type Profile = z.infer<typeof ProfileSchema>;

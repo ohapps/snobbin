@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Button,
   Chip,
@@ -14,20 +13,20 @@ import {
   MenuItem,
   styled,
   Typography,
-} from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import Settings from "@mui/icons-material/Settings";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import PersonOffIcon from "@mui/icons-material/PersonOff";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import { getSnobIdentifier } from "@/utils/get-snob-identifier";
-import { SnobGroup, SnobGroupMember, SnobGroupRole } from "@/types/snobGroup";
-import { useState, useTransition } from "react";
-import { LoadingButton } from "@mui/lab";
-import { makeMemberAdmin } from "@/server/actions/group/make-member-admin";
-import { useSnackbar } from "notistack";
-import { disableGroupMember } from "@/server/actions/group/disable-group-member";
-import { enableGroupMember } from "@/server/actions/group/enable-group-member";
+} from '@mui/material';
+import Settings from '@mui/icons-material/Settings';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import PersonOffIcon from '@mui/icons-material/PersonOff';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { getSnobIdentifier } from '@/utils/get-snob-identifier';
+import { SnobGroup, SnobGroupMember, SnobGroupRole } from '@/types/snobGroup';
+import { useState, useTransition } from 'react';
+import { LoadingButton } from '@mui/lab';
+import { makeMemberAdmin } from '@/server/actions/group/make-member-admin';
+import { useSnackbar } from 'notistack';
+import { disableGroupMember } from '@/server/actions/group/disable-group-member';
+import { enableGroupMember } from '@/server/actions/group/enable-group-member';
+import ProfileAvatar from '../Profile/ProfileAvatar';
 
 export const Text = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(1),
@@ -69,12 +68,12 @@ const GroupMemberDetails = ({
       if (member.snob.id && group.id) {
         const results = await makeMemberAdmin(group.id, member.snob.id);
         if (results.success) {
-          enqueueSnackbar("Group member updated to admin successfully", {
-            variant: "success",
+          enqueueSnackbar('Group member updated to admin successfully', {
+            variant: 'success',
           });
         } else {
-          enqueueSnackbar("Failed to update group member to admin", {
-            variant: "error",
+          enqueueSnackbar('Failed to update group member to admin', {
+            variant: 'error',
           });
         }
       }
@@ -92,12 +91,12 @@ const GroupMemberDetails = ({
       if (member.snob.id && group.id) {
         const results = await disableGroupMember(group.id, member.snob.id);
         if (results.success) {
-          enqueueSnackbar("Group member disabled successfully", {
-            variant: "success",
+          enqueueSnackbar('Group member disabled successfully', {
+            variant: 'success',
           });
         } else {
-          enqueueSnackbar("Failed to disable group member", {
-            variant: "error",
+          enqueueSnackbar('Failed to disable group member', {
+            variant: 'error',
           });
         }
         setShowDisableMemberConfirm(false);
@@ -115,12 +114,12 @@ const GroupMemberDetails = ({
       if (member.snob.id && group.id) {
         const results = await enableGroupMember(group.id, member.snob.id);
         if (results.success) {
-          enqueueSnackbar("Group member enabled successfully", {
-            variant: "success",
+          enqueueSnackbar('Group member enabled successfully', {
+            variant: 'success',
           });
         } else {
-          enqueueSnackbar("Failed to enable group member", {
-            variant: "error",
+          enqueueSnackbar('Failed to enable group member', {
+            variant: 'error',
           });
         }
         setShowEnableMemberConfirm(false);
@@ -129,13 +128,11 @@ const GroupMemberDetails = ({
   };
 
   return (
-    <Box display={"flex"} alignItems="center" justifyContent={"space-between"}>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Avatar sx={{ width: 30, height: 30 }}>
-          <PersonIcon />
-        </Avatar>
+    <Box display={'flex'} alignItems="center" justifyContent={'space-between'}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <ProfileAvatar snob={member.snob} size="small" />
         <Text key={member.snob.id}>
-          {getSnobIdentifier(member.snob)}{" "}
+          {getSnobIdentifier(member.snob)}{' '}
           {isAdmin && <Chip label="admin" size="small" color="primary" />}
           {isDisabled && <Chip label="disabled" size="small" />}
         </Text>
@@ -145,9 +142,9 @@ const GroupMemberDetails = ({
           <IconButton
             onClick={handleClick}
             size="small"
-            aria-controls={open ? "account-menu" : undefined}
+            aria-controls={open ? 'account-menu' : undefined}
             aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
+            aria-expanded={open ? 'true' : undefined}
           >
             <Settings />
           </IconButton>
@@ -161,32 +158,32 @@ const GroupMemberDetails = ({
               paper: {
                 elevation: 0,
                 sx: {
-                  overflow: "visible",
-                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                  overflow: 'visible',
+                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
                   mt: 1.5,
-                  "& .MuiAvatar-root": {
+                  '& .MuiAvatar-root': {
                     width: 32,
                     height: 32,
                     ml: -0.5,
                     mr: 1,
                   },
-                  "&::before": {
+                  '&::before': {
                     content: '""',
-                    display: "block",
-                    position: "absolute",
+                    display: 'block',
+                    position: 'absolute',
                     top: 0,
                     right: 14,
                     width: 10,
                     height: 10,
-                    bgcolor: "background.paper",
-                    transform: "translateY(-50%) rotate(45deg)",
+                    bgcolor: 'background.paper',
+                    transform: 'translateY(-50%) rotate(45deg)',
                     zIndex: 0,
                   },
                 },
               },
             }}
-            transformOrigin={{ horizontal: "right", vertical: "top" }}
-            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           >
             {!isDisabled && (
               <MenuItem onClick={handleShowConfirmAdmin}>

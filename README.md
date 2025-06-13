@@ -32,8 +32,6 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Show rankings per user in group summary
-- Add ability to upload profile picture
 - Add ability to upload snob group picture
 - Add install button for PWA
 - Add offline support via PWA
