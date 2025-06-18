@@ -1,0 +1,1 @@
+ALTER TABLE "snob_groups" ADD COLUMN "picture_url" text;

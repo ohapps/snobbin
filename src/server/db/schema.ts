@@ -17,6 +17,7 @@ export const snobGroupsTable = pgTable("snob_groups", {
   rankIcon: text("rank_icon").notNull(),
   rankingsRequired: numeric("rankings_required").notNull(),
   deleted: boolean("deleted").notNull().default(false),
+  pictureUrl: text("picture_url"),
 });
 
 export type InsertSnobGroup = typeof snobGroupsTable.$inferInsert;

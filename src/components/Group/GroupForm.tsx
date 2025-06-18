@@ -4,14 +4,20 @@ import Grid from "@mui/material/Grid2";
 import { FormProvider, useForm } from "react-hook-form";
 import ControlledTextField from "../Form/ControlledTextField";
 import FullSubmitButton from "../Form/FullSubmitButton";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import ControlledSelect from "../Form/ControlledSelect";
-import { MenuItem } from "@mui/material";
+import { MenuItem, Box } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import StarIcon from "@mui/icons-material/Star";
 import { saveGroup } from "@/server/actions/group/save-group";
 import { useSnackbar } from "notistack";
 import GroupAttributes from "./GroupAttributes";
+import {
+  CldUploadButton,
+  CloudinaryUploadWidgetInfo,
+  CloudinaryUploadWidgetResults,
+} from "next-cloudinary";
+import GroupAvatar from "./GroupAvatar";
 
 const GroupForm = ({
   group,
@@ -20,6 +26,7 @@ const GroupForm = ({
   group: SnobGroup;
   onSave: () => void;
 }) => {
+  const [pictureUrl, setPictureUrl] = useState(group.pictureUrl);
   const [isPending, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const methods = useForm<SnobGroup>({
@@ -40,7 +47,10 @@ const GroupForm = ({
 
   const onSubmit = async (data: SnobGroup) => {
     startTransition(async () => {
-      const results = await saveGroup(data);
+      const results = await saveGroup({
+        ...data,
+        pictureUrl,
+      });
       if (results.success) {
         enqueueSnackbar("Group saved successfully", {
           variant: "success",
@@ -61,6 +71,27 @@ const GroupForm = ({
       >
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 4 }}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <GroupAvatar
+                group={group}
+                size="large"
+                imaageOverrideUrl={pictureUrl ?? ""}
+              />
+              <CldUploadButton
+                options={{ maxFiles: 1 }}
+                onSuccess={(res: CloudinaryUploadWidgetResults) => {
+                  if (res.info) {
+                    const info = res.info as CloudinaryUploadWidgetInfo;
+                    setPictureUrl(info.secure_url);
+                  }
+                }}
+                signatureEndpoint={"/api/sign-image"}
+                uploadPreset="snobbin"
+                className="image_upload_button"
+              >
+                UPLOAD IMAGE
+              </CldUploadButton>
+            </Box>
             <ControlledTextField name="name" label="Name" />
             <ControlledTextField
               name="description"
@@ -68,13 +99,13 @@ const GroupForm = ({
               multiline
               rows={4}
             />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
             <ControlledTextField
               name="rankingsRequired"
               label="Rankings Required"
               type="number"
             />
-          </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
             <ControlledTextField
               name="minRanking"
               label="Minimum Ranking"

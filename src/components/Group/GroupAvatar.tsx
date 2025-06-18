@@ -9,11 +9,28 @@ const Avatar = styled(MuiAvatar)(({ theme }) => ({
   backgroundColor: theme.palette.primary.dark,
 }));
 
-const GroupAvatar = ({ group }: { group: SnobGroup }) => {
+const GroupAvatar = ({
+  group,
+  size,
+  imaageOverrideUrl,
+}: {
+  group: SnobGroup;
+  size: "small" | "large";
+  imaageOverrideUrl?: string;
+}) => {
+  const style =
+    size === "large"
+      ? { width: 120, height: 120, fontSize: "48px" }
+      : { width: 32, height: 32, fontSize: "12px" };
+
   return (
-    <>
-      <Avatar>{getGroupInitials(group)}</Avatar>
-    </>
+    <Avatar
+      alt="group avatar"
+      src={imaageOverrideUrl ?? group.pictureUrl ?? ""}
+      sx={style}
+    >
+      {getGroupInitials(group)}
+    </Avatar>
   );
 };
 

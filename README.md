@@ -32,8 +32,8 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add ability to upload snob group picture
 - Add install button for PWA
+  - https://dev.to/divyanshulohani/from-web-to-mobile-building-pwas-with-nextjs-bubblewrap-337b
 - Add offline support via PWA
 - Add global error page
 - Add not found page

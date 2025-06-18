@@ -69,6 +69,7 @@ const updateOrCreateGroup = async (
     increments: data.increments.toString(),
     rankIcon: data.rankIcon,
     rankingsRequired: data.rankingsRequired.toString(),
+    pictureUrl: data.pictureUrl,
   };
 
   if (data.id) {

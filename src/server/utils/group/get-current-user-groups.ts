@@ -19,6 +19,7 @@ export const getCurrentUserGroups = async (): Promise<SnobGroup[]> => {
       increments: snobGroupsTable.increments,
       rankingsRequired: snobGroupsTable.rankingsRequired,
       deleted: snobGroupsTable.deleted,
+      pictureUrl: snobGroupsTable.pictureUrl,
     })
     .from(snobGroupsTable)
     .leftJoin(

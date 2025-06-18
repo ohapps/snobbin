@@ -30,6 +30,7 @@ export const SnobGroupSchema = z.object({
         .max(50, "attribute name must be less than or equal to 50 characters"),
     }),
   ),
+  pictureUrl: z.string().url().nullish(),
 });
 
 export enum SnobGroupRole {

@@ -17,7 +17,7 @@ const Title = styled(Typography)(({ theme }) => ({
 const GroupTitle = ({ group }: { group: SnobGroup }) => {
   return (
     <Info>
-      <GroupAvatar group={group} />
+      <GroupAvatar group={group} size="small" />
       <Title>{group.name}</Title>
     </Info>
   );
