@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { PaginatedResults } from "@/types/rankings";
-import { SnobGroup } from "@/types/snobGroup";
-import { Box, styled, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import SearchBox from "./SearchBox";
-import ItemListPage from "./ItemListPage";
-import { PagingNavigation } from "./PagingNavigation";
-import SortByMenu from "./SortByMenu";
-import NewItemButton from "./NewItemButton";
-import { formatNumber } from "@/utils/format-number";
-import { useUpdateQueryParams } from "@/hooks/useUpdateQueryParams";
-import { useTransition } from "react";
-import LoadingPage from "../Page/LoadingPage";
-import GroupAvatar from "../Group/GroupAvatar";
+import { PaginatedResults } from '@/types/rankings';
+import { SnobGroup } from '@/types/snobGroup';
+import { Box, styled, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import SearchBox from './SearchBox';
+import ItemListPage from './ItemListPage';
+import { PagingNavigation } from './PagingNavigation';
+import SortByMenu from './SortByMenu';
+import NewItemButton from './NewItemButton';
+import { formatNumber } from '@/utils/format-number';
+import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
+import { useTransition } from 'react';
+import LoadingPage from '../Page/LoadingPage';
+import GroupAvatar from '../Group/GroupAvatar';
 
 const GroupAvatarContainer = styled(Box)(({ theme }) => ({
   paddingRight: theme.spacing(2),
-  cursor: "pointer",
-  "&:hover": {
+  cursor: 'pointer',
+  '&:hover': {
     backgroundColor: theme.palette.action.hover,
   },
 }));
@@ -49,13 +49,13 @@ const ItemList = ({
         <Grid
           size={{ md: 6, xs: 12 }}
           paddingBottom={2}
-          display={"flex"}
-          alignItems={"center"}
+          display={'flex'}
+          alignItems={'center'}
         >
-          <Typography variant="h5" display={"flex"} alignItems={"center"}>
+          <Typography variant="h5" display={'flex'} alignItems={'center'}>
             {hideGroupSummary && (
               <GroupAvatarContainer onClick={() => setHideGroupSummary(false)}>
-                <GroupAvatar group={group} />
+                <GroupAvatar group={group} size="small" />
               </GroupAvatarContainer>
             )}
             {formatNumber(paginatedResults.total)} items
@@ -63,25 +63,25 @@ const ItemList = ({
         </Grid>
         <Grid
           size={{ md: 6, xs: 12 }}
-          display={"flex"}
-          sx={{ justifyContent: { xs: "flex-start", md: "flex-end" } }}
+          display={'flex'}
+          sx={{ justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
           paddingBottom={2}
         >
           <SearchBox updateQuery={updateQuery} />
         </Grid>
         <Grid
           size={{ md: 6, xs: 9 }}
-          display={"flex"}
-          justifyContent={"flex-start"}
-          alignItems={"center"}
+          display={'flex'}
+          justifyContent={'flex-start'}
+          alignItems={'center'}
           paddingBottom={2}
         >
           <SortByMenu updateQuery={updateQuery} />
         </Grid>
         <Grid
           size={{ md: 6, xs: 3 }}
-          display={"flex"}
-          sx={{ justifyContent: "flex-end" }}
+          display={'flex'}
+          sx={{ justifyContent: 'flex-end' }}
           paddingBottom={2}
         >
           <NewItemButton />
