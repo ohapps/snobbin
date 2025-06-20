@@ -1,0 +1,19 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ohapps.snobbin.twa",
+      "sha256_cert_fingerprints": [
+        "47:41:6A:EA:06:DD:82:26:95:46:DE:1C:D7:21:40:D5:66:CA:8F:F9:36:0B:0D:9A:AC:F8:EC:0D:3F:EB:AF:3D"
+      ]
+    }
+  },
+  {
+    "relation": ["check_validation"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ohapps.snobbin.twa"
+    }
+  }
+]
