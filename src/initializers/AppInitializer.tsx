@@ -1,6 +1,7 @@
 import AlertInitializer from "./AlertInitializer";
 import AuthInitializer from "./AuthInitializer";
 import JotaiInitializer from "./JotaiInitializer";
+import { PwaProvider } from "./PwaInitializer";
 import ThemeInitializer from "./ThemeInitializer";
 
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
@@ -8,7 +9,9 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
     <ThemeInitializer>
       <AuthInitializer>
         <JotaiInitializer>
-          <AlertInitializer>{children}</AlertInitializer>
+          <AlertInitializer>
+            <PwaProvider>{children}</PwaProvider>
+          </AlertInitializer>
         </JotaiInitializer>
       </AuthInitializer>
     </ThemeInitializer>

@@ -13,6 +13,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import ProfileIcon from "@mui/icons-material/Person";
 import GroupsIcon from "@mui/icons-material/People";
 import ActivityIcon from "@mui/icons-material/Assessment";
+import PwaInstallButton from "@/components/Header/PwaInstallButton";
 
 export const NavLink = styled(Link)(({ theme }) => ({
   textDecoration: "none",
@@ -77,6 +78,7 @@ const NavigationMenu = () => {
           </ListItemIcon>
           <NavLink href={AppRoutes.PROFILE}>Profile</NavLink>
         </MenuItem>
+        <PwaInstallButton />
         <MenuItem href="/api/auth/logout">
           <ListItemIcon>
             <LogoutIcon fontSize="small" />

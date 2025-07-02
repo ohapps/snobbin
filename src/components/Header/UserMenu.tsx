@@ -9,6 +9,7 @@ import { AppRoutes } from "@/config/appRoutes";
 import { Link, styled } from "@mui/material";
 import ProfileAvatar from "@/components/Profile/ProfileAvatar";
 import { Snob } from "@/types/snob";
+import PwaInstallButton from "@/components/Header/PwaInstallButton";
 
 export const NavLink = styled(Link)(({ theme }) => ({
   textDecoration: "none",
@@ -62,6 +63,7 @@ const UserMenu = ({ snob }: { snob: Snob }) => {
           </ListItemIcon>
           <NavLink href={AppRoutes.PROFILE}>Profile</NavLink>
         </MenuItem>
+        <PwaInstallButton />
         <MenuItem>
           <ListItemIcon>
             <LogoutIcon fontSize="small" />
