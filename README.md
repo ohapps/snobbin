@@ -32,15 +32,12 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add install button for PWA
-- Add offline support via PWA
-- Add global error page
-- Add not found page
 - Add email functionality
 - Add public groups
 - Add tests
 - Add logging library
 - Setup Github pipeline
+- Add offline support via PWA
 - Setup AI pull request reviews
 - Implement data loading pattern for pagination query
 - Add websocket events for real-time updates
