@@ -5,24 +5,31 @@ import { eq, and, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { ActionResponse } from "@/types/actions";
 import { generateNewId } from "@/utils/generate-new-id";
-import { GroupInviteStatus } from "@/types/snobGroup";
+import { CreateSnobGroupInvite, CreateSnobGroupInviteSchema, GroupInviteStatus } from "@/types/snobGroup";
 import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
 import { logAndReturnError } from "@/server/utils/log-and-return-error";
+import { nodemailerMailgun } from "@/server/email/email";
 
 export const sendGroupInvite = async (
-  groupId: string,
-  email: string,
+  invite: CreateSnobGroupInvite
 ): Promise<ActionResponse> => {
   try {
-    await getGroupForCurrentUser(groupId);
+    const validatedData = CreateSnobGroupInviteSchema.safeParse(invite);
+
+    if (!validatedData.success) {
+      console.error("send group invite validation error", validatedData.error);
+      return { success: false, message: "error parsing group invite data" };
+    }
+
+    await getGroupForCurrentUser(invite.groupId);
 
     const invites = await db
       .select()
       .from(snobGroupInvitesTable)
       .where(
         and(
-          eq(snobGroupInvitesTable.groupId, groupId),
-          eq(snobGroupInvitesTable.email, email.toLowerCase()),
+          eq(snobGroupInvitesTable.groupId, invite.groupId),
+          eq(snobGroupInvitesTable.email, invite.email.toLowerCase()),
           inArray(snobGroupInvitesTable.status, [
             GroupInviteStatus.PENDING,
             GroupInviteStatus.ACCEPTED,
@@ -39,9 +46,20 @@ export const sendGroupInvite = async (
 
     await db.insert(snobGroupInvitesTable).values({
       id: generateNewId(),
-      groupId: groupId,
-      email: email,
+      groupId: invite.groupId,
+      email: invite.email,
       status: GroupInviteStatus.PENDING,
+    });
+
+    const acceptLink = `${process.env.AUTH0_BASE_URL}/activity`;
+
+    await nodemailerMailgun.sendMail({
+      from: "noreply@ohapps.com",
+      to: invite.email,
+      subject: "You have been invited to join a group on Snobbin",
+      text: `You have been invited to join a group on Snobbin. Click the link below to accept the invite:\n\n${acceptLink}`,
+      html: `<p>You have been invited to join a group on Snobbin. Click the link below to accept the invite:</p>
+             <p><a href="${acceptLink}">Accept Invite</a></p>`,
     });
 
     return { success: true };

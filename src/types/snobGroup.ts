@@ -89,3 +89,10 @@ export const newSnobGroup: SnobGroup = {
   invites: [],
   attributes: [],
 };
+
+export const CreateSnobGroupInviteSchema = z.object({
+  groupId: z.string().uuid("group id must be a valid uuid"),
+  email: z.string().email("please enter a valid email address"),
+});
+
+export type CreateSnobGroupInvite = z.infer<typeof CreateSnobGroupInviteSchema>;

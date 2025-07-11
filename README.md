@@ -32,7 +32,7 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- Add email functionality
+- add slider to select rating instead of star
 - Add public groups
 - Add tests
 - Add logging library
@@ -41,6 +41,7 @@ npx drizzle-kit migrate
 - Setup AI pull request reviews
 - Implement data loading pattern for pagination query
 - Add websocket events for real-time updates
+- Review types to see if we can consolidate Zod, Drizzle and other types
 - Add Auth0 production keys
 - Add Sentry
 - Add Google Analytics
