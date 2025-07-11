@@ -5,13 +5,17 @@ import { eq, and, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { ActionResponse } from "@/types/actions";
 import { generateNewId } from "@/utils/generate-new-id";
-import { CreateSnobGroupInvite, CreateSnobGroupInviteSchema, GroupInviteStatus } from "@/types/snobGroup";
+import {
+  CreateSnobGroupInvite,
+  CreateSnobGroupInviteSchema,
+  GroupInviteStatus,
+} from "@/types/snobGroup";
 import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
 import { logAndReturnError } from "@/server/utils/log-and-return-error";
 import { nodemailerMailgun } from "@/server/email/email";
 
 export const sendGroupInvite = async (
-  invite: CreateSnobGroupInvite
+  invite: CreateSnobGroupInvite,
 ): Promise<ActionResponse> => {
   try {
     const validatedData = CreateSnobGroupInviteSchema.safeParse(invite);

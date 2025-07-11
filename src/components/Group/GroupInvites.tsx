@@ -7,22 +7,22 @@ import {
   TextField as MuiTextField,
   Typography,
   styled,
-} from '@mui/material';
-import { useTransition } from 'react';
-import SendIcon from '@mui/icons-material/Send';
-import { useSnackbar } from 'notistack';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+} from "@mui/material";
+import { useTransition } from "react";
+import SendIcon from "@mui/icons-material/Send";
+import { useSnackbar } from "notistack";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   CreateSnobGroupInvite,
   CreateSnobGroupInviteSchema,
   GroupInviteStatus,
   SnobGroup,
-} from '@/types/snobGroup';
-import GroupInviteItem from './GroupInviteItem';
-import { sendGroupInvite } from '@/server/actions/group/send-group-invite';
-import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import ControlledTextField from '../Form/ControlledTextField';
+} from "@/types/snobGroup";
+import GroupInviteItem from "./GroupInviteItem";
+import { sendGroupInvite } from "@/server/actions/group/send-group-invite";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import ControlledTextField from "../Form/ControlledTextField";
 
 export const Title = styled(Typography)(({ theme }) => ({
   fontWeight: theme.typography.fontWeightBold,
@@ -35,14 +35,14 @@ export const Text = styled(Typography)(({ theme }) => ({
 
 export const TextField = styled(MuiTextField)(({ theme }) => ({
   paddingTop: theme.spacing(0.5),
-  '& .MuiInputBase-input': {
+  "& .MuiInputBase-input": {
     backgroundColor: theme.palette.common.white,
   },
 }));
 
 export const InviteContainer = styled(Box)(() => ({
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
 }));
 
 const GroupInvites = ({ group }: { group: SnobGroup }) => {
@@ -51,26 +51,26 @@ const GroupInvites = ({ group }: { group: SnobGroup }) => {
   const methods = useForm<CreateSnobGroupInvite>({
     defaultValues: {
       groupId: group.id,
-      email: '',
+      email: "",
     },
-    mode: 'onSubmit',
+    mode: "onSubmit",
     resolver: zodResolver(CreateSnobGroupInviteSchema),
   });
 
   const pendingInvites = group.invites.filter(
-    (invite) => invite.status === GroupInviteStatus.PENDING
+    (invite) => invite.status === GroupInviteStatus.PENDING,
   );
 
   const sendInvite = async (data: CreateSnobGroupInvite) => {
     startTransition(async () => {
       const results = await sendGroupInvite(data);
       if (results.success) {
-        enqueueSnackbar('Invite sent successfully', {
-          variant: 'success',
+        enqueueSnackbar("Invite sent successfully", {
+          variant: "success",
         });
         methods.reset();
       } else {
-        enqueueSnackbar(results.message, { variant: 'error' });
+        enqueueSnackbar(results.message, { variant: "error" });
       }
     });
   };
