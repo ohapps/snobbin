@@ -1,13 +1,13 @@
-import { Divider, Rating, TextField, Typography } from "@mui/material";
-import useCurrentGroupMember from "@/hooks/useCurrentGroupMember";
-import { useEffect, useState, useTransition } from "react";
-import { useSnackbar } from "notistack";
-import { LoadingButton } from "@mui/lab";
-import { SnobGroup } from "@/types/snobGroup";
-import { RankingItem } from "@/types/rankings";
-import OtherRanking from "./OtherRanking";
-import Grid from "@mui/material/Grid2";
-import { saveRanking } from "@/server/actions/items/save-ranking";
+import { Divider, Slider, TextField, Typography } from '@mui/material';
+import useCurrentGroupMember from '@/hooks/useCurrentGroupMember';
+import { useEffect, useState, useTransition } from 'react';
+import { useSnackbar } from 'notistack';
+import { LoadingButton } from '@mui/lab';
+import { SnobGroup } from '@/types/snobGroup';
+import { RankingItem } from '@/types/rankings';
+import OtherRanking from './OtherRanking';
+import Grid from '@mui/material/Grid2';
+import { saveRanking } from '@/server/actions/items/save-ranking';
 
 const ItemRankings = ({
   group,
@@ -20,14 +20,14 @@ const ItemRankings = ({
   const { enqueueSnackbar } = useSnackbar();
   const groupMember = useCurrentGroupMember(group);
   const [rating, setRating] = useState(0);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
 
   const currentRanking = item.rankings.find(
-    (ranking) => ranking.groupMemberId === groupMember?.id,
+    (ranking) => ranking.groupMemberId === groupMember?.id
   );
 
   const otherRankings = item.rankings.filter(
-    (ranking) => ranking.groupMemberId !== groupMember?.id,
+    (ranking) => ranking.groupMemberId !== groupMember?.id
   );
 
   const isValid = rating > 0 && rating <= group.maxRanking;
@@ -41,9 +41,9 @@ const ItemRankings = ({
         notes,
       });
       if (results.success) {
-        enqueueSnackbar("Ranking saved successfully", { variant: "success" });
+        enqueueSnackbar('Ranking saved successfully', { variant: 'success' });
       } else {
-        enqueueSnackbar("Failed to save ranking", { variant: "error" });
+        enqueueSnackbar('Failed to save ranking', { variant: 'error' });
       }
     });
   };
@@ -51,7 +51,7 @@ const ItemRankings = ({
   useEffect(() => {
     if (currentRanking) {
       setRating(currentRanking?.ranking ?? 0);
-      setNotes(currentRanking?.notes ?? "");
+      setNotes(currentRanking?.notes ?? '');
     }
   }, [currentRanking]);
 
@@ -66,17 +66,19 @@ const ItemRankings = ({
         </Grid>
         <Grid
           size={{ xs: 12, md: 6 }}
-          sx={{ display: "flex", flexDirection: "row" }}
+          sx={{ display: 'flex', flexDirection: 'row' }}
         >
-          <Rating
+          <Slider
             value={rating}
-            precision={group.increments}
+            min={group.minRanking}
             max={group.maxRanking}
-            onChange={(event, newValue) => {
-              setRating(newValue ?? 0);
+            step={group.increments}
+            marks
+            valueLabelDisplay="on"
+            onChange={(_, newValue) => {
+              setRating(newValue as number);
             }}
           />
-          <Typography pl={1}>({rating} stars)</Typography>
         </Grid>
         <Grid size={{ xs: 12 }}>
           <TextField
@@ -89,7 +91,7 @@ const ItemRankings = ({
             onChange={(event) => setNotes(event.target.value)}
           />
         </Grid>
-        <Grid size={{ xs: 12 }} sx={{ display: "flex", justifyContent: "end" }}>
+        <Grid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'end' }}>
           <LoadingButton
             variant="contained"
             onClick={onSave}
