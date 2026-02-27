@@ -51,3 +51,19 @@ npx drizzle-kit migrate
 ## Schema
 
 ![DB Schema](/docs/QuickDBD-export.png)
+
+## Database Keepalive
+
+To prevent Supabase from pausing the project due to inactivity, an API route is available at `/api/keepalive`. 
+
+### Setting up Vercel Cron
+
+1.  **Configure `vercel.json`**: I have already created a `vercel.json` file in the root directory that schedules this job to run daily at midnight.
+2.  **Add `CRON_SECRET` Environment Variable**:
+    *   Go to your project settings in the Vercel Dashboard.
+    *   Add a new Environment Variable named `CRON_SECRET`.
+    *   You can generate a random string for this value.
+    *   Vercel will automatically include this secret in the `Authorization` header when it triggers the cron job.
+3.  **Deploy**: Once you push these changes to Vercel, the cron job will be active.
+
+The route performs a simple `SELECT 1` query to keep the database active and requires the `Authorization` header to match `Bearer ${process.env.CRON_SECRET}` for security.
