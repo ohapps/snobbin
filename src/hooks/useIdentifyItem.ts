@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { SnobGroupAttribute, SnobGroupAttributeSummary } from "@/types/snobGroup";
+import {
+  SnobGroupAttribute,
+  SnobGroupAttributeSummary,
+} from "@/types/snobGroup";
 import { RankingItemAttribute } from "@/types/rankings";
 
 interface IdentifyItemRequest {
@@ -80,7 +83,8 @@ export const useIdentifyItem = (
         })),
       };
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to identify item";
+      const message =
+        err instanceof Error ? err.message : "Failed to identify item";
       setError(message);
       return null;
     } finally {
