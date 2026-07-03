@@ -1,42 +1,15 @@
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
-import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
-
-const RequestSchema = z.object({
-  imageUrl: z.string().url(),
-  groupName: z.string(),
-  groupDescription: z.string(),
-  attributes: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      existingValues: z.array(z.string()),
-    }),
-  ),
-});
-
-const ResponseSchema = z.object({
-  description: z
-    .string()
-    .max(100)
-    .describe("Short name or description of the item identified in the image"),
-  attributes: z.array(
-    z.object({
-      id: z.string().describe("The attribute ID from the request"),
-      value: z
-        .string()
-        .describe(
-          "The value for this attribute. Prefer an existing value if the item matches, otherwise provide a new one",
-        ),
-    }),
-  ),
-});
+import {
+  IdentifyItemRequestSchema,
+  IdentifyItemResponseSchema,
+} from "@/types/ai";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const parsed = RequestSchema.safeParse(body);
+    const parsed = IdentifyItemRequestSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -58,7 +31,7 @@ export async function POST(request: NextRequest) {
       .join("\n");
 
     const result = await generateObject({
-      model: google("gemini-3-flash-preview"),
+      model: google("gemini-3.5-flash"),
       messages: [
         {
           role: "user",
@@ -83,7 +56,7 @@ Return the attribute IDs exactly as provided.`,
           ],
         },
       ],
-      schema: ResponseSchema,
+      schema: IdentifyItemResponseSchema,
     });
 
     return NextResponse.json(result.object);

@@ -4,25 +4,7 @@ import {
   SnobGroupAttributeSummary,
 } from "@/types/snobGroup";
 import { RankingItemAttribute } from "@/types/rankings";
-
-interface IdentifyItemRequest {
-  imageUrl: string;
-  groupName: string;
-  groupDescription: string;
-  attributes: {
-    id: string;
-    name: string;
-    existingValues: string[];
-  }[];
-}
-
-interface IdentifyItemResponse {
-  description: string;
-  attributes: {
-    id: string;
-    value: string;
-  }[];
-}
+import { IdentifyItemRequest, IdentifyItemResponse } from "@/types/ai";
 
 interface UseIdentifyItemResult {
   identifyItem: (imageUrl: string) => Promise<{
