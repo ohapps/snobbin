@@ -9,8 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ControlledTextField from "../Form/ControlledTextField";
 import { saveItem } from "@/server/actions/items/save-item";
 import ImageUploadButton from "../Image/ImageUploadButton";
-import { getImageOrPlaceholder } from "@/types/image";
+import { getImageOrPlaceholder, placeholderImage } from "@/types/image";
 import ItemAttributes from "./ItemAttributes";
+import { useIdentifyItem } from "@/hooks/useIdentifyItem";
+import { LoadingButton } from "@mui/lab";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 
 const ItemForm = ({
   rankingItem,
@@ -43,6 +46,31 @@ const ItemForm = ({
     })) ?? [],
   );
   const [image, setImage] = useState(getImageOrPlaceholder(rankingItem));
+
+  const { identifyItem, isIdentifying } = useIdentifyItem(
+    rankingGroup.name,
+    rankingGroup.description,
+    rankingGroup.attributes,
+    snobGroupAttributes,
+  );
+
+  const handleIdentify = async () => {
+    if (image.publicId === placeholderImage.publicId) {
+      enqueueSnackbar("Upload an image first", { variant: "warning" });
+      return;
+    }
+
+    const result = await identifyItem(image.url);
+    if (result) {
+      methods.setValue("description", result.description, {
+        shouldValidate: true,
+      });
+      setAttributes(result.attributes);
+      enqueueSnackbar("Item identified successfully", { variant: "success" });
+    } else {
+      enqueueSnackbar("Failed to identify item", { variant: "error" });
+    }
+  };
 
   const onSubmit = async (data: RankingItem) => {
     startTransition(async () => {
@@ -80,6 +108,18 @@ const ItemForm = ({
               setItemAttributes={setAttributes}
               snobGroupAttributes={snobGroupAttributes}
             />
+            <LoadingButton
+              variant="outlined"
+              size="small"
+              onClick={handleIdentify}
+              loading={isIdentifying}
+              startIcon={<AutoFixHighIcon />}
+              disabled={image.publicId === placeholderImage.publicId}
+              fullWidth
+              sx={{ mt: 2 }}
+            >
+              Identify with AI
+            </LoadingButton>
           </Grid>
           <Grid size={{ xs: 12 }}>
             <FullSubmitButton
