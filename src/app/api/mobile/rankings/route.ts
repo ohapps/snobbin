@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!userId) {
     return NextResponse.json(
       { error: "Authorization required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -37,13 +37,16 @@ export async function POST(request: Request) {
   if (!itemId || !groupMemberId || ranking === undefined) {
     return NextResponse.json(
       { error: "itemId, groupMemberId, and ranking are required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   // Verify the group member belongs to the authenticated user
   const member = await db
-    .select({ id: snobGroupMembersTable.id, snobId: snobGroupMembersTable.snobId })
+    .select({
+      id: snobGroupMembersTable.id,
+      snobId: snobGroupMembersTable.snobId,
+    })
     .from(snobGroupMembersTable)
     .where(eq(snobGroupMembersTable.id, groupMemberId))
     .limit(1);
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
   if (member.length === 0 || member[0].snobId !== userId) {
     return NextResponse.json(
       { error: "Unauthorized — member does not belong to you" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -133,7 +136,7 @@ async function getUserIdFromToken(request: Request): Promise<string | null> {
   if (!AUTH0_ISSUER_BASE_URL) {
     try {
       const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString()
+        Buffer.from(token.split(".")[1], "base64").toString(),
       );
       return payload.sub || null;
     } catch {

@@ -17,7 +17,7 @@ import {
  */
 export async function GET(
   request: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } },
 ) {
   const { userId } = params;
 
@@ -32,8 +32,8 @@ export async function GET(
     .where(
       and(
         eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED")
-      )
+        ne(snobGroupMembersTable.role, "DISABLED"),
+      ),
     );
 
   if (userMemberships.length === 0) {
@@ -55,7 +55,9 @@ export async function GET(
     .where(inArray(snobGroupMembersTable.groupId, groupIds));
 
   // Get snob profiles for all members
-  const memberSnobIds = Array.from(new Set(allMemberships.map((m) => m.snobId)));
+  const memberSnobIds = Array.from(
+    new Set(allMemberships.map((m) => m.snobId)),
+  );
   const allSnobs =
     memberSnobIds.length > 0
       ? await db
@@ -98,7 +100,7 @@ const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
 
 async function validateAuth(
   request: Request,
-  expectedUserId: string
+  expectedUserId: string,
 ): Promise<NextResponse | null> {
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
@@ -106,7 +108,7 @@ async function validateAuth(
   if (!token) {
     return NextResponse.json(
       { error: "Authorization header required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -122,7 +124,7 @@ async function validateAuth(
   if (!userInfo.ok) {
     return NextResponse.json(
       { error: "Invalid or expired token" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -130,7 +132,7 @@ async function validateAuth(
   if (info.sub !== expectedUserId) {
     return NextResponse.json(
       { error: "Token does not match requested user" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 

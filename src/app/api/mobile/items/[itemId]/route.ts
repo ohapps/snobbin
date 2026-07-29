@@ -18,7 +18,7 @@ const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
  */
 export async function PUT(
   request: Request,
-  { params }: { params: { itemId: string } }
+  { params }: { params: { itemId: string } },
 ) {
   const { itemId } = params;
 
@@ -26,7 +26,7 @@ export async function PUT(
   if (!userId) {
     return NextResponse.json(
       { error: "Authorization required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -41,7 +41,7 @@ export async function PUT(
   if (!description) {
     return NextResponse.json(
       { error: "description is required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -66,15 +66,15 @@ export async function PUT(
       and(
         eq(snobGroupMembersTable.groupId, groupId),
         eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED")
-      )
+        ne(snobGroupMembersTable.role, "DISABLED"),
+      ),
     )
     .limit(1);
 
   if (membership.length === 0) {
     return NextResponse.json(
       { error: "Not a member of this group" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -118,7 +118,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { itemId: string } }
+  { params }: { params: { itemId: string } },
 ) {
   const { itemId } = params;
 
@@ -126,7 +126,7 @@ export async function DELETE(
   if (!userId) {
     return NextResponse.json(
       { error: "Authorization required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -150,22 +150,22 @@ export async function DELETE(
     .where(
       and(
         eq(snobGroupMembersTable.groupId, groupId),
-        eq(snobGroupMembersTable.snobId, userId)
-      )
+        eq(snobGroupMembersTable.snobId, userId),
+      ),
     )
     .limit(1);
 
   if (membership.length === 0) {
     return NextResponse.json(
       { error: "Not a member of this group" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
   if (membership[0].role !== "ADMIN") {
     return NextResponse.json(
       { error: "Only group admins can delete items" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -184,7 +184,7 @@ async function getUserIdFromToken(request: Request): Promise<string | null> {
   if (!AUTH0_ISSUER_BASE_URL) {
     try {
       const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString()
+        Buffer.from(token.split(".")[1], "base64").toString(),
       );
       return payload.sub || null;
     } catch {

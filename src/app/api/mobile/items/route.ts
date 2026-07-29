@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!userId) {
     return NextResponse.json(
       { error: "Authorization required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   if (!groupId || !description) {
     return NextResponse.json(
       { error: "groupId and description are required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -49,15 +49,15 @@ export async function POST(request: Request) {
       and(
         eq(snobGroupMembersTable.groupId, groupId),
         eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED")
-      )
+        ne(snobGroupMembersTable.role, "DISABLED"),
+      ),
     )
     .limit(1);
 
   if (membership.length === 0) {
     return NextResponse.json(
       { error: "Not a member of this group" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -102,7 +102,7 @@ async function getUserIdFromToken(request: Request): Promise<string | null> {
   if (!AUTH0_ISSUER_BASE_URL) {
     try {
       const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString()
+        Buffer.from(token.split(".")[1], "base64").toString(),
       );
       return payload.sub || null;
     } catch {

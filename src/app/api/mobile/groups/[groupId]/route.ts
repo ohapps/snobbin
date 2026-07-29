@@ -22,7 +22,7 @@ import {
  */
 export async function GET(
   request: Request,
-  { params }: { params: { groupId: string } }
+  { params }: { params: { groupId: string } },
 ) {
   const { groupId } = params;
 
@@ -31,7 +31,7 @@ export async function GET(
   if (!userId) {
     return NextResponse.json(
       { error: "Authorization header required" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -43,15 +43,15 @@ export async function GET(
       and(
         eq(snobGroupMembersTable.groupId, groupId),
         eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED")
-      )
+        ne(snobGroupMembersTable.role, "DISABLED"),
+      ),
     )
     .limit(1);
 
   if (membershipCheck.length === 0) {
     return NextResponse.json(
       { error: "Not a member of this group" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -194,7 +194,7 @@ async function getUserIdFromToken(request: Request): Promise<string | null> {
     // Dev mode: decode the JWT payload without verification
     try {
       const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString()
+        Buffer.from(token.split(".")[1], "base64").toString(),
       );
       return payload.sub || null;
     } catch {
