@@ -65,4 +65,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ id: itemId }, { status: 201 });
 }
-

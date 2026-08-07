@@ -10,7 +10,7 @@ const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
  * Returns null if the token is missing or invalid.
  */
 export async function getUserIdFromToken(
-  request: Request
+  request: Request,
 ): Promise<string | null> {
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
@@ -21,7 +21,7 @@ export async function getUserIdFromToken(
     // Dev mode: decode the JWT payload without verification
     try {
       const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString()
+        Buffer.from(token.split(".")[1], "base64").toString(),
       );
       return payload.sub || null;
     } catch {

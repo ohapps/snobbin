@@ -4,7 +4,10 @@ import {
   rankingItemsTable,
   rankingItemAttributesTable,
 } from "@/server/db/schema";
-import { getActiveMembership, GroupMembership } from "@/server/utils/group/get-active-membership";
+import {
+  getActiveMembership,
+  GroupMembership,
+} from "@/server/utils/group/get-active-membership";
 import { generateNewId } from "@/utils/generate-new-id";
 
 export interface ItemWithMembership {
@@ -18,7 +21,7 @@ export interface ItemWithMembership {
  */
 export async function getItemWithMembership(
   itemId: string,
-  userId: string
+  userId: string,
 ): Promise<ItemWithMembership | null> {
   const existingItem = await db
     .select({ id: rankingItemsTable.id, groupId: rankingItemsTable.groupId })
@@ -48,7 +51,7 @@ export async function getItemWithMembership(
 export async function saveItemAttributes(
   itemId: string,
   attributes: Array<{ attributeId: string; attributeValue: string }>,
-  replace: boolean = false
+  replace: boolean = false,
 ) {
   if (replace) {
     await db

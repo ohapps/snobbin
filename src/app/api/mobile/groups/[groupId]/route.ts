@@ -127,4 +127,3 @@ export async function GET(
     rankings: rankings.map(formatRankingResponse),
   });
 }
-

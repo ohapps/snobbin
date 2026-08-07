@@ -39,7 +39,6 @@ export async function POST(request: Request) {
 
   const { id, itemId, groupMemberId, ranking, notes } = parsed.data;
 
-
   // Verify the group member belongs to the authenticated user
   const member = await db
     .select({
@@ -76,7 +75,8 @@ export async function POST(request: Request) {
     .where(eq(snobGroupsTable.id, item[0].groupId))
     .limit(1);
 
-  const rankingsRequired = group.length > 0 ? Number(group[0].rankingsRequired) : 1;
+  const rankingsRequired =
+    group.length > 0 ? Number(group[0].rankingsRequired) : 1;
 
   const now = new Date();
 

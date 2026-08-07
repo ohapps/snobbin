@@ -25,7 +25,7 @@ export interface GroupMembership {
  */
 export async function getActiveMembership(
   groupId: string,
-  userId: string
+  userId: string,
 ): Promise<GroupMembership | null> {
   const rows = await db
     .select({
@@ -37,8 +37,8 @@ export async function getActiveMembership(
       and(
         eq(snobGroupMembersTable.groupId, groupId),
         eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED")
-      )
+        ne(snobGroupMembersTable.role, "DISABLED"),
+      ),
     )
     .limit(1);
 

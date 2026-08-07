@@ -13,9 +13,7 @@ describe("mobile-schemas", () => {
         description: "Delicious Pizza",
         imageId: "img-1",
         imageUrl: "https://example.com/pizza.png",
-        attributes: [
-          { attributeId: "attr-1", attributeValue: "Spicy" },
-        ],
+        attributes: [{ attributeId: "attr-1", attributeValue: "Spicy" }],
       };
 
       const result = CreateItemSchema.safeParse(payload);
@@ -112,7 +110,9 @@ describe("mobile-schemas", () => {
     });
 
     it("fails when required fields are missing", () => {
-      expect(PostRankingSchema.safeParse({ itemId: "item-123" }).success).toBe(false);
+      expect(PostRankingSchema.safeParse({ itemId: "item-123" }).success).toBe(
+        false,
+      );
     });
   });
 });

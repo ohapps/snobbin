@@ -1,5 +1,3 @@
-
-
 export function formatGroupResponse(g: {
   id: string;
   name: string;
