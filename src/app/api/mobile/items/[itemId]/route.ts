@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { eq, and, ne } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/server/db";
+import { rankingItemsTable } from "@/server/db/schema";
+import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { UpdateItemSchema } from "@/server/schemas/mobile-schemas";
 import {
-  snobGroupMembersTable,
-  rankingItemsTable,
-  rankingItemAttributesTable,
-} from "@/server/db/schema";
-import { generateNewId } from "@/utils/generate-new-id";
-
-const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
+  getItemWithMembership,
+  saveItemAttributes,
+} from "@/server/utils/items/item-utils";
 
 /**
  * PUT /api/mobile/items/:itemId
@@ -31,52 +30,24 @@ export async function PUT(
   }
 
   const body = await request.json();
-  const { description, imageId, imageUrl, attributes } = body as {
-    description: string;
-    imageId: string | null;
-    imageUrl: string | null;
-    attributes: Array<{ attributeId: string; attributeValue: string }>;
-  };
+  const parsed = UpdateItemSchema.safeParse(body);
 
-  if (!description) {
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "description is required" },
+      { error: "Validation failed", details: parsed.error.format() },
       { status: 400 },
     );
   }
 
-  // Get the item to verify it exists and get its group
-  const existingItem = await db
-    .select({ id: rankingItemsTable.id, groupId: rankingItemsTable.groupId })
-    .from(rankingItemsTable)
-    .where(eq(rankingItemsTable.id, itemId))
-    .limit(1);
-
-  if (existingItem.length === 0) {
-    return NextResponse.json({ error: "Item not found" }, { status: 404 });
-  }
-
-  const groupId = existingItem[0].groupId;
-
-  // Verify user is a member of the group
-  const membership = await db
-    .select({ id: snobGroupMembersTable.id })
-    .from(snobGroupMembersTable)
-    .where(
-      and(
-        eq(snobGroupMembersTable.groupId, groupId),
-        eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED"),
-      ),
-    )
-    .limit(1);
-
-  if (membership.length === 0) {
+  const itemWithMembership = await getItemWithMembership(itemId, userId);
+  if (!itemWithMembership) {
     return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
+      { error: "Item not found or forbidden" },
+      { status: 404 },
     );
   }
+
+  const { description, imageId, imageUrl, attributes } = parsed.data;
 
   // Update the item
   await db
@@ -90,21 +61,8 @@ export async function PUT(
     })
     .where(eq(rankingItemsTable.id, itemId));
 
-  // Replace attributes: delete existing, insert new
-  await db
-    .delete(rankingItemAttributesTable)
-    .where(eq(rankingItemAttributesTable.itemId, itemId));
-
-  if (attributes && attributes.length > 0) {
-    for (const attr of attributes) {
-      await db.insert(rankingItemAttributesTable).values({
-        id: generateNewId(),
-        itemId,
-        attributeId: attr.attributeId,
-        attributeValue: attr.attributeValue,
-      });
-    }
-  }
+  // Replace attributes
+  await saveItemAttributes(itemId, attributes, true);
 
   return NextResponse.json({ id: itemId });
 }
@@ -130,39 +88,15 @@ export async function DELETE(
     );
   }
 
-  // Get the item to verify it exists and get its group
-  const existingItem = await db
-    .select({ id: rankingItemsTable.id, groupId: rankingItemsTable.groupId })
-    .from(rankingItemsTable)
-    .where(eq(rankingItemsTable.id, itemId))
-    .limit(1);
-
-  if (existingItem.length === 0) {
-    return NextResponse.json({ error: "Item not found" }, { status: 404 });
-  }
-
-  const groupId = existingItem[0].groupId;
-
-  // Verify user is an ADMIN of the group
-  const membership = await db
-    .select({ id: snobGroupMembersTable.id, role: snobGroupMembersTable.role })
-    .from(snobGroupMembersTable)
-    .where(
-      and(
-        eq(snobGroupMembersTable.groupId, groupId),
-        eq(snobGroupMembersTable.snobId, userId),
-      ),
-    )
-    .limit(1);
-
-  if (membership.length === 0) {
+  const itemWithMembership = await getItemWithMembership(itemId, userId);
+  if (!itemWithMembership) {
     return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
+      { error: "Item not found or forbidden" },
+      { status: 404 },
     );
   }
 
-  if (membership[0].role !== "ADMIN") {
+  if (itemWithMembership.membership.role !== "ADMIN") {
     return NextResponse.json(
       { error: "Only group admins can delete items" },
       { status: 403 },
@@ -175,29 +109,3 @@ export async function DELETE(
   return new NextResponse(null, { status: 204 });
 }
 
-async function getUserIdFromToken(request: Request): Promise<string | null> {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-
-  if (!token) return null;
-
-  if (!AUTH0_ISSUER_BASE_URL) {
-    try {
-      const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString(),
-      );
-      return payload.sub || null;
-    } catch {
-      return null;
-    }
-  }
-
-  const userInfo = await fetch(`${AUTH0_ISSUER_BASE_URL}/userinfo`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!userInfo.ok) return null;
-
-  const info = await userInfo.json();
-  return info.sub || null;
-}

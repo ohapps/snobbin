@@ -6,6 +6,12 @@ import {
   snobGroupMembersTable,
   snobsTable,
 } from "@/server/db/schema";
+import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import {
+  formatGroupResponse,
+  formatMemberResponse,
+  formatSnobResponse,
+} from "@/server/utils/mobile/mobile-formatters";
 
 /**
  * GET /api/mobile/user/:userId/groups
@@ -21,9 +27,20 @@ export async function GET(
 ) {
   const { userId } = params;
 
-  // Validate auth
-  const authError = await validateAuth(request, userId);
-  if (authError) return authError;
+  // Validate auth — token must be present and (in prod) must match the requested userId
+  const tokenUserId = await getUserIdFromToken(request);
+  if (!tokenUserId) {
+    return NextResponse.json(
+      { error: "Authorization header required" },
+      { status: 401 },
+    );
+  }
+  if (tokenUserId !== userId) {
+    return NextResponse.json(
+      { error: "Token does not match requested user" },
+      { status: 403 },
+    );
+  }
 
   // Get user's active memberships
   const userMemberships = await db
@@ -67,74 +84,9 @@ export async function GET(
       : [];
 
   return NextResponse.json({
-    groups: allGroups.map((g) => ({
-      id: g.id,
-      name: g.name,
-      description: g.description,
-      min_ranking: Number(g.minRanking),
-      max_ranking: Number(g.maxRanking),
-      increments: Number(g.increments),
-      rank_icon: g.rankIcon,
-      rankings_required: Number(g.rankingsRequired),
-      deleted: g.deleted ? 1 : 0,
-      picture_url: g.pictureUrl,
-    })),
-    memberships: allMemberships.map((m) => ({
-      id: m.id,
-      group_id: m.groupId,
-      snob_id: m.snobId,
-      role: m.role,
-    })),
-    snobs: allSnobs.map((s) => ({
-      id: s.id,
-      email: s.email,
-      first_name: s.firstName,
-      last_name: s.lastName,
-      picture_url: s.pictureUrl,
-      last_group_id: s.lastGroupId,
-    })),
+    groups: allGroups.map(formatGroupResponse),
+    memberships: allMemberships.map(formatMemberResponse),
+    snobs: allSnobs.map(formatSnobResponse),
   });
 }
 
-const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
-
-async function validateAuth(
-  request: Request,
-  expectedUserId: string,
-): Promise<NextResponse | null> {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-
-  if (!token) {
-    return NextResponse.json(
-      { error: "Authorization header required" },
-      { status: 401 },
-    );
-  }
-
-  if (!AUTH0_ISSUER_BASE_URL) {
-    // In development without Auth0 configured, skip validation
-    return null;
-  }
-
-  const userInfo = await fetch(`${AUTH0_ISSUER_BASE_URL}/userinfo`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!userInfo.ok) {
-    return NextResponse.json(
-      { error: "Invalid or expired token" },
-      { status: 401 },
-    );
-  }
-
-  const info = await userInfo.json();
-  if (info.sub !== expectedUserId) {
-    return NextResponse.json(
-      { error: "Token does not match requested user" },
-      { status: 403 },
-    );
-  }
-
-  return null;
-}

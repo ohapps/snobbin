@@ -62,7 +62,7 @@ export const saveRanking = async (
       });
     }
 
-    await calcuateAverageRanking(rankingItem.id, group);
+    await calcuateAverageRanking(rankingItem.id, group.rankingsRequired);
 
     return { success: true };
   } catch (error) {

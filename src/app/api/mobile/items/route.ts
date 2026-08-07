@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
-import { eq, and, ne } from "drizzle-orm";
 import { db } from "@/server/db";
-import {
-  snobGroupMembersTable,
-  rankingItemsTable,
-  rankingItemAttributesTable,
-} from "@/server/db/schema";
+import { rankingItemsTable } from "@/server/db/schema";
 import { generateNewId } from "@/utils/generate-new-id";
-
-const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
+import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { getActiveMembership } from "@/server/utils/group/get-active-membership";
+import { CreateItemSchema } from "@/server/schemas/mobile-schemas";
+import { saveItemAttributes } from "@/server/utils/items/item-utils";
 
 /**
  * POST /api/mobile/items
@@ -26,35 +23,20 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { groupId, description, imageId, imageUrl, attributes } = body as {
-    groupId: string;
-    description: string;
-    imageId: string | null;
-    imageUrl: string | null;
-    attributes: Array<{ attributeId: string; attributeValue: string }>;
-  };
+  const parsed = CreateItemSchema.safeParse(body);
 
-  if (!groupId || !description) {
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "groupId and description are required" },
+      { error: "Validation failed", details: parsed.error.format() },
       { status: 400 },
     );
   }
 
-  // Verify user is a member of this group
-  const membership = await db
-    .select({ id: snobGroupMembersTable.id })
-    .from(snobGroupMembersTable)
-    .where(
-      and(
-        eq(snobGroupMembersTable.groupId, groupId),
-        eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED"),
-      ),
-    )
-    .limit(1);
+  const { groupId, description, imageId, imageUrl, attributes } = parsed.data;
 
-  if (membership.length === 0) {
+  // Verify user is a member of this group
+  const membership = await getActiveMembership(groupId, userId);
+  if (!membership) {
     return NextResponse.json(
       { error: "Not a member of this group" },
       { status: 403 },
@@ -79,43 +61,8 @@ export async function POST(request: Request) {
   });
 
   // Create attributes
-  if (attributes && attributes.length > 0) {
-    for (const attr of attributes) {
-      await db.insert(rankingItemAttributesTable).values({
-        id: generateNewId(),
-        itemId,
-        attributeId: attr.attributeId,
-        attributeValue: attr.attributeValue,
-      });
-    }
-  }
+  await saveItemAttributes(itemId, attributes);
 
   return NextResponse.json({ id: itemId }, { status: 201 });
 }
 
-async function getUserIdFromToken(request: Request): Promise<string | null> {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-
-  if (!token) return null;
-
-  if (!AUTH0_ISSUER_BASE_URL) {
-    try {
-      const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString(),
-      );
-      return payload.sub || null;
-    } catch {
-      return null;
-    }
-  }
-
-  const userInfo = await fetch(`${AUTH0_ISSUER_BASE_URL}/userinfo`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!userInfo.ok) return null;
-
-  const info = await userInfo.json();
-  return info.sub || null;
-}

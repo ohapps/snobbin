@@ -5,10 +5,12 @@ import {
   rankingsTable,
   rankingItemsTable,
   snobGroupMembersTable,
+  snobGroupsTable,
 } from "@/server/db/schema";
 import { generateNewId } from "@/utils/generate-new-id";
-
-const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
+import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { calcuateAverageRanking } from "@/server/utils/items/calculate-average-ranking";
+import { PostRankingSchema } from "@/server/schemas/mobile-schemas";
 
 /**
  * POST /api/mobile/rankings
@@ -26,20 +28,17 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { id, itemId, groupMemberId, ranking, notes } = body as {
-    id?: string;
-    itemId: string;
-    groupMemberId: string;
-    ranking: number;
-    notes: string | null;
-  };
+  const parsed = PostRankingSchema.safeParse(body);
 
-  if (!itemId || !groupMemberId || ranking === undefined) {
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "itemId, groupMemberId, and ranking are required" },
+      { error: "Validation failed", details: parsed.error.format() },
       { status: 400 },
     );
   }
+
+  const { id, itemId, groupMemberId, ranking, notes } = parsed.data;
+
 
   // Verify the group member belongs to the authenticated user
   const member = await db
@@ -58,6 +57,27 @@ export async function POST(request: Request) {
     );
   }
 
+  // Look up the item's group to get rankingsRequired
+  const item = await db
+    .select({
+      groupId: rankingItemsTable.groupId,
+    })
+    .from(rankingItemsTable)
+    .where(eq(rankingItemsTable.id, itemId))
+    .limit(1);
+
+  if (item.length === 0) {
+    return NextResponse.json({ error: "Item not found" }, { status: 404 });
+  }
+
+  const group = await db
+    .select({ rankingsRequired: snobGroupsTable.rankingsRequired })
+    .from(snobGroupsTable)
+    .where(eq(snobGroupsTable.id, item[0].groupId))
+    .limit(1);
+
+  const rankingsRequired = group.length > 0 ? Number(group[0].rankingsRequired) : 1;
+
   const now = new Date();
 
   if (id) {
@@ -71,8 +91,8 @@ export async function POST(request: Request) {
       })
       .where(eq(rankingsTable.id, id));
 
-    // Recalculate average ranking for this item
-    await recalculateAverageRanking(itemId);
+    // Recalculate average ranking using shared logic
+    await calcuateAverageRanking(itemId, rankingsRequired);
 
     return NextResponse.json({ id });
   } else {
@@ -89,67 +109,9 @@ export async function POST(request: Request) {
       updatedDate: now,
     });
 
-    // Recalculate average ranking for this item
-    await recalculateAverageRanking(itemId);
+    // Recalculate average ranking using shared logic
+    await calcuateAverageRanking(itemId, rankingsRequired);
 
     return NextResponse.json({ id: rankingId }, { status: 201 });
   }
-}
-
-/**
- * Recalculates the average ranking for an item based on all its rankings.
- * Also marks the item as ranked if it has any rankings.
- */
-async function recalculateAverageRanking(itemId: string): Promise<void> {
-  const allRankings = await db
-    .select({ ranking: rankingsTable.ranking })
-    .from(rankingsTable)
-    .where(eq(rankingsTable.itemId, itemId));
-
-  if (allRankings.length === 0) {
-    await db
-      .update(rankingItemsTable)
-      .set({ averageRanking: null, ranked: false, updatedDate: new Date() })
-      .where(eq(rankingItemsTable.id, itemId));
-    return;
-  }
-
-  const total = allRankings.reduce((sum, r) => sum + Number(r.ranking), 0);
-  const average = total / allRankings.length;
-
-  await db
-    .update(rankingItemsTable)
-    .set({
-      averageRanking: average.toString(),
-      ranked: true,
-      updatedDate: new Date(),
-    })
-    .where(eq(rankingItemsTable.id, itemId));
-}
-
-async function getUserIdFromToken(request: Request): Promise<string | null> {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-
-  if (!token) return null;
-
-  if (!AUTH0_ISSUER_BASE_URL) {
-    try {
-      const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString(),
-      );
-      return payload.sub || null;
-    } catch {
-      return null;
-    }
-  }
-
-  const userInfo = await fetch(`${AUTH0_ISSUER_BASE_URL}/userinfo`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!userInfo.ok) return null;
-
-  const info = await userInfo.json();
-  return info.sub || null;
 }

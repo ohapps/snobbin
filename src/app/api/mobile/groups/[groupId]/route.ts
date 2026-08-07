@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq, and, ne, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import {
   snobGroupsTable,
@@ -10,6 +10,17 @@ import {
   rankingItemAttributesTable,
   rankingsTable,
 } from "@/server/db/schema";
+import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { getActiveMembership } from "@/server/utils/group/get-active-membership";
+import {
+  formatGroupResponse,
+  formatMemberResponse,
+  formatSnobResponse,
+  formatAttributeResponse,
+  formatItemResponse,
+  formatItemAttributeResponse,
+  formatRankingResponse,
+} from "@/server/utils/mobile/mobile-formatters";
 
 /**
  * GET /api/mobile/groups/:groupId
@@ -36,19 +47,8 @@ export async function GET(
   }
 
   // Verify user is a member of this group
-  const membershipCheck = await db
-    .select({ id: snobGroupMembersTable.id })
-    .from(snobGroupMembersTable)
-    .where(
-      and(
-        eq(snobGroupMembersTable.groupId, groupId),
-        eq(snobGroupMembersTable.snobId, userId),
-        ne(snobGroupMembersTable.role, "DISABLED"),
-      ),
-    )
-    .limit(1);
-
-  if (membershipCheck.length === 0) {
+  const membership = await getActiveMembership(groupId, userId);
+  if (!membership) {
     return NextResponse.json(
       { error: "Not a member of this group" },
       { status: 403 },
@@ -117,97 +117,14 @@ export async function GET(
           .where(inArray(snobsTable.id, memberSnobIds))
       : [];
 
-  const g = groupRows[0];
-
   return NextResponse.json({
-    group: {
-      id: g.id,
-      name: g.name,
-      description: g.description,
-      min_ranking: Number(g.minRanking),
-      max_ranking: Number(g.maxRanking),
-      increments: Number(g.increments),
-      rank_icon: g.rankIcon,
-      rankings_required: Number(g.rankingsRequired),
-      deleted: g.deleted ? 1 : 0,
-      picture_url: g.pictureUrl,
-    },
-    members: members.map((m) => ({
-      id: m.id,
-      group_id: m.groupId,
-      snob_id: m.snobId,
-      role: m.role,
-    })),
-    snobs: snobs.map((s) => ({
-      id: s.id,
-      email: s.email,
-      first_name: s.firstName,
-      last_name: s.lastName,
-      picture_url: s.pictureUrl,
-      last_group_id: s.lastGroupId,
-    })),
-    attributes: attributes.map((a) => ({
-      id: a.id,
-      group_id: a.groupId,
-      name: a.name,
-    })),
-    items: items.map((item) => ({
-      id: item.id,
-      group_id: item.groupId,
-      description: item.description,
-      ranked: item.ranked ? 1 : 0,
-      average_ranking: item.averageRanking ? Number(item.averageRanking) : null,
-      image_id: item.imageId,
-      image_url: item.imageUrl,
-      created_date: item.createdDate?.toISOString() ?? null,
-      updated_date: item.updatedDate?.toISOString() ?? null,
-      created_by: item.createdBy,
-      updated_by: item.updatedBy,
-    })),
-    itemAttributes: itemAttributes.map((ia) => ({
-      id: ia.id,
-      item_id: ia.itemId,
-      attribute_id: ia.attributeId,
-      attribute_value: ia.attributeValue,
-    })),
-    rankings: rankings.map((r) => ({
-      id: r.id,
-      item_id: r.itemId,
-      group_member_id: r.groupMemberId,
-      ranking: Number(r.ranking),
-      notes: r.notes,
-      created_date: r.createdDate?.toISOString() ?? null,
-      updated_date: r.updatedDate?.toISOString() ?? null,
-    })),
+    group: formatGroupResponse(groupRows[0]),
+    members: members.map(formatMemberResponse),
+    snobs: snobs.map(formatSnobResponse),
+    attributes: attributes.map(formatAttributeResponse),
+    items: items.map(formatItemResponse),
+    itemAttributes: itemAttributes.map(formatItemAttributeResponse),
+    rankings: rankings.map(formatRankingResponse),
   });
 }
 
-const AUTH0_ISSUER_BASE_URL = process.env.AUTH0_ISSUER_BASE_URL;
-
-async function getUserIdFromToken(request: Request): Promise<string | null> {
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-
-  if (!token) return null;
-
-  if (!AUTH0_ISSUER_BASE_URL) {
-    // Dev mode: decode the JWT payload without verification
-    try {
-      const payload = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString(),
-      );
-      return payload.sub || null;
-    } catch {
-      return null;
-    }
-  }
-
-  const userInfo = await fetch(`${AUTH0_ISSUER_BASE_URL}/userinfo`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!userInfo.ok) return null;
-
-  const info = await userInfo.json();
-  return info.sub || null;
-}
