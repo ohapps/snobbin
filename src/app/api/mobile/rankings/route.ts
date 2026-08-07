@@ -98,7 +98,12 @@ export async function POST(request: Request) {
         notes: notes || null,
         updatedDate: now,
       })
-      .where(and(eq(rankingsTable.id, id), eq(rankingsTable.groupMemberId, groupMemberId)))
+      .where(
+        and(
+          eq(rankingsTable.id, id),
+          eq(rankingsTable.groupMemberId, groupMemberId),
+        ),
+      )
       .returning({ id: rankingsTable.id });
 
     if (updated.length === 0) {

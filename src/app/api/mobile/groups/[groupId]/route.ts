@@ -68,8 +68,6 @@ export async function GET(
     );
   }
 
-
-
   // Fetch group
   const groupRows = await db
     .select()
