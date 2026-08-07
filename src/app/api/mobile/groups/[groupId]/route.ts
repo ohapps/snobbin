@@ -55,11 +55,20 @@ export async function GET(
     );
   }
 
-  // Update lastGroupId for the user (fire-and-forget, don't block the response)
-  db.update(snobsTable)
-    .set({ lastGroupId: groupId })
-    .where(eq(snobsTable.id, userId))
-    .catch(() => {});
+  // Persist lastGroupId for the user with structured error logging
+  try {
+    await db
+      .update(snobsTable)
+      .set({ lastGroupId: groupId })
+      .where(eq(snobsTable.id, userId));
+  } catch (err) {
+    console.error(
+      `Failed to update lastGroupId for userId=${userId}, groupId=${groupId}:`,
+      err,
+    );
+  }
+
+
 
   // Fetch group
   const groupRows = await db

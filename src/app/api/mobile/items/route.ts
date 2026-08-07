@@ -22,7 +22,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON payload" },
+      { status: 400 },
+    );
+  }
+
   const parsed = CreateItemSchema.safeParse(body);
 
   if (!parsed.success) {

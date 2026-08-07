@@ -47,26 +47,29 @@ export async function getItemWithMembership(
 
 /**
  * Inserts item attributes for a ranking item. If replace is true, existing attributes are deleted first.
+ * Executed inside an atomic transaction.
  */
 export async function saveItemAttributes(
   itemId: string,
   attributes: Array<{ attributeId: string; attributeValue: string }>,
   replace: boolean = false,
 ) {
-  if (replace) {
-    await db
-      .delete(rankingItemAttributesTable)
-      .where(eq(rankingItemAttributesTable.itemId, itemId));
-  }
-
-  if (attributes && attributes.length > 0) {
-    for (const attr of attributes) {
-      await db.insert(rankingItemAttributesTable).values({
-        id: generateNewId(),
-        itemId,
-        attributeId: attr.attributeId,
-        attributeValue: attr.attributeValue,
-      });
+  await db.transaction(async (tx) => {
+    if (replace) {
+      await tx
+        .delete(rankingItemAttributesTable)
+        .where(eq(rankingItemAttributesTable.itemId, itemId));
     }
-  }
+
+    if (attributes && attributes.length > 0) {
+      for (const attr of attributes) {
+        await tx.insert(rankingItemAttributesTable).values({
+          id: generateNewId(),
+          itemId,
+          attributeId: attr.attributeId,
+          attributeValue: attr.attributeValue,
+        });
+      }
+    }
+  });
 }
