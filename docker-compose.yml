@@ -2,7 +2,7 @@ version: "3.3"
 services:
   postgres:
     container_name: "postgres-snobbin-db"
-    image: postgres
+    image: postgres:17
     restart: always
     environment:
       POSTGRES_USER: admin
@@ -12,6 +12,11 @@ services:
       - "5434:5432"
     volumes:
       - postgresdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d snobbin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgresdata:
