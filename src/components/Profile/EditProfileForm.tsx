@@ -8,8 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { saveProfile } from "@/server/actions/profile/save-profile";
 import { useTransition, useState } from "react";
 import { useSnackbar } from "notistack";
-import { Box, Card, Divider, styled, Typography } from "@mui/material";
+import { Box, Card, Chip, Divider, styled, Typography } from "@mui/material";
 import ProfileAvatar from "./ProfileAvatar";
+import StarIcon from "@mui/icons-material/Star";
 import {
   CldUploadButton,
   CloudinaryUploadWidgetInfo,
@@ -70,6 +71,20 @@ const EditProfileForm = ({ snob }: { snob: Snob }) => {
               size="large"
             />
           </Box>
+          {snob.isPremium && (
+            <Box display="flex" justifyContent="center" pb={1}>
+              <Chip
+                icon={<StarIcon fontSize="small" />}
+                label="Premium"
+                size="small"
+                sx={{
+                  backgroundColor: "#fff3e0",
+                  color: "#e65100",
+                  fontWeight: 500,
+                }}
+              />
+            </Box>
+          )}
           <Box display={"flex"} justifyContent="center" padding={2}>
             <CldUploadButton
               options={{ maxFiles: 1 }}

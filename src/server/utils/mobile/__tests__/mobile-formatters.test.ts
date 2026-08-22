@@ -63,6 +63,7 @@ describe("mobile-formatters", () => {
       lastName: "Doe",
       pictureUrl: "https://example.com/avatar.jpg",
       lastGroupId: "group-1",
+      isPremium: true,
     };
 
     expect(formatSnobResponse(dbSnob)).toEqual({
@@ -72,6 +73,7 @@ describe("mobile-formatters", () => {
       last_name: "Doe",
       picture_url: "https://example.com/avatar.jpg",
       last_group_id: "group-1",
+      is_premium: 1,
     });
   });
 

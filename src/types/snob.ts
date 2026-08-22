@@ -25,4 +25,5 @@ export interface Snob {
   lastName?: string | null;
   pictureUrl?: string | null;
   lastGroupId?: string | null;
+  isPremium?: boolean | null;
 }

@@ -20,6 +20,7 @@ export const getUserFromSession = async (
       lastName: snobs[0].lastName,
       pictureUrl: snobs[0].pictureUrl,
       lastGroupId: snobs[0].lastGroupId,
+      isPremium: snobs[0].isPremium,
     } as Snob;
   }
 
