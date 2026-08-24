@@ -1,12 +1,7 @@
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@auth0/nextjs-auth0";
-import { db } from "@/server/db";
-import { snobsTable } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
-import { getUserFromSession } from "@/server/utils/user/get-user-from-session";
+import { getAuthenticatedUser } from "@/server/utils/user/get-authenticated-user";
 import {
   IdentifyItemRequestSchema,
   IdentifyItemResponseSchema,
@@ -14,41 +9,15 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Authenticate user via mobile Bearer token or web session
-    let isPremiumUser = false;
-    let isAuthenticated = false;
-
-    const tokenUserId = await getUserIdFromToken(request);
-    if (tokenUserId) {
-      const snobs = await db
-        .select()
-        .from(snobsTable)
-        .where(eq(snobsTable.id, tokenUserId));
-      if (snobs.length > 0) {
-        isAuthenticated = true;
-        isPremiumUser = !!snobs[0].isPremium;
-      }
-    }
-
-    if (!isAuthenticated) {
-      const session = await getSession();
-      if (session) {
-        const snob = await getUserFromSession(session);
-        if (snob) {
-          isAuthenticated = true;
-          isPremiumUser = !!snob.isPremium;
-        }
-      }
-    }
-
-    if (!isAuthenticated) {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 },
       );
     }
 
-    if (!isPremiumUser) {
+    if (!user.isPremium) {
       return NextResponse.json(
         { error: "AI item detection is only available to premium users" },
         { status: 403 },
