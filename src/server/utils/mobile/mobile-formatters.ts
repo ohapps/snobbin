@@ -45,6 +45,7 @@ export function formatSnobResponse(s: {
   lastName: string | null;
   pictureUrl: string | null;
   lastGroupId: string | null;
+  isPremium?: boolean | null;
 }) {
   return {
     id: s.id,
@@ -53,6 +54,7 @@ export function formatSnobResponse(s: {
     last_name: s.lastName,
     picture_url: s.pictureUrl,
     last_group_id: s.lastGroupId,
+    is_premium: s.isPremium ? 1 : 0,
   };
 }
 

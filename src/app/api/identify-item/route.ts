@@ -1,6 +1,7 @@
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { NextRequest, NextResponse } from "next/server";
+import { getAuthenticatedUser } from "@/server/utils/user/get-authenticated-user";
 import {
   IdentifyItemRequestSchema,
   IdentifyItemResponseSchema,
@@ -8,6 +9,21 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+
+    if (!user.isPremium) {
+      return NextResponse.json(
+        { error: "AI item detection is only available to premium users" },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
     const parsed = IdentifyItemRequestSchema.safeParse(body);
 

@@ -30,6 +30,7 @@ export const snobsTable = pgTable("snobs", {
   lastName: text("last_name"),
   pictureUrl: text("picture_url"),
   lastGroupId: uuid("last_group_id").references(() => snobGroupsTable.id),
+  isPremium: boolean("is_premium").notNull().default(false),
 });
 
 export type InsertSnob = typeof snobsTable.$inferInsert;

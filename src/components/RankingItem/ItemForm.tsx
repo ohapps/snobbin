@@ -12,6 +12,7 @@ import ImageUploadButton from "../Image/ImageUploadButton";
 import { getImageOrPlaceholder, placeholderImage } from "@/types/image";
 import ItemAttributes from "./ItemAttributes";
 import { useIdentifyItem } from "@/hooks/useIdentifyItem";
+import useCurrentGroupMember from "@/hooks/useCurrentGroupMember";
 import { LoadingButton } from "@mui/lab";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 
@@ -46,6 +47,9 @@ const ItemForm = ({
     })) ?? [],
   );
   const [image, setImage] = useState(getImageOrPlaceholder(rankingItem));
+
+  const currentMember = useCurrentGroupMember(rankingGroup);
+  const isPremiumUser = !!currentMember?.snob?.isPremium;
 
   const { identifyItem, isIdentifying } = useIdentifyItem(
     rankingGroup.name,
@@ -108,18 +112,20 @@ const ItemForm = ({
               setItemAttributes={setAttributes}
               snobGroupAttributes={snobGroupAttributes}
             />
-            <LoadingButton
-              variant="outlined"
-              size="small"
-              onClick={handleIdentify}
-              loading={isIdentifying}
-              startIcon={<AutoFixHighIcon />}
-              disabled={image.publicId === placeholderImage.publicId}
-              fullWidth
-              sx={{ mt: 2 }}
-            >
-              Identify with AI
-            </LoadingButton>
+            {isPremiumUser && (
+              <LoadingButton
+                variant="outlined"
+                size="small"
+                onClick={handleIdentify}
+                loading={isIdentifying}
+                startIcon={<AutoFixHighIcon />}
+                disabled={image.publicId === placeholderImage.publicId}
+                fullWidth
+                sx={{ mt: 2 }}
+              >
+                Identify with AI
+              </LoadingButton>
+            )}
           </Grid>
           <Grid size={{ xs: 12 }}>
             <FullSubmitButton
