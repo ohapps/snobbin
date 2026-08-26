@@ -134,3 +134,47 @@ export async function GET(
     rankings: rankings.map(formatRankingResponse),
   });
 }
+
+/**
+ * DELETE /api/mobile/groups/:groupId
+ *
+ * Soft-deletes a group (sets deleted = true).
+ * Auth: Bearer token (Auth0 access token).
+ * Authorization: user must be ADMIN of the group.
+ */
+export async function DELETE(
+  request: Request,
+  { params }: { params: { groupId: string } },
+) {
+  const { groupId } = params;
+
+  const userId = await getUserIdFromToken(request);
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Authorization required" },
+      { status: 401 },
+    );
+  }
+
+  const membership = await getActiveMembership(groupId, userId);
+  if (!membership) {
+    return NextResponse.json(
+      { error: "Not a member of this group" },
+      { status: 403 },
+    );
+  }
+
+  if (membership.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Only group admins can delete the group" },
+      { status: 403 },
+    );
+  }
+
+  await db
+    .update(snobGroupsTable)
+    .set({ deleted: true })
+    .where(eq(snobGroupsTable.id, groupId));
+
+  return new NextResponse(null, { status: 204 });
+}
