@@ -89,7 +89,10 @@ export async function POST(
     status: "PENDING",
   });
 
-  return NextResponse.json({ id: inviteId, email, status: "PENDING" }, { status: 201 });
+  return NextResponse.json(
+    { id: inviteId, email, status: "PENDING" },
+    { status: 201 },
+  );
 }
 
 /**

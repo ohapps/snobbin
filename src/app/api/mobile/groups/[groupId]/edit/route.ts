@@ -113,7 +113,9 @@ export async function PUT(
   if (attributeIdsToDelete.length > 0) {
     await db
       .delete(rankingItemAttributesTable)
-      .where(inArray(rankingItemAttributesTable.attributeId, attributeIdsToDelete));
+      .where(
+        inArray(rankingItemAttributesTable.attributeId, attributeIdsToDelete),
+      );
   }
 
   // Delete attributes that are no longer in the payload
