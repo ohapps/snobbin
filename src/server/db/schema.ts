@@ -95,7 +95,7 @@ export const rankingItemAttributesTable = pgTable("ranking_item_attributes", {
     .references(() => rankingItemsTable.id, { onDelete: "cascade" }),
   attributeId: uuid("attribute_id")
     .notNull()
-    .references(() => snobGroupAttributesTable.id),
+    .references(() => snobGroupAttributesTable.id, { onDelete: "cascade" }),
   attributeValue: text("attribute_value").notNull(),
 });
 

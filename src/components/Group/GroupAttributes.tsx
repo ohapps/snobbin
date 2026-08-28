@@ -16,6 +16,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { SnobGroupAttribute } from "@/types/snobGroup";
 import { useFormContext } from "react-hook-form";
 import { generateNewId } from "@/utils/generate-new-id";
+import ConfirmModal from "../Modal/ConfirmModal";
 
 const StyledTextField = styled(TextField)(() => ({
   marginTop: "10px",
@@ -45,6 +46,9 @@ const GroupAttributes = () => {
   const groupAttributes = watch("attributes") as SnobGroupAttribute[];
   const [selectedAttribute, setSelectedAttribute] =
     useState<SnobGroupAttribute>(newAttribute());
+  const [deleteConfirm, setDeleteConfirm] = useState<SnobGroupAttribute | null>(
+    null,
+  );
 
   const handleSave = () => {
     const newAttributes = groupAttributes.filter(
@@ -55,13 +59,20 @@ const GroupAttributes = () => {
     setSelectedAttribute(newAttribute());
   };
 
-  const handleDelete = (attribute: SnobGroupAttribute) => {
+  const handleDeleteRequest = (attribute: SnobGroupAttribute) => {
+    setDeleteConfirm(attribute);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteConfirm) return;
     setValue(
       "attributes",
       groupAttributes.filter(
-        (attr) => !(attr.id === attribute.id && attr.name === attribute.name),
+        (attr) =>
+          !(attr.id === deleteConfirm.id && attr.name === deleteConfirm.name),
       ),
     );
+    setDeleteConfirm(null);
   };
 
   return (
@@ -96,7 +107,7 @@ const GroupAttributes = () => {
               <IconButton
                 edge="end"
                 aria-label="delete"
-                onClick={() => handleDelete(attribute)}
+                onClick={() => handleDeleteRequest(attribute)}
               >
                 <DeleteIcon />
               </IconButton>
@@ -114,6 +125,13 @@ const GroupAttributes = () => {
           </AttributeItem>
         ))}
       </AttributeList>
+      <ConfirmModal
+        open={!!deleteConfirm}
+        onCancel={() => setDeleteConfirm(null)}
+        onConfirm={handleDeleteConfirm}
+        title={`Delete "${deleteConfirm?.name}"? Any item data for this attribute will be permanently removed.`}
+        confirmText="Delete"
+      />
     </Box>
   );
 };

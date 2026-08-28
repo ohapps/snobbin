@@ -10,8 +10,7 @@ import {
   rankingItemAttributesTable,
   rankingsTable,
 } from "@/server/db/schema";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
-import { getActiveMembership } from "@/server/utils/group/get-active-membership";
+import { requireMember, requireAdmin } from "@/server/utils/api/route-guards";
 import {
   formatGroupResponse,
   formatMemberResponse,
@@ -37,33 +36,18 @@ export async function GET(
 ) {
   const { groupId } = params;
 
-  // Validate auth — extract user from token
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization header required" },
-      { status: 401 },
-    );
-  }
-
-  // Verify user is a member of this group
-  const membership = await getActiveMembership(groupId, userId);
-  if (!membership) {
-    return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
-    );
-  }
+  const auth = await requireMember(request, groupId);
+  if (!auth.ok) return auth.response;
 
   // Persist lastGroupId for the user with structured error logging
   try {
     await db
       .update(snobsTable)
       .set({ lastGroupId: groupId })
-      .where(eq(snobsTable.id, userId));
+      .where(eq(snobsTable.id, auth.userId));
   } catch (err) {
     console.error(
-      `Failed to update lastGroupId for userId=${userId}, groupId=${groupId}:`,
+      `Failed to update lastGroupId for userId=${auth.userId}, groupId=${groupId}:`,
       err,
     );
   }
@@ -133,4 +117,28 @@ export async function GET(
     itemAttributes: itemAttributes.map(formatItemAttributeResponse),
     rankings: rankings.map(formatRankingResponse),
   });
+}
+
+/**
+ * DELETE /api/mobile/groups/:groupId
+ *
+ * Soft-deletes a group (sets deleted = true).
+ * Auth: Bearer token (Auth0 access token).
+ * Authorization: user must be ADMIN of the group.
+ */
+export async function DELETE(
+  request: Request,
+  { params }: { params: { groupId: string } },
+) {
+  const { groupId } = params;
+
+  const auth = await requireAdmin(request, groupId);
+  if (!auth.ok) return auth.response;
+
+  await db
+    .update(snobGroupsTable)
+    .set({ deleted: true })
+    .where(eq(snobGroupsTable.id, groupId));
+
+  return new NextResponse(null, { status: 204 });
 }

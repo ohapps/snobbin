@@ -6,7 +6,7 @@ import {
   snobGroupMembersTable,
   snobsTable,
 } from "@/server/db/schema";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { requireAuth } from "@/server/utils/api/route-guards";
 import {
   formatGroupResponse,
   formatMemberResponse,
@@ -27,15 +27,10 @@ export async function GET(
 ) {
   const { userId } = params;
 
-  // Validate auth — token must be present and (in prod) must match the requested userId
-  const tokenUserId = await getUserIdFromToken(request);
-  if (!tokenUserId) {
-    return NextResponse.json(
-      { error: "Authorization header required" },
-      { status: 401 },
-    );
-  }
-  if (tokenUserId !== userId) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
+  if (auth.userId !== userId) {
     return NextResponse.json(
       { error: "Token does not match requested user" },
       { status: 403 },

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { rankingItemsTable } from "@/server/db/schema";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { requireAuth, parseBody } from "@/server/utils/api/route-guards";
 import { UpdateItemSchema } from "@/server/schemas/mobile-schemas";
 import {
   getItemWithMembership,
@@ -21,25 +21,13 @@ export async function PUT(
 ) {
   const { itemId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
 
-  const body = await request.json();
-  const parsed = UpdateItemSchema.safeParse(body);
+  const body = await parseBody(request, UpdateItemSchema);
+  if (!body.ok) return body.response;
 
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.format() },
-      { status: 400 },
-    );
-  }
-
-  const itemWithMembership = await getItemWithMembership(itemId, userId);
+  const itemWithMembership = await getItemWithMembership(itemId, auth.userId);
   if (!itemWithMembership) {
     return NextResponse.json(
       { error: "Item not found or forbidden" },
@@ -47,7 +35,7 @@ export async function PUT(
     );
   }
 
-  const { description, imageId, imageUrl, attributes } = parsed.data;
+  const { description, imageId, imageUrl, attributes } = body.data;
 
   // Update the item
   await db
@@ -57,7 +45,7 @@ export async function PUT(
       imageId: imageId || null,
       imageUrl: imageUrl || null,
       updatedDate: new Date(),
-      updatedBy: userId,
+      updatedBy: auth.userId,
     })
     .where(eq(rankingItemsTable.id, itemId));
 
@@ -80,15 +68,10 @@ export async function DELETE(
 ) {
   const { itemId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
 
-  const itemWithMembership = await getItemWithMembership(itemId, userId);
+  const itemWithMembership = await getItemWithMembership(itemId, auth.userId);
   if (!itemWithMembership) {
     return NextResponse.json(
       { error: "Item not found or forbidden" },

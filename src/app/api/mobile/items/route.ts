@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { rankingItemsTable } from "@/server/db/schema";
 import { generateNewId } from "@/utils/generate-new-id";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
-import { getActiveMembership } from "@/server/utils/group/get-active-membership";
+import {
+  requireAuth,
+  requireMember,
+  parseBody,
+} from "@/server/utils/api/route-guards";
 import { CreateItemSchema } from "@/server/schemas/mobile-schemas";
 import { saveItemAttributes } from "@/server/utils/items/item-utils";
 
@@ -14,43 +17,17 @@ import { saveItemAttributes } from "@/server/utils/items/item-utils";
  * Auth: Bearer token (Auth0 access token).
  */
 export async function POST(request: Request) {
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 },
-    );
-  }
+  const body = await parseBody(request, CreateItemSchema);
+  if (!body.ok) return body.response;
 
-  const parsed = CreateItemSchema.safeParse(body);
+  const { groupId, description, imageId, imageUrl, attributes } = body.data;
 
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.format() },
-      { status: 400 },
-    );
-  }
-
-  const { groupId, description, imageId, imageUrl, attributes } = parsed.data;
-
-  // Verify user is a member of this group
-  const membership = await getActiveMembership(groupId, userId);
-  if (!membership) {
-    return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
-    );
-  }
+  // Verify user is a member of this group (groupId comes from body)
+  const memberAuth = await requireMember(request, groupId);
+  if (!memberAuth.ok) return memberAuth.response;
 
   // Create the item
   const itemId = generateNewId();
@@ -65,8 +42,8 @@ export async function POST(request: Request) {
     ranked: false,
     createdDate: now,
     updatedDate: now,
-    createdBy: userId,
-    updatedBy: userId,
+    createdBy: auth.userId,
+    updatedBy: auth.userId,
   });
 
   // Create attributes

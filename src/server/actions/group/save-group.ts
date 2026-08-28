@@ -13,8 +13,9 @@ import {
   snobGroupsTable,
   snobGroupMembersTable,
   snobGroupAttributesTable,
+  rankingItemAttributesTable,
 } from "@/server/db/schema";
-import { and, eq, notInArray } from "drizzle-orm";
+import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { generateNewId } from "@/utils/generate-new-id";
 import { Snob } from "@/types/snob";
 import { getGroupForUser } from "@/server/utils/group/get-group-for-user";
@@ -38,6 +39,26 @@ export const saveGroup = async (data: SnobGroup): Promise<ActionResponse> => {
     const attributesIds: string[] = validatedData.data.attributes
       .map((attribute) => attribute.id)
       .filter((id) => id !== undefined);
+
+    // Find which attributes will be removed
+    const allGroupAttributes = await db
+      .select({ id: snobGroupAttributesTable.id })
+      .from(snobGroupAttributesTable)
+      .where(eq(snobGroupAttributesTable.groupId, updatedGroupId));
+
+    const attributeIdsToDelete = allGroupAttributes
+      .map((a) => a.id)
+      .filter((id) => !attributesIds.includes(id));
+
+    // Delete item attribute values referencing the removed group attributes
+    if (attributeIdsToDelete.length > 0) {
+      await db
+        .delete(rankingItemAttributesTable)
+        .where(
+          inArray(rankingItemAttributesTable.attributeId, attributeIdsToDelete),
+        );
+    }
+
     await db
       .delete(snobGroupAttributesTable)
       .where(
