@@ -7,7 +7,7 @@ import {
   snobsTable,
 } from "@/server/db/schema";
 import { generateNewId } from "@/utils/generate-new-id";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { requireAuth } from "@/server/utils/api/route-guards";
 
 /**
  * POST /api/mobile/invites/:inviteId/accept
@@ -22,19 +22,14 @@ export async function POST(
 ) {
   const { inviteId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
 
   // Get the user's email
   const snobs = await db
     .select({ email: snobsTable.email })
     .from(snobsTable)
-    .where(eq(snobsTable.id, userId))
+    .where(eq(snobsTable.id, auth.userId))
     .limit(1);
 
   if (snobs.length === 0) {
@@ -69,7 +64,7 @@ export async function POST(
   await db.insert(snobGroupMembersTable).values({
     id: generateNewId(),
     groupId: invite.groupId,
-    snobId: userId,
+    snobId: auth.userId,
     role: "MEMBER",
   });
 

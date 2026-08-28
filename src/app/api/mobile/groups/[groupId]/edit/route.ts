@@ -7,8 +7,7 @@ import {
   rankingItemAttributesTable,
 } from "@/server/db/schema";
 import { generateNewId } from "@/utils/generate-new-id";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
-import { getActiveMembership } from "@/server/utils/group/get-active-membership";
+import { requireAdmin, parseBody } from "@/server/utils/api/route-guards";
 import { UpdateGroupSchema } from "@/server/schemas/mobile-schemas";
 
 /**
@@ -24,48 +23,11 @@ export async function PUT(
 ) {
   const { groupId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireAdmin(request, groupId);
+  if (!auth.ok) return auth.response;
 
-  // Verify user is an ADMIN member of this group
-  const membership = await getActiveMembership(groupId, userId);
-  if (!membership) {
-    return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
-    );
-  }
-
-  if (membership.role !== "ADMIN") {
-    return NextResponse.json(
-      { error: "Only group admins can edit the group" },
-      { status: 403 },
-    );
-  }
-
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 },
-    );
-  }
-
-  const parsed = UpdateGroupSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.format() },
-      { status: 400 },
-    );
-  }
+  const body = await parseBody(request, UpdateGroupSchema);
+  if (!body.ok) return body.response;
 
   const {
     name,
@@ -77,7 +39,7 @@ export async function PUT(
     rankingsRequired,
     pictureUrl,
     attributes,
-  } = parsed.data;
+  } = body.data;
 
   // Update the group
   await db

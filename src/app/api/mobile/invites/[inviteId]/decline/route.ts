@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/server/db";
 import { snobGroupInvitesTable, snobsTable } from "@/server/db/schema";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { requireAuth } from "@/server/utils/api/route-guards";
 
 /**
  * POST /api/mobile/invites/:inviteId/decline
@@ -17,19 +17,14 @@ export async function POST(
 ) {
   const { inviteId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
 
   // Get the user's email
   const snobs = await db
     .select({ email: snobsTable.email })
     .from(snobsTable)
-    .where(eq(snobsTable.id, userId))
+    .where(eq(snobsTable.id, auth.userId))
     .limit(1);
 
   if (snobs.length === 0) {

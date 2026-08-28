@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/server/db";
 import { snobGroupMembersTable } from "@/server/db/schema";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
-import { getActiveMembership } from "@/server/utils/group/get-active-membership";
+import { requireAdmin } from "@/server/utils/api/route-guards";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   MEMBER: ["ADMIN", "DISABLED"],
@@ -29,28 +28,8 @@ export async function PUT(
 ) {
   const { groupId, memberId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
-
-  // Verify caller is ADMIN
-  const callerMembership = await getActiveMembership(groupId, userId);
-  if (!callerMembership) {
-    return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
-    );
-  }
-  if (callerMembership.role !== "ADMIN") {
-    return NextResponse.json(
-      { error: "Only group admins can change member roles" },
-      { status: 403 },
-    );
-  }
+  const auth = await requireAdmin(request, groupId);
+  if (!auth.ok) return auth.response;
 
   // Parse body
   const body = await request.json();
@@ -85,7 +64,7 @@ export async function PUT(
   const target = targetRows[0];
 
   // Cannot modify your own role
-  if (target.snobId === userId) {
+  if (target.snobId === auth.userId) {
     return NextResponse.json(
       { error: "Cannot change your own role" },
       { status: 400 },

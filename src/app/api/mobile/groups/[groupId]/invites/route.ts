@@ -3,8 +3,7 @@ import { eq, and, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { snobGroupInvitesTable } from "@/server/db/schema";
 import { generateNewId } from "@/utils/generate-new-id";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
-import { getActiveMembership } from "@/server/utils/group/get-active-membership";
+import { requireMember, parseBody } from "@/server/utils/api/route-guards";
 import { z } from "zod";
 
 const CreateInviteSchema = z.object({
@@ -25,41 +24,13 @@ export async function POST(
 ) {
   const { groupId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireMember(request, groupId);
+  if (!auth.ok) return auth.response;
 
-  const membership = await getActiveMembership(groupId, userId);
-  if (!membership) {
-    return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
-    );
-  }
+  const body = await parseBody(request, CreateInviteSchema);
+  if (!body.ok) return body.response;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 },
-    );
-  }
-
-  const parsed = CreateInviteSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.format() },
-      { status: 400 },
-    );
-  }
-
-  const email = parsed.data.email.toLowerCase();
+  const email = body.data.email.toLowerCase();
 
   // Check for existing pending or accepted invite
   const existing = await db
@@ -108,21 +79,8 @@ export async function GET(
 ) {
   const { groupId } = params;
 
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
-
-  const membership = await getActiveMembership(groupId, userId);
-  if (!membership) {
-    return NextResponse.json(
-      { error: "Not a member of this group" },
-      { status: 403 },
-    );
-  }
+  const auth = await requireMember(request, groupId);
+  if (!auth.ok) return auth.response;
 
   const invites = await db
     .select()

@@ -6,7 +6,7 @@ import {
   snobGroupAttributesTable,
 } from "@/server/db/schema";
 import { generateNewId } from "@/utils/generate-new-id";
-import { getUserIdFromToken } from "@/server/utils/user/get-user-id-from-token";
+import { requireAuth, parseBody } from "@/server/utils/api/route-guards";
 import { CreateGroupSchema } from "@/server/schemas/mobile-schemas";
 
 /**
@@ -17,32 +17,11 @@ import { CreateGroupSchema } from "@/server/schemas/mobile-schemas";
  * Auth: Bearer token (Auth0 access token).
  */
 export async function POST(request: Request) {
-  const userId = await getUserIdFromToken(request);
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authorization required" },
-      { status: 401 },
-    );
-  }
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 },
-    );
-  }
-
-  const parsed = CreateGroupSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.format() },
-      { status: 400 },
-    );
-  }
+  const body = await parseBody(request, CreateGroupSchema);
+  if (!body.ok) return body.response;
 
   const {
     name,
@@ -54,7 +33,7 @@ export async function POST(request: Request) {
     rankingsRequired,
     pictureUrl,
     attributes,
-  } = parsed.data;
+  } = body.data;
 
   const groupId = generateNewId();
 
@@ -75,7 +54,7 @@ export async function POST(request: Request) {
   await db.insert(snobGroupMembersTable).values({
     id: generateNewId(),
     groupId,
-    snobId: userId,
+    snobId: auth.userId,
     role: "ADMIN",
   });
 
