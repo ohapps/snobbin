@@ -51,6 +51,12 @@ const ItemForm = ({
   const currentMember = useCurrentGroupMember(rankingGroup);
   const isPremiumUser = !!currentMember?.snob?.isPremium;
 
+  const currentDescription = methods.watch("description");
+  const hasImage = image.publicId !== placeholderImage.publicId;
+  const hasDescription =
+    !!currentDescription && currentDescription.trim().length > 0;
+  const canIdentify = hasImage || hasDescription;
+
   const { identifyItem, isIdentifying } = useIdentifyItem(
     rankingGroup.name,
     rankingGroup.description,
@@ -59,17 +65,26 @@ const ItemForm = ({
   );
 
   const handleIdentify = async () => {
-    if (image.publicId === placeholderImage.publicId) {
-      enqueueSnackbar("Upload an image first", { variant: "warning" });
+    if (!canIdentify) {
+      enqueueSnackbar("Enter a description or upload an image first", {
+        variant: "warning",
+      });
       return;
     }
 
-    const result = await identifyItem(image.url);
+    const result = await identifyItem({
+      imageUrl: hasImage ? image.url : undefined,
+      description: currentDescription?.trim(),
+    });
+
     if (result) {
       methods.setValue("description", result.description, {
         shouldValidate: true,
       });
       setAttributes(result.attributes);
+      if (result.image) {
+        setImage(result.image);
+      }
       enqueueSnackbar("Item identified successfully", { variant: "success" });
     } else {
       enqueueSnackbar("Failed to identify item", { variant: "error" });
@@ -119,7 +134,7 @@ const ItemForm = ({
                 onClick={handleIdentify}
                 loading={isIdentifying}
                 startIcon={<AutoFixHighIcon />}
-                disabled={image.publicId === placeholderImage.publicId}
+                disabled={!canIdentify}
                 fullWidth
                 sx={{ mt: 2 }}
               >
