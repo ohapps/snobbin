@@ -5,12 +5,23 @@ import {
 } from "@/types/snobGroup";
 import { RankingItemAttribute } from "@/types/rankings";
 import { IdentifyItemRequest, IdentifyItemResponse } from "@/types/ai";
+import { ItemImage } from "@/types/image";
+
+interface UseIdentifyItemParams {
+  imageUrl?: string;
+  description?: string;
+}
+
+interface IdentifyItemResultData {
+  description: string;
+  attributes: RankingItemAttribute[];
+  image?: ItemImage | null;
+}
 
 interface UseIdentifyItemResult {
-  identifyItem: (imageUrl: string) => Promise<{
-    description: string;
-    attributes: RankingItemAttribute[];
-  } | null>;
+  identifyItem: (
+    params: UseIdentifyItemParams,
+  ) => Promise<IdentifyItemResultData | null>;
   isIdentifying: boolean;
   error: string | null;
 }
@@ -24,7 +35,10 @@ export const useIdentifyItem = (
   const [isIdentifying, setIsIdentifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const identifyItem = async (imageUrl: string) => {
+  const identifyItem = async ({
+    imageUrl,
+    description,
+  }: UseIdentifyItemParams): Promise<IdentifyItemResultData | null> => {
     setIsIdentifying(true);
     setError(null);
 
@@ -38,7 +52,8 @@ export const useIdentifyItem = (
       }));
 
       const requestBody: IdentifyItemRequest = {
-        imageUrl,
+        imageUrl: imageUrl || undefined,
+        description: description || undefined,
         groupName,
         groupDescription,
         attributes,
@@ -63,6 +78,13 @@ export const useIdentifyItem = (
           attributeId: attr.id,
           attributeValue: attr.value,
         })),
+        image:
+          data.imageUrl && data.imagePublicId
+            ? {
+                url: data.imageUrl,
+                publicId: data.imagePublicId,
+              }
+            : null,
       };
     } catch (err) {
       const message =
@@ -76,3 +98,4 @@ export const useIdentifyItem = (
 
   return { identifyItem, isIdentifying, error };
 };
+
