@@ -53,7 +53,8 @@ const ItemForm = ({
 
   const currentDescription = methods.watch("description");
   const hasImage = image.publicId !== placeholderImage.publicId;
-  const hasDescription = !!currentDescription && currentDescription.trim().length > 0;
+  const hasDescription =
+    !!currentDescription && currentDescription.trim().length > 0;
   const canIdentify = hasImage || hasDescription;
 
   const { identifyItem, isIdentifying } = useIdentifyItem(
@@ -156,4 +157,3 @@ const ItemForm = ({
 };
 
 export default ItemForm;
-

@@ -15,7 +15,9 @@ export const IdentifyItemRequestSchema = z
     ),
   })
   .refine(
-    (data) => !!data.imageUrl || (!!data.description && data.description.trim().length > 0),
+    (data) =>
+      !!data.imageUrl ||
+      (!!data.description && data.description.trim().length > 0),
     {
       message: "Either imageUrl or description must be provided",
     },
@@ -43,4 +45,3 @@ export const IdentifyItemResponseSchema = z.object({
 });
 
 export type IdentifyItemResponse = z.infer<typeof IdentifyItemResponseSchema>;
-
