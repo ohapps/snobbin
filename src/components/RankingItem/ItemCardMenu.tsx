@@ -13,7 +13,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useState, useTransition } from "react";
 import { LoadingButton } from "@mui/lab";
 import { useSnackbar } from "notistack";
-import { RankingItem } from "@/types/rankings";
+import { defaultNewRankingItem, RankingItem } from "@/types/rankings";
 import { useAtom } from "jotai";
 import { selectedRankingItem } from "@/atoms/app";
 import { deleteItem } from "@/server/actions/items/delete-item";
@@ -28,7 +28,13 @@ const Container = styled(Box)(({ theme }) => ({
   marginLeft: theme.spacing(2),
 }));
 
-const ItemCardMenu = ({ item }: { item: RankingItem }) => {
+const ItemCardMenu = ({
+  item,
+  canEdit,
+}: {
+  item: RankingItem;
+  canEdit?: boolean;
+}) => {
   const [isDeleting, startTransition] = useTransition();
   const [, setSelectedRankingItem] = useAtom(selectedRankingItem);
   const { enqueueSnackbar } = useSnackbar();
@@ -46,6 +52,23 @@ const ItemCardMenu = ({ item }: { item: RankingItem }) => {
 
   const handleEdit = () => {
     setSelectedRankingItem(item);
+    handleClose();
+  };
+
+  const handleCopy = () => {
+    const copiedItem: RankingItem = {
+      ...defaultNewRankingItem,
+      groupId: item.groupId,
+      description: `${item.description} - copy`,
+      imageId: item.imageId,
+      imageUrl: item.imageUrl,
+      attributes: (item.attributes || []).map((attr) => ({
+        id: "",
+        attributeId: attr.attributeId,
+        attributeValue: attr.attributeValue,
+      })),
+    };
+    setSelectedRankingItem(copiedItem);
     handleClose();
   };
 
@@ -91,8 +114,11 @@ const ItemCardMenu = ({ item }: { item: RankingItem }) => {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleEdit}>Edit Item</MenuItem>
-        <MenuItem onClick={handleConfirmDelete}>Delete Item</MenuItem>
+        <MenuItem onClick={handleCopy}>Copy Item</MenuItem>
+        {canEdit && <MenuItem onClick={handleEdit}>Edit Item</MenuItem>}
+        {canEdit && (
+          <MenuItem onClick={handleConfirmDelete}>Delete Item</MenuItem>
+        )}
       </Menu>
       <Dialog open={showDeleteConfirm} onClose={closeConfirm}>
         <DialogTitle>Are you sure you want to delete this item?</DialogTitle>

@@ -74,7 +74,7 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
             marginBottom: "-40px",
           }}
         >
-          {canEdit && <ItemCardMenu item={item} />}
+          <ItemCardMenu item={item} canEdit={canEdit} />
         </Grid>
         <Grid
           size={{ xs: 12, md: 4 }}
