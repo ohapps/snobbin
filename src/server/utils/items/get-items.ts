@@ -45,24 +45,29 @@ export const getItems = async (
   }
 
   if (attributeFilters) {
-    Object.entries(attributeFilters).forEach(([attributeId, attributeValue]) => {
-      if (attributeValue && attributeValue !== "all") {
-        filters.push(
-          exists(
-            db
-              .select()
-              .from(rankingItemAttributesTable)
-              .where(
-                and(
-                  eq(rankingItemAttributesTable.itemId, rankingItemsTable.id),
-                  eq(rankingItemAttributesTable.attributeId, attributeId),
-                  eq(rankingItemAttributesTable.attributeValue, attributeValue),
+    Object.entries(attributeFilters).forEach(
+      ([attributeId, attributeValue]) => {
+        if (attributeValue && attributeValue !== "all") {
+          filters.push(
+            exists(
+              db
+                .select()
+                .from(rankingItemAttributesTable)
+                .where(
+                  and(
+                    eq(rankingItemAttributesTable.itemId, rankingItemsTable.id),
+                    eq(rankingItemAttributesTable.attributeId, attributeId),
+                    eq(
+                      rankingItemAttributesTable.attributeValue,
+                      attributeValue,
+                    ),
+                  ),
                 ),
-              ),
-          ),
-        );
-      }
-    });
+            ),
+          );
+        }
+      },
+    );
   }
 
   const [{ count }] = await db

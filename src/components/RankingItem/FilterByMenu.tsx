@@ -100,8 +100,7 @@ const FilterByMenu = ({
       page: "1",
     };
     group.attributes.forEach((attr) => {
-      queryParams[`attr_${attr.id}`] =
-        selectedAttributes[attr.id] ?? "all";
+      queryParams[`attr_${attr.id}`] = selectedAttributes[attr.id] ?? "all";
     });
     updateQuery(queryParams);
     setAnchorEl(null);
@@ -125,10 +124,17 @@ const FilterByMenu = ({
 
   const getAttributeOptions = (attributeId: string) => {
     const valuesFromSummary = attributeSummary
-      .filter((attr) => attr.attributeId === attributeId && Boolean(attr.attributeValue))
+      .filter(
+        (attr) =>
+          attr.attributeId === attributeId && Boolean(attr.attributeValue),
+      )
       .map((attr) => attr.attributeValue);
     const selectedVal = selectedAttributes[attributeId];
-    if (selectedVal && selectedVal !== "all" && !valuesFromSummary.includes(selectedVal)) {
+    if (
+      selectedVal &&
+      selectedVal !== "all" &&
+      !valuesFromSummary.includes(selectedVal)
+    ) {
       valuesFromSummary.push(selectedVal);
     }
     return Array.from(new Set(valuesFromSummary)).sort((a, b) =>
