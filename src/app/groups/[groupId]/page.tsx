@@ -5,17 +5,14 @@ import ItemDrawer from "@/components/RankingItem/ItemDrawer";
 import { getGroupForCurrentUser } from "@/server/utils/group/get-group-for-current-user";
 import { updateLastGroup } from "@/server/utils/user/update-last-group";
 import { getGroupAttributeSummary } from "@/server/utils/group/get-group-attribute-summary";
+import { SnobGroupSearchParams } from "@/types/snobGroup";
 
 const GroupPage = async ({
   params,
   searchParams,
 }: {
   params: { groupId: string };
-  searchParams: {
-    page: string;
-    keyword: string;
-    sortBy: string;
-  };
+  searchParams: SnobGroupSearchParams;
 }) => {
   const page = parseInt(searchParams.page, 10) || 1;
   const group = await getGroupForCurrentUser(params.groupId);
@@ -26,6 +23,7 @@ const GroupPage = async ({
     page,
     searchParams.keyword,
     searchParams.sortBy,
+    searchParams.status,
   );
   return (
     <PageContainer>
@@ -33,6 +31,7 @@ const GroupPage = async ({
         group={group}
         paginatedResults={pageinatedResults}
         attributeSummary={attributeSummary}
+        searchParams={searchParams}
       />
       <ItemDrawer group={group} snobGroupAttributes={attributeSummary} />
     </PageContainer>

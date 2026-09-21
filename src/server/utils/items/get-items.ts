@@ -24,6 +24,7 @@ export const getItems = async (
   page: number,
   keyword: string,
   sortBy: string,
+  status: string,
 ): Promise<PaginatedResults> => {
   const pageSize = 20;
   const filters: SQL[] = [eq(rankingItemsTable.groupId, groupId)];
@@ -36,6 +37,10 @@ export const getItems = async (
     if (keywordFilter) {
       filters.push(keywordFilter);
     }
+  }
+
+  if (status && status !== "all") {
+    filters.push(eq(rankingItemsTable.ranked, status === "ranked"));
   }
 
   const [{ count }] = await db
