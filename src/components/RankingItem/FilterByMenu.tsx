@@ -27,25 +27,27 @@ const HeaderText = styled(Typography)(({ theme }) => ({
 const Buttons = styled(Box)(({ theme }) => ({
   padding: theme.spacing(1),
   gap: theme.spacing(1),
-  display: 'flex',
+  display: "flex",
   justifyContent: "flex-end",
 }));
 
 const filterDefaults = {
-  status: "all"
-}
+  status: "all",
+};
 
 const FilterByMenu = ({
   updateQuery,
-  searchParams
+  searchParams,
 }: {
   updateQuery: (newParams: Record<string, string>) => void;
   searchParams: SnobGroupSearchParams;
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [status, setStatus] = useState(searchParams.status ?? filterDefaults.status);
+  const [status, setStatus] = useState(
+    searchParams.status ?? filterDefaults.status,
+  );
   const open = Boolean(anchorEl);
-  const filtersApplied = (status === filterDefaults.status ? 0 : 1);
+  const filtersApplied = status === filterDefaults.status ? 0 : 1;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -54,15 +56,15 @@ const FilterByMenu = ({
   const applyfilters = () => {
     updateQuery({ status });
     setAnchorEl(null);
-  }
+  };
 
   const resetFilters = () => {
     setStatus(filterDefaults.status);
     updateQuery({
-      status: filterDefaults.status
+      status: filterDefaults.status,
     });
     setAnchorEl(null);
-  }
+  };
 
   return (
     <Box display="flex" alignItems="center">
@@ -104,7 +106,9 @@ const FilterByMenu = ({
         </FilterContainer>
         <Buttons>
           <Button onClick={resetFilters}>RESET</Button>
-          <Button variant="contained" onClick={applyfilters}>APPLY</Button>
+          <Button variant="contained" onClick={applyfilters}>
+            APPLY
+          </Button>
         </Buttons>
       </Menu>
     </Box>

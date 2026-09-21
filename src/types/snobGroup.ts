@@ -102,4 +102,4 @@ export type SnobGroupSearchParams = {
   keyword: string;
   sortBy: string;
   status: string;
-}
+};

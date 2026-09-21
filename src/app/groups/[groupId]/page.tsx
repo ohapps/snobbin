@@ -23,7 +23,7 @@ const GroupPage = async ({
     page,
     searchParams.keyword,
     searchParams.sortBy,
-    searchParams.status
+    searchParams.status,
   );
   return (
     <PageContainer>

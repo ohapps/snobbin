@@ -29,7 +29,7 @@ const ItemList = ({
   paginatedResults,
   hideGroupSummary,
   setHideGroupSummary,
-  searchParams
+  searchParams,
 }: {
   group: SnobGroup;
   paginatedResults: PaginatedResults;
@@ -59,7 +59,9 @@ const ItemList = ({
           <Box>
             <Typography variant="h5" display={"flex"} alignItems={"center"}>
               {hideGroupSummary && (
-                <GroupAvatarContainer onClick={() => setHideGroupSummary(false)}>
+                <GroupAvatarContainer
+                  onClick={() => setHideGroupSummary(false)}
+                >
                   <GroupAvatar group={group} size="small" />
                 </GroupAvatarContainer>
               )}
@@ -68,7 +70,10 @@ const ItemList = ({
           </Box>
           <Box display={"flex"}>
             <SortByMenu updateQuery={updateQuery} searchParams={searchParams} />
-            <FilterByMenu updateQuery={updateQuery} searchParams={searchParams} />
+            <FilterByMenu
+              updateQuery={updateQuery}
+              searchParams={searchParams}
+            />
           </Box>
         </Grid>
         <Grid

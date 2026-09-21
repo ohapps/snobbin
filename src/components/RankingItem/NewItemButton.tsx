@@ -12,12 +12,7 @@ const NewItemButton = () => {
   };
 
   return (
-    <Fab
-      onClick={newItem}
-      color="primary"
-      size="small"
-      sx={{ marginLeft: 1 }}
-    >
+    <Fab onClick={newItem} color="primary" size="small" sx={{ marginLeft: 1 }}>
       <AddIcon />
     </Fab>
   );

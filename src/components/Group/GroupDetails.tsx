@@ -1,7 +1,11 @@
 "use client";
 
 import Grid from "@mui/material/Grid2";
-import { SnobGroup, SnobGroupAttributeSummary, SnobGroupSearchParams } from "@/types/snobGroup";
+import {
+  SnobGroup,
+  SnobGroupAttributeSummary,
+  SnobGroupSearchParams,
+} from "@/types/snobGroup";
 import ItemList from "../RankingItem/ItemList";
 import { PaginatedResults } from "@/types/rankings";
 import GroupSummary from "./GroupSummary";
@@ -15,7 +19,12 @@ interface Props {
   searchParams: SnobGroupSearchParams;
 }
 
-const GroupDetails = ({ group, paginatedResults, attributeSummary, searchParams }: Props) => {
+const GroupDetails = ({
+  group,
+  paginatedResults,
+  attributeSummary,
+  searchParams,
+}: Props) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [hideGroupSummary, setHideGroupSummary] = useState(true);
