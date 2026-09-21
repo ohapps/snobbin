@@ -98,8 +98,9 @@ export const CreateSnobGroupInviteSchema = z.object({
 export type CreateSnobGroupInvite = z.infer<typeof CreateSnobGroupInviteSchema>;
 
 export type SnobGroupSearchParams = {
-  page: string;
-  keyword: string;
-  sortBy: string;
-  status: string;
+  page?: string;
+  keyword?: string;
+  sortBy?: string;
+  status?: string;
+  [key: string]: string | undefined;
 };

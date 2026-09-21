@@ -11,59 +11,129 @@ import {
   styled,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { SnobGroupSearchParams } from "@/types/snobGroup";
+import {
+  SnobGroup,
+  SnobGroupAttributeSummary,
+  SnobGroupSearchParams,
+} from "@/types/snobGroup";
 
 const FilterContainer = styled(Box)(({ theme }) => ({
-  width: theme.spacing(30),
-  padding: theme.spacing(1),
+  width: theme.spacing(32),
+  maxHeight: "75vh",
+  overflowY: "auto",
+  padding: theme.spacing(2),
 }));
 
 const HeaderText = styled(Typography)(({ theme }) => ({
   paddingBottom: theme.spacing(2),
+  fontWeight: theme.typography.fontWeightBold,
 }));
 
 const Buttons = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(1),
+  padding: theme.spacing(1.5),
   gap: theme.spacing(1),
   display: "flex",
   justifyContent: "flex-end",
+  borderTop: `1px solid ${theme.palette.divider}`,
 }));
 
 const filterDefaults = {
   status: "all",
 };
 
-const FilterByMenu = ({
-  updateQuery,
-  searchParams,
-}: {
+interface FilterByMenuProps {
+  group: SnobGroup;
+  attributeSummary: SnobGroupAttributeSummary[];
   updateQuery: (newParams: Record<string, string>) => void;
   searchParams: SnobGroupSearchParams;
-}) => {
+}
+
+const FilterByMenu = ({
+  group,
+  attributeSummary,
+  updateQuery,
+  searchParams,
+}: FilterByMenuProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [status, setStatus] = useState(
     searchParams.status ?? filterDefaults.status,
   );
+
+  const getInitialAttributeFilters = () => {
+    const initial: Record<string, string> = {};
+    group.attributes.forEach((attr) => {
+      initial[attr.id] = searchParams[`attr_${attr.id}`] ?? "all";
+    });
+    return initial;
+  };
+
+  const [selectedAttributes, setSelectedAttributes] = useState<
+    Record<string, string>
+  >(getInitialAttributeFilters);
+
+  useEffect(() => {
+    setStatus(searchParams.status ?? filterDefaults.status);
+    const updated: Record<string, string> = {};
+    group.attributes.forEach((attr) => {
+      updated[attr.id] = searchParams[`attr_${attr.id}`] ?? "all";
+    });
+    setSelectedAttributes(updated);
+  }, [searchParams, group.attributes]);
+
   const open = Boolean(anchorEl);
-  const filtersApplied = status === filterDefaults.status ? 0 : 1;
+
+  const statusApplied = status && status !== filterDefaults.status ? 1 : 0;
+  const attributesApplied = Object.values(selectedAttributes).filter(
+    (val) => val && val !== "all",
+  ).length;
+  const filtersApplied = statusApplied + attributesApplied;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const applyfilters = () => {
-    updateQuery({ status });
+    const queryParams: Record<string, string> = {
+      status,
+      page: "1",
+    };
+    group.attributes.forEach((attr) => {
+      queryParams[`attr_${attr.id}`] =
+        selectedAttributes[attr.id] ?? "all";
+    });
+    updateQuery(queryParams);
     setAnchorEl(null);
   };
 
   const resetFilters = () => {
     setStatus(filterDefaults.status);
-    updateQuery({
+    const resetAttrs: Record<string, string> = {};
+    const queryParams: Record<string, string> = {
       status: filterDefaults.status,
+      page: "1",
+    };
+    group.attributes.forEach((attr) => {
+      resetAttrs[attr.id] = "all";
+      queryParams[`attr_${attr.id}`] = "all";
     });
+    setSelectedAttributes(resetAttrs);
+    updateQuery(queryParams);
     setAnchorEl(null);
+  };
+
+  const getAttributeOptions = (attributeId: string) => {
+    const valuesFromSummary = attributeSummary
+      .filter((attr) => attr.attributeId === attributeId && Boolean(attr.attributeValue))
+      .map((attr) => attr.attributeValue);
+    const selectedVal = selectedAttributes[attributeId];
+    if (selectedVal && selectedVal !== "all" && !valuesFromSummary.includes(selectedVal)) {
+      valuesFromSummary.push(selectedVal);
+    }
+    return Array.from(new Set(valuesFromSummary)).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" }),
+    );
   };
 
   return (
@@ -87,7 +157,7 @@ const FilterByMenu = ({
       >
         <FilterContainer>
           <HeaderText>Filter Options</HeaderText>
-          <FormControl fullWidth>
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
             <InputLabel id="status-filter-label">Status</InputLabel>
             <Select
               labelId="status-filter-label"
@@ -103,6 +173,40 @@ const FilterByMenu = ({
               <MenuItem value={"pending"}>Pending</MenuItem>
             </Select>
           </FormControl>
+          {group.attributes.map((attribute) => {
+            const options = getAttributeOptions(attribute.id);
+            return (
+              <FormControl
+                fullWidth
+                size="small"
+                key={attribute.id}
+                sx={{ mb: 2 }}
+              >
+                <InputLabel id={`attr-filter-label-${attribute.id}`}>
+                  {attribute.name}
+                </InputLabel>
+                <Select
+                  labelId={`attr-filter-label-${attribute.id}`}
+                  id={`attr-filter-${attribute.id}`}
+                  label={attribute.name}
+                  value={selectedAttributes[attribute.id] ?? "all"}
+                  onChange={(e) => {
+                    setSelectedAttributes((prev) => ({
+                      ...prev,
+                      [attribute.id]: e.target.value,
+                    }));
+                  }}
+                >
+                  <MenuItem value={"all"}>All</MenuItem>
+                  {options.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            );
+          })}
         </FilterContainer>
         <Buttons>
           <Button onClick={resetFilters}>RESET</Button>

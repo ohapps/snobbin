@@ -27,12 +27,14 @@ const GroupAvatarContainer = styled(Box)(({ theme }) => ({
 const ItemList = ({
   group,
   paginatedResults,
+  attributeSummary,
   hideGroupSummary,
   setHideGroupSummary,
   searchParams,
 }: {
   group: SnobGroup;
   paginatedResults: PaginatedResults;
+  attributeSummary: SnobGroupAttributeSummary[];
   hideGroupSummary: boolean;
   setHideGroupSummary: (hide: boolean) => void;
   searchParams: SnobGroupSearchParams;
@@ -71,6 +73,8 @@ const ItemList = ({
           <Box display={"flex"}>
             <SortByMenu updateQuery={updateQuery} searchParams={searchParams} />
             <FilterByMenu
+              group={group}
+              attributeSummary={attributeSummary}
               updateQuery={updateQuery}
               searchParams={searchParams}
             />
