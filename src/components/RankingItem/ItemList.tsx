@@ -1,7 +1,11 @@
 "use client";
 
 import { PaginatedResults } from "@/types/rankings";
-import { SnobGroup, SnobGroupSearchParams } from "@/types/snobGroup";
+import {
+  SnobGroup,
+  SnobGroupAttributeSummary,
+  SnobGroupSearchParams,
+} from "@/types/snobGroup";
 import { Box, styled, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import SearchBox from "./SearchBox";
@@ -27,12 +31,14 @@ const GroupAvatarContainer = styled(Box)(({ theme }) => ({
 const ItemList = ({
   group,
   paginatedResults,
+  attributeSummary,
   hideGroupSummary,
   setHideGroupSummary,
   searchParams,
 }: {
   group: SnobGroup;
   paginatedResults: PaginatedResults;
+  attributeSummary: SnobGroupAttributeSummary[];
   hideGroupSummary: boolean;
   setHideGroupSummary: (hide: boolean) => void;
   searchParams: SnobGroupSearchParams;
@@ -71,6 +77,8 @@ const ItemList = ({
           <Box display={"flex"}>
             <SortByMenu updateQuery={updateQuery} searchParams={searchParams} />
             <FilterByMenu
+              group={group}
+              attributeSummary={attributeSummary}
               updateQuery={updateQuery}
               searchParams={searchParams}
             />

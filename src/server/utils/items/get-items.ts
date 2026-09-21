@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { eq, and, ilike, SQL, sql, asc, desc, or } from "drizzle-orm";
+import { eq, and, ilike, SQL, sql, asc, desc, or, exists } from "drizzle-orm";
 import {
   rankingItemAttributesTable,
   rankingItemsTable,
@@ -8,7 +8,7 @@ import { PaginatedResults, RankingItemSoryBy } from "@/types/rankings";
 import { getRankings } from "./get-rankings";
 import { getRankingAttributes } from "./get-ranking-attributes";
 
-const getSortBy = (sortBy: string): SQL => {
+const getSortBy = (sortBy?: string): SQL => {
   switch (sortBy) {
     case RankingItemSoryBy.DESCRIPTION:
       return asc(rankingItemsTable.description);
@@ -22,9 +22,10 @@ const getSortBy = (sortBy: string): SQL => {
 export const getItems = async (
   groupId: string,
   page: number,
-  keyword: string,
-  sortBy: string,
-  status: string,
+  keyword?: string,
+  sortBy?: string,
+  status?: string,
+  attributeFilters?: Record<string, string>,
 ): Promise<PaginatedResults> => {
   const pageSize = 20;
   const filters: SQL[] = [eq(rankingItemsTable.groupId, groupId)];
@@ -41,6 +42,32 @@ export const getItems = async (
 
   if (status && status !== "all") {
     filters.push(eq(rankingItemsTable.ranked, status === "ranked"));
+  }
+
+  if (attributeFilters) {
+    Object.entries(attributeFilters).forEach(
+      ([attributeId, attributeValue]) => {
+        if (attributeValue && attributeValue !== "all") {
+          filters.push(
+            exists(
+              db
+                .select()
+                .from(rankingItemAttributesTable)
+                .where(
+                  and(
+                    eq(rankingItemAttributesTable.itemId, rankingItemsTable.id),
+                    eq(rankingItemAttributesTable.attributeId, attributeId),
+                    eq(
+                      rankingItemAttributesTable.attributeValue,
+                      attributeValue,
+                    ),
+                  ),
+                ),
+            ),
+          );
+        }
+      },
+    );
   }
 
   const [{ count }] = await db

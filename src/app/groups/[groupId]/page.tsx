@@ -14,16 +14,26 @@ const GroupPage = async ({
   params: { groupId: string };
   searchParams: SnobGroupSearchParams;
 }) => {
-  const page = parseInt(searchParams.page, 10) || 1;
+  const page = parseInt(searchParams.page ?? "1", 10) || 1;
   const group = await getGroupForCurrentUser(params.groupId);
   await updateLastGroup(group);
   const attributeSummary = await getGroupAttributeSummary(group);
+
+  const attributeFilters: Record<string, string> = {};
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (key.startsWith("attr_") && typeof value === "string" && value) {
+      const attributeId = key.replace("attr_", "");
+      attributeFilters[attributeId] = value;
+    }
+  });
+
   const pageinatedResults = await getItems(
     params.groupId,
     page,
     searchParams.keyword,
     searchParams.sortBy,
     searchParams.status,
+    attributeFilters,
   );
   return (
     <PageContainer>

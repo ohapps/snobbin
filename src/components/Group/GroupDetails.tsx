@@ -58,6 +58,7 @@ const GroupDetails = ({
         <ItemList
           group={group}
           paginatedResults={paginatedResults}
+          attributeSummary={attributeSummary}
           hideGroupSummary={hideGroupSummary}
           setHideGroupSummary={setHideGroupSummary}
           searchParams={searchParams}
