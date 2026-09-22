@@ -1,5 +1,5 @@
-import withPWA from "next-pwa";
-import { withSentryConfig } from "@sentry/nextjs";
+import withPWAInit from "next-pwa";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -10,14 +10,16 @@ const nextConfig = {
   },
 };
 
-// export default withPWA({
-//   disable: process.env.NODE_ENV === "development", // Disable PWA in development mode
-//   dest: "public", // destination directory for the PWA files
-//   register: true, // register the PWA service worker
-//   skipWaiting: true, // skip waiting for service worker activation
-// })(nextConfig);
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+});
 
-export default withSentryConfig(nextConfig, {
+const configWithPWA = withPWA(nextConfig);
+
+export default withSentryConfig(configWithPWA, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
@@ -53,3 +55,4 @@ export default withSentryConfig(nextConfig, {
     },
   },
 });
+
