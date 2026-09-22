@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -16,7 +17,7 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: "Snobbin",
   description: "Snobbin",
   generator: "Next.js",
@@ -26,6 +27,15 @@ export const metadata: Metadata = {
     { rel: "icon", url: "/icons-128.png" },
   ],
 };
+
+export function generateMetadata(): Metadata {
+  return {
+    ...metadata,
+    other: {
+      ...Sentry.getTraceData(),
+    },
+  };
+}
 
 export default function RootLayout({
   children,

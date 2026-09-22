@@ -32,21 +32,15 @@ npx drizzle-kit migrate
 
 ## Tasks
 
-- add slider to select rating instead of star
 - Add public groups
 - Add tests
 - Add logging library
 - Setup Github pipeline
-- Add offline support via PWA
-- Setup AI pull request reviews
 - Implement data loading pattern for pagination query
 - Add websocket events for real-time updates
 - Review types to see if we can consolidate Zod, Drizzle and other types
 - Add Auth0 production keys
-- Add Sentry
 - Add Google Analytics
-- Investigage using untappd API for quicker search
-- use AI to scrape the web for item information
 
 ## Schema
 
@@ -67,3 +61,14 @@ To prevent Supabase from pausing the project due to inactivity, an API route is 
 3.  **Deploy**: Once you push these changes to Vercel, the cron job will be active.
 
 The route performs a simple `SELECT 1` query to keep the database active and requires the `Authorization` header to match `Bearer ${process.env.CRON_SECRET}` for security.
+
+## Health Check
+
+An unauthenticated health check endpoint is available at `/api/health` for uptime monitors and automated health probes.
+
+It verifies:
+- Next.js server runtime status and uptime
+- PostgreSQL database connectivity via `SELECT 1`
+- Database query response time in milliseconds
+
+Returns HTTP `200` with JSON status `"ok"` when healthy, or HTTP `503` with status `"error"` if the database is unreachable.
