@@ -28,7 +28,9 @@ describe("GET /api/health", () => {
   });
 
   it("returns 503 and error status when database check fails", async () => {
-    vi.mocked(db.execute).mockRejectedValueOnce(new Error("DB connection timeout"));
+    vi.mocked(db.execute).mockRejectedValueOnce(
+      new Error("DB connection timeout"),
+    );
 
     const response = await GET();
     const data = await response.json();

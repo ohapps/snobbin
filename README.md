@@ -67,6 +67,7 @@ The route performs a simple `SELECT 1` query to keep the database active and req
 An unauthenticated health check endpoint is available at `/api/health` for uptime monitors and automated health probes.
 
 It verifies:
+
 - Next.js server runtime status and uptime
 - PostgreSQL database connectivity via `SELECT 1`
 - Database query response time in milliseconds
