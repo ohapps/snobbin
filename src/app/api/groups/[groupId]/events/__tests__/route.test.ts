@@ -24,7 +24,9 @@ describe("GET /api/groups/[groupId]/events", () => {
   it("returns 401 if web user has no session", async () => {
     vi.mocked(getSession).mockResolvedValueOnce(null);
 
-    const request = new Request("http://localhost:3000/api/groups/group-1/events");
+    const request = new Request(
+      "http://localhost:3000/api/groups/group-1/events",
+    );
     const response = await GET(request, { params: { groupId: "group-1" } });
 
     expect(response.status).toBe(401);
@@ -36,7 +38,9 @@ describe("GET /api/groups/[groupId]/events", () => {
     } as never);
     vi.mocked(getActiveMembership).mockResolvedValueOnce(null);
 
-    const request = new Request("http://localhost:3000/api/groups/group-1/events");
+    const request = new Request(
+      "http://localhost:3000/api/groups/group-1/events",
+    );
     const response = await GET(request, { params: { groupId: "group-1" } });
 
     expect(response.status).toBe(403);
@@ -51,7 +55,9 @@ describe("GET /api/groups/[groupId]/events", () => {
       role: SnobGroupRole.MEMBER,
     });
 
-    const request = new Request("http://localhost:3000/api/groups/group-1/events");
+    const request = new Request(
+      "http://localhost:3000/api/groups/group-1/events",
+    );
     const response = await GET(request, { params: { groupId: "group-1" } });
 
     expect(response.status).toBe(200);

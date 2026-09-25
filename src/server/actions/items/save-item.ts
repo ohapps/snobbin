@@ -137,4 +137,3 @@ export const saveItem = async (item: RankingItem): Promise<ActionResponse> => {
     return logAndReturnError("error saving ranking item", error);
   }
 };
-

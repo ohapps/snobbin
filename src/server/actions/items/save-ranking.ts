@@ -88,4 +88,3 @@ export const saveRanking = async (
     return logAndReturnError("error saving ranking", error);
   }
 };
-

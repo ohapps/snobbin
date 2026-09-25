@@ -170,4 +170,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ id: rankingId }, { status: 201 });
   }
 }
-

@@ -25,7 +25,11 @@ export const useGroupEvents = ({
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (!groupId || typeof window === "undefined" || typeof EventSource === "undefined") {
+    if (
+      !groupId ||
+      typeof window === "undefined" ||
+      typeof EventSource === "undefined"
+    ) {
       return;
     }
 
@@ -37,10 +41,13 @@ export const useGroupEvents = ({
 
         if (!currentUserId || payload.createdBy.id !== currentUserId) {
           const author = payload.createdBy.name || "A member";
-          enqueueSnackbar(`${author} added a new item: "${payload.description}"`, {
-            variant: "info",
-            autoHideDuration: 5000,
-          });
+          enqueueSnackbar(
+            `${author} added a new item: "${payload.description}"`,
+            {
+              variant: "info",
+              autoHideDuration: 5000,
+            },
+          );
 
           router.refresh();
         }

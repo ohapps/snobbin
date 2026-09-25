@@ -41,4 +41,3 @@ export type GroupEvent =
   | ItemAddedPayload
   | ItemModifiedPayload
   | RankingAddedPayload;
-
