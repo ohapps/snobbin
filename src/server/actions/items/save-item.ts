@@ -20,6 +20,7 @@ import { SnobGroupRole } from "@/types/snobGroup";
 import { getGroupForUser } from "@/server/utils/group/get-group-for-user";
 import { Snob } from "@/types/snob";
 import { getItem } from "../../utils/items/get-item";
+import { broadcastGroupEvent } from "@/server/events/event-broadcaster";
 
 const createOrUpdateRankingItem = async (
   item: RankItemUpdate,
@@ -67,6 +68,7 @@ export const saveItem = async (item: RankingItem): Promise<ActionResponse> => {
     }
 
     const snob = await getCurrentUser();
+    const isNewItem = !item.id;
 
     if (item.id) {
       // If updating, ensure the user is the creator or an admin of the group
@@ -98,6 +100,37 @@ export const saveItem = async (item: RankingItem): Promise<ActionResponse> => {
           .where(eq(rankingItemAttributesTable.id, attribute.id));
       }
     });
+
+    const creatorName =
+      [snob.firstName, snob.lastName].filter(Boolean).join(" ") ||
+      snob.email ||
+      "A member";
+
+    if (isNewItem) {
+      broadcastGroupEvent(item.groupId, {
+        type: "ITEM_ADDED",
+        groupId: item.groupId,
+        itemId,
+        description: validatedData.data.description,
+        createdBy: {
+          id: snob.id,
+          name: creatorName,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      broadcastGroupEvent(item.groupId, {
+        type: "ITEM_MODIFIED",
+        groupId: item.groupId,
+        itemId,
+        description: validatedData.data.description,
+        createdBy: {
+          id: snob.id,
+          name: creatorName,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     return { success: true };
   } catch (error) {
