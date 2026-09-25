@@ -8,6 +8,7 @@ import {
   getItemWithMembership,
   saveItemAttributes,
 } from "@/server/utils/items/item-utils";
+import { broadcastGroupEvent } from "@/server/events/event-broadcaster";
 
 /**
  * PUT /api/mobile/items/:itemId
@@ -51,6 +52,17 @@ export async function PUT(
 
   // Replace attributes
   await saveItemAttributes(itemId, attributes, true);
+
+  broadcastGroupEvent(itemWithMembership.item.groupId, {
+    type: "ITEM_MODIFIED",
+    groupId: itemWithMembership.item.groupId,
+    itemId,
+    description,
+    createdBy: {
+      id: auth.userId,
+    },
+    timestamp: new Date().toISOString(),
+  });
 
   return NextResponse.json({ id: itemId });
 }

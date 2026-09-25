@@ -11,6 +11,7 @@ import { generateNewId } from "@/utils/generate-new-id";
 import { requireAuth, parseBody } from "@/server/utils/api/route-guards";
 import { calcuateAverageRanking } from "@/server/utils/items/calculate-average-ranking";
 import { PostRankingSchema } from "@/server/schemas/mobile-schemas";
+import { broadcastGroupEvent } from "@/server/events/event-broadcaster";
 
 /**
  * POST /api/mobile/rankings
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
   const item = await db
     .select({
       groupId: rankingItemsTable.groupId,
+      description: rankingItemsTable.description,
     })
     .from(rankingItemsTable)
     .where(eq(rankingItemsTable.id, itemId))
@@ -104,6 +106,18 @@ export async function POST(request: Request) {
     // Recalculate average ranking using shared logic
     await calcuateAverageRanking(itemId, rankingsRequired);
 
+    broadcastGroupEvent(item[0].groupId, {
+      type: "RANKING_ADDED",
+      groupId: item[0].groupId,
+      itemId,
+      itemDescription: item[0].description,
+      ranking: Number(ranking),
+      createdBy: {
+        id: auth.userId,
+      },
+      timestamp: now.toISOString(),
+    });
+
     return NextResponse.json({ id });
   } else {
     // Check if member already has a ranking for this item (uniqueness guard)
@@ -141,6 +155,19 @@ export async function POST(request: Request) {
     // Recalculate average ranking using shared logic
     await calcuateAverageRanking(itemId, rankingsRequired);
 
+    broadcastGroupEvent(item[0].groupId, {
+      type: "RANKING_ADDED",
+      groupId: item[0].groupId,
+      itemId,
+      itemDescription: item[0].description,
+      ranking: Number(ranking),
+      createdBy: {
+        id: auth.userId,
+      },
+      timestamp: now.toISOString(),
+    });
+
     return NextResponse.json({ id: rankingId }, { status: 201 });
   }
 }
+

@@ -11,6 +11,8 @@ import { PaginatedResults } from "@/types/rankings";
 import GroupSummary from "./GroupSummary";
 import { Button, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { useGroupEvents } from "@/hooks/useGroupEvents";
 
 interface Props {
   group: SnobGroup;
@@ -25,11 +27,17 @@ const GroupDetails = ({
   attributeSummary,
   searchParams,
 }: Props) => {
+  const { user } = useUser();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [hideGroupSummary, setHideGroupSummary] = useState(true);
   const showLargeGroupSummary = !hideGroupSummary && !isSmallScreen;
   const showSmallGroupSummary = !hideGroupSummary && isSmallScreen;
+
+  useGroupEvents({
+    groupId: group.id,
+    currentUserId: user?.sub,
+  });
 
   useEffect(() => {
     setHideGroupSummary(isSmallScreen);

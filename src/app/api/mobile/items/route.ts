@@ -9,6 +9,7 @@ import {
 } from "@/server/utils/api/route-guards";
 import { CreateItemSchema } from "@/server/schemas/mobile-schemas";
 import { saveItemAttributes } from "@/server/utils/items/item-utils";
+import { broadcastGroupEvent } from "@/server/events/event-broadcaster";
 
 /**
  * POST /api/mobile/items
@@ -49,5 +50,17 @@ export async function POST(request: Request) {
   // Create attributes
   await saveItemAttributes(itemId, attributes);
 
+  broadcastGroupEvent(groupId, {
+    type: "ITEM_ADDED",
+    groupId,
+    itemId,
+    description,
+    createdBy: {
+      id: auth.userId,
+    },
+    timestamp: now.toISOString(),
+  });
+
   return NextResponse.json({ id: itemId }, { status: 201 });
 }
+

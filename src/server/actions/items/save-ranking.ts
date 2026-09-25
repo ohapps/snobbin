@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 import { generateNewId } from "@/utils/generate-new-id";
 import { getGroupForUser } from "@/server/utils/group/get-group-for-user";
 import { calcuateAverageRanking } from "@/server/utils/items/calculate-average-ranking";
+import { broadcastGroupEvent } from "@/server/events/event-broadcaster";
 
 export const saveRanking = async (
   data: RankingUpdate,
@@ -64,8 +65,27 @@ export const saveRanking = async (
 
     await calcuateAverageRanking(rankingItem.id, group.rankingsRequired);
 
+    const creatorName =
+      [snob.firstName, snob.lastName].filter(Boolean).join(" ") ||
+      snob.email ||
+      "A member";
+
+    broadcastGroupEvent(rankingItem.groupId, {
+      type: "RANKING_ADDED",
+      groupId: rankingItem.groupId,
+      itemId: rankingItem.id,
+      itemDescription: rankingItem.description,
+      ranking: validatedData.data.ranking,
+      createdBy: {
+        id: snob.id,
+        name: creatorName,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
     return { success: true };
   } catch (error) {
     return logAndReturnError("error saving ranking", error);
   }
 };
+
