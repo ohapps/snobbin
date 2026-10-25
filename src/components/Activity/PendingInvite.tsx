@@ -13,7 +13,13 @@ import { useTransition } from "react";
 import { acceptGroupInvite } from "@/server/actions/group/accept-group-invite";
 import { declineGroupInvite } from "@/server/actions/group/decline-group-invite";
 
-const PendingInvite = ({ invite }: { invite: SnobGroupInvite }) => {
+const PendingInvite = ({
+  invite,
+  readOnly = false,
+}: {
+  invite: SnobGroupInvite;
+  readOnly?: boolean;
+}) => {
   const [loading, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -48,27 +54,30 @@ const PendingInvite = ({ invite }: { invite: SnobGroupInvite }) => {
       <ListItemText>
         <Typography>{invite.groupName}</Typography>
       </ListItemText>
-      <ListItemAvatar>
-        <Button
-          color="primary"
-          variant="contained"
-          startIcon={<AcceptIcon />}
-          disabled={loading}
-          onClick={acceptInvite}
-          sx={{ mr: 2 }}
-        >
-          ACCEPT
-        </Button>
-        <Button
-          color="error"
-          variant="text"
-          startIcon={<RejectIcon />}
-          disabled={loading}
-          onClick={declineInvite}
-        >
-          DECLINE
-        </Button>
-      </ListItemAvatar>
+      {/* Accept/decline are server actions; unavailable offline. */}
+      {!readOnly && (
+        <ListItemAvatar>
+          <Button
+            color="primary"
+            variant="contained"
+            startIcon={<AcceptIcon />}
+            disabled={loading}
+            onClick={acceptInvite}
+            sx={{ mr: 2 }}
+          >
+            ACCEPT
+          </Button>
+          <Button
+            color="error"
+            variant="text"
+            startIcon={<RejectIcon />}
+            disabled={loading}
+            onClick={declineInvite}
+          >
+            DECLINE
+          </Button>
+        </ListItemAvatar>
+      )}
     </ListItem>
   );
 };

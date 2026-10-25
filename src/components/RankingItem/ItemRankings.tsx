@@ -1,4 +1,4 @@
-import { Divider, Slider, TextField, Typography } from "@mui/material";
+import { Divider, Rating, Slider, TextField, Typography } from "@mui/material";
 import useCurrentGroupMember from "@/hooks/useCurrentGroupMember";
 import { useEffect, useState, useTransition } from "react";
 import { useSnackbar } from "notistack";
@@ -12,9 +12,12 @@ import { saveRanking } from "@/server/actions/items/save-ranking";
 const ItemRankings = ({
   group,
   item,
+  readOnly = false,
 }: {
   group: SnobGroup;
   item: RankingItem;
+  /** Offline read-only mode: show your ranking but no slider/notes/save. */
+  readOnly?: boolean;
 }) => {
   const [isPending, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
@@ -54,6 +57,50 @@ const ItemRankings = ({
       setNotes(currentRanking?.notes ?? "");
     }
   }, [currentRanking]);
+
+  if (readOnly) {
+    return (
+      <>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12 }}>
+            <Divider />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Typography>Your Ranking</Typography>
+          </Grid>
+          <Grid
+            size={{ xs: 12, md: 6 }}
+            sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
+          >
+            {currentRanking ? (
+              <>
+                <Rating
+                  value={currentRanking.ranking}
+                  precision={group.increments}
+                  max={group.maxRanking}
+                  readOnly
+                />
+                <Typography pl={1}>({currentRanking.ranking} stars)</Typography>
+              </>
+            ) : (
+              <Typography color="text.secondary">Not ranked yet</Typography>
+            )}
+          </Grid>
+          {currentRanking?.notes && (
+            <Grid size={{ xs: 12 }}>
+              <Typography sx={{ fontStyle: "italic" }}>
+                {currentRanking.notes}
+              </Typography>
+            </Grid>
+          )}
+        </Grid>
+        {otherRankings &&
+          otherRankings.map((ranking) => (
+            <OtherRanking key={ranking.id} group={group} ranking={ranking} />
+          ))}
+      </>
+    );
+  }
 
   return (
     <>

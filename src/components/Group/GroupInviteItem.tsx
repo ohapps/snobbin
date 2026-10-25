@@ -16,7 +16,14 @@ export const Text = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(1),
 }));
 
-const GroupInviteItem = ({ invite }: { invite: SnobGroupInvite }) => {
+const GroupInviteItem = ({
+  invite,
+  readOnly = false,
+}: {
+  invite: SnobGroupInvite;
+  /** Offline read-only mode: hide the delete action. */
+  readOnly?: boolean;
+}) => {
   const { enqueueSnackbar } = useSnackbar();
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, startTransition] = useTransition();
@@ -41,17 +48,21 @@ const GroupInviteItem = ({ invite }: { invite: SnobGroupInvite }) => {
           <PersonIcon />
         </Avatar>
         <Text>{invite.email}</Text>
-        <IconButton onClick={() => setModalOpen(true)} disabled={loading}>
-          <DeleteIcon />
-        </IconButton>
+        {!readOnly && (
+          <IconButton onClick={() => setModalOpen(true)} disabled={loading}>
+            <DeleteIcon />
+          </IconButton>
+        )}
       </InviteContainer>
-      <ConfirmModal
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
-        onConfirm={deleteInvite}
-        title="Are you sure you want to delete this invite?"
-        loading={loading}
-      />
+      {!readOnly && (
+        <ConfirmModal
+          open={modalOpen}
+          onCancel={() => setModalOpen(false)}
+          onConfirm={deleteInvite}
+          title="Are you sure you want to delete this invite?"
+          loading={loading}
+        />
+      )}
     </>
   );
 };

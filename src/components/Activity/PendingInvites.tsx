@@ -5,7 +5,14 @@ import { Typography, List } from "@mui/material";
 import PendingInvite from "./PendingInvite";
 import CardContainer from "../Card/CardContainer";
 
-const PendingInvites = ({ invites }: { invites: SnobGroupInvite[] }) => {
+const PendingInvites = ({
+  invites,
+  readOnly = false,
+}: {
+  invites: SnobGroupInvite[];
+  /** Offline: invites can be viewed but not accepted/declined. */
+  readOnly?: boolean;
+}) => {
   return (
     <CardContainer title="Pending Invites">
       {invites.length === 0 && (
@@ -13,7 +20,7 @@ const PendingInvites = ({ invites }: { invites: SnobGroupInvite[] }) => {
       )}
       <List>
         {invites.map((invite) => (
-          <PendingInvite key={invite.id} invite={invite} />
+          <PendingInvite key={invite.id} invite={invite} readOnly={readOnly} />
         ))}
       </List>
     </CardContainer>

@@ -6,6 +6,7 @@ import Logo from "./Logo";
 import MainNavigation from "./MainNavigation";
 import NavigationMenu from "./NavigationMenu";
 import UserMenu from "./UserMenu";
+import OfflineIndicator from "@/components/Offline/OfflineIndicator";
 import { Snob } from "@/types/snob";
 
 export const HeaderItemsWrapper = styled("div")(() => ({
@@ -28,6 +29,7 @@ const HeaderBar = ({ snob }: { snob: Snob }) => {
           <MainNavigation />
         </HeaderItemsWrapper>
         <HeaderItemsWrapper>
+          <OfflineIndicator />
           <UserMenu snob={snob} />
         </HeaderItemsWrapper>
       </Toolbar>

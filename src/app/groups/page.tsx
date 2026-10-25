@@ -1,14 +1,22 @@
-import GroupList from "@/components/Group/GroupList";
-import GroupToolbar from "@/components/Group/GroupToolbar";
 import PageContainer from "@/components/Page/PageContainer";
+import GroupsPageClient from "@/components/Group/GroupsPageClient";
 import { getCurrentUserGroups } from "@/server/utils/group/get-current-user-groups";
+import { OFFLINE_ENABLED } from "@/config/offline";
+import type { SnobGroup } from "@/types/snobGroup";
 
 const Page = async () => {
-  const groups = await getCurrentUserGroups();
+  let groups: SnobGroup[] | null = null;
+
+  try {
+    groups = await getCurrentUserGroups();
+  } catch (error) {
+    // Offline: render from the local mirror instead of erroring.
+    if (!OFFLINE_ENABLED) throw error;
+  }
+
   return (
     <PageContainer>
-      <GroupToolbar />
-      <GroupList groups={groups} />
+      <GroupsPageClient serverGroups={groups} />
     </PageContainer>
   );
 };

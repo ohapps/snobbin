@@ -13,8 +13,30 @@ const nextConfig = {
 const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
-  register: true,
+  // `next-pwa`'s auto-register injects into the Pages Router `main.js` entry,
+  // which the App Router never loads, so it silently does nothing. We register
+  // the worker ourselves in `src/initializers/PwaInitializer.tsx` instead.
+  register: false,
   skipWaiting: true,
+  // Several precache manifest entries 404/redirect in production, and a single
+  // non-200 entry makes the Workbox install fail — leaving the service worker
+  // `redundant` and disabling offline entirely (verified in a production build).
+  //
+  //  - `.js.map`                 : listed by next-pwa but not emitted to `.next/static`.
+  //  - `app-build-manifest.json` : served via the app router, so the auth guard
+  //    redirects it (307 → /api/auth/login) instead of returning 200.
+  //
+  // `buildExcludes` is passed through to Workbox's `exclude`, which tests each
+  // entry's asset name.
+  buildExcludes: [/\.map$/, /app-build-manifest\.json$/],
+  // Use our own worker (InjectManifest) instead of next-pwa's generated one.
+  //
+  // Workbox's stock `NetworkFirst` returns 4xx/5xx responses as-is, so a server
+  // outage behind a reverse proxy (502/503) would replace the cached app with an
+  // error page. `sw.js` implements a navigation handler that treats 5xx as a
+  // failure and serves the cached document. It also keeps the runtime caching
+  // rules that used to live here. See docs/OFFLINE_PLAN.md §4.
+  swSrc: "sw.js",
 });
 
 const configWithPWA = withPWA(nextConfig);

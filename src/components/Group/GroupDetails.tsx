@@ -19,6 +19,10 @@ interface Props {
   paginatedResults: PaginatedResults;
   attributeSummary: SnobGroupAttributeSummary[];
   searchParams: SnobGroupSearchParams;
+  /** When true, write affordances are hidden (offline read-only mode). */
+  readOnly?: boolean;
+  /** Offline override for query changes (see ItemList). */
+  onUpdateQuery?: (newParams: Record<string, string>) => void;
 }
 
 const GroupDetails = ({
@@ -26,6 +30,8 @@ const GroupDetails = ({
   paginatedResults,
   attributeSummary,
   searchParams,
+  readOnly = false,
+  onUpdateQuery,
 }: Props) => {
   const { user } = useUser();
   const theme = useTheme();
@@ -35,7 +41,7 @@ const GroupDetails = ({
   const showSmallGroupSummary = !hideGroupSummary && isSmallScreen;
 
   useGroupEvents({
-    groupId: group.id,
+    groupId: readOnly ? undefined : group.id,
     currentUserId: user?.sub,
   });
 
@@ -52,7 +58,11 @@ const GroupDetails = ({
           flexDirection={"column"}
           alignItems={"center"}
         >
-          <GroupSummary group={group} attributeSummary={attributeSummary} />
+          <GroupSummary
+            group={group}
+            attributeSummary={attributeSummary}
+            readOnly={readOnly}
+          />
           <Button
             onClick={() => setHideGroupSummary(true)}
             variant="outlined"
@@ -70,11 +80,17 @@ const GroupDetails = ({
           hideGroupSummary={hideGroupSummary}
           setHideGroupSummary={setHideGroupSummary}
           searchParams={searchParams}
+          readOnly={readOnly}
+          onUpdateQuery={onUpdateQuery}
         />
       </Grid>
       {showLargeGroupSummary && (
         <Grid size={{ xs: 12, sm: 4 }}>
-          <GroupSummary group={group} attributeSummary={attributeSummary} />
+          <GroupSummary
+            group={group}
+            attributeSummary={attributeSummary}
+            readOnly={readOnly}
+          />
         </Grid>
       )}
     </Grid>

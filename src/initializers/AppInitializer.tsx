@@ -3,6 +3,8 @@ import AuthInitializer from "./AuthInitializer";
 import JotaiInitializer from "./JotaiInitializer";
 import { PwaProvider } from "./PwaInitializer";
 import ThemeInitializer from "./ThemeInitializer";
+import OfflineIdentitySync from "@/components/Offline/OfflineIdentitySync";
+import OfflineReconnect from "@/components/Offline/OfflineReconnect";
 
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -10,7 +12,11 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
       <AuthInitializer>
         <JotaiInitializer>
           <AlertInitializer>
-            <PwaProvider>{children}</PwaProvider>
+            <PwaProvider>
+              <OfflineIdentitySync />
+              <OfflineReconnect />
+              {children}
+            </PwaProvider>
           </AlertInitializer>
         </JotaiInitializer>
       </AuthInitializer>

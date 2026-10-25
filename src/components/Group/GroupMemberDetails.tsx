@@ -35,9 +35,12 @@ export const Text = styled(Typography)(({ theme }) => ({
 const GroupMemberDetails = ({
   member,
   group,
+  readOnly = false,
 }: {
   member: SnobGroupMember;
   group: SnobGroup;
+  /** Offline read-only mode: hide role/enable/disable actions. */
+  readOnly?: boolean;
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [isUpdating, startTransition] = useTransition();
@@ -137,7 +140,7 @@ const GroupMemberDetails = ({
           {isDisabled && <Chip label="disabled" size="small" />}
         </Text>
       </Box>
-      {!isAdmin && (
+      {!readOnly && !isAdmin && (
         <Box>
           <IconButton
             onClick={handleClick}

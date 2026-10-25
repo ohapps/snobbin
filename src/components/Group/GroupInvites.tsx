@@ -45,7 +45,14 @@ export const InviteContainer = styled(Box)(() => ({
   alignItems: "center",
 }));
 
-const GroupInvites = ({ group }: { group: SnobGroup }) => {
+const GroupInvites = ({
+  group,
+  readOnly = false,
+}: {
+  group: SnobGroup;
+  /** Offline read-only mode: invites can be viewed but not sent/deleted. */
+  readOnly?: boolean;
+}) => {
   const { enqueueSnackbar } = useSnackbar();
   const [isPending, startTransition] = useTransition();
   const methods = useForm<CreateSnobGroupInvite>({
@@ -89,20 +96,26 @@ const GroupInvites = ({ group }: { group: SnobGroup }) => {
             </AccordionSummary>
             <AccordionDetails>
               {pendingInvites.map((invite) => (
-                <GroupInviteItem key={invite.id} invite={invite} />
+                <GroupInviteItem
+                  key={invite.id}
+                  invite={invite}
+                  readOnly={readOnly}
+                />
               ))}
-              <ControlledTextField
-                name="email"
-                placeholder="enter email to invite"
-                fullWidth
-                InputProps={{
-                  endAdornment: (
-                    <IconButton type="submit" disabled={isPending}>
-                      <SendIcon />
-                    </IconButton>
-                  ),
-                }}
-              />
+              {!readOnly && (
+                <ControlledTextField
+                  name="email"
+                  placeholder="enter email to invite"
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton type="submit" disabled={isPending}>
+                        <SendIcon />
+                      </IconButton>
+                    ),
+                  }}
+                />
+              )}
             </AccordionDetails>
           </Accordion>
         </Box>

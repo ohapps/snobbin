@@ -56,6 +56,26 @@ export const PwaProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
+  // Register the service worker.
+  //
+  // `next-pwa` injects its own register script into the Pages Router `main.js`
+  // entry, which the App Router never loads — so the worker was bundled but
+  // never registered. Registering here is the App Router–correct equivalent.
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
+    if (!("serviceWorker" in navigator)) return;
+
+    const register = async () => {
+      try {
+        await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      } catch (error) {
+        console.error("Service worker registration failed:", error);
+      }
+    };
+
+    void register();
+  }, []);
+
   return (
     <PwaContext.Provider value={{ deferredPrompt, setDeferredPrompt }}>
       {children}

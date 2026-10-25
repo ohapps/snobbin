@@ -11,7 +11,7 @@ export const NewGroupButton = styled(Button)(({ theme }) => ({
   height: theme.spacing(4.5),
 }));
 
-const GroupToolbar = () => {
+const GroupToolbar = ({ readOnly = false }: { readOnly?: boolean }) => {
   const [, setSelectedSnobGroup] = useAtom(selectedSnobGroup);
 
   const newGroup = () => {
@@ -21,9 +21,12 @@ const GroupToolbar = () => {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between" }}>
       <PageTitle title="My Groups" />
-      <NewGroupButton variant="contained" size="small" onClick={newGroup}>
-        New Group
-      </NewGroupButton>
+      {/* Offline the app is read-only, so group creation is unavailable. */}
+      {!readOnly && (
+        <NewGroupButton variant="contained" size="small" onClick={newGroup}>
+          New Group
+        </NewGroupButton>
+      )}
     </Box>
   );
 };

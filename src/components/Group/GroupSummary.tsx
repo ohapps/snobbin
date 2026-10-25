@@ -33,21 +33,23 @@ const CardContent = styled(MuiCardContent)(({ theme }) => ({
 interface Props {
   group: SnobGroup;
   attributeSummary: SnobGroupAttributeSummary[];
+  /** Offline read-only mode: hide group/member/invite write actions. */
+  readOnly?: boolean;
 }
 
-const GroupSummary = ({ group, attributeSummary }: Props) => {
+const GroupSummary = ({ group, attributeSummary, readOnly = false }: Props) => {
   const groupMember = useCurrentGroupMember(group);
 
   return (
     <Card>
       <CardContent>
         <GroupInfo group={group} expanded={true} />
-        {groupMember?.role === SnobGroupRole.ADMIN && (
+        {!readOnly && groupMember?.role === SnobGroupRole.ADMIN && (
           <GroupCardMenu group={group} />
         )}
       </CardContent>
-      <GroupMembers group={group} />
-      <GroupInvites group={group} />
+      <GroupMembers group={group} readOnly={readOnly} />
+      <GroupInvites group={group} readOnly={readOnly} />
       <GroupAttributeSummary
         group={group}
         attributeSummary={attributeSummary}

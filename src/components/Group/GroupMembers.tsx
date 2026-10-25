@@ -14,7 +14,14 @@ export const Text = styled(Typography)(({ theme }) => ({
   padding: theme.spacing(1),
 }));
 
-const GroupMembers = ({ group }: { group: SnobGroup }) => {
+const GroupMembers = ({
+  group,
+  readOnly = false,
+}: {
+  group: SnobGroup;
+  /** Offline read-only mode: hide member management. */
+  readOnly?: boolean;
+}) => {
   return (
     <Box p={2}>
       <Accordion defaultExpanded>
@@ -27,6 +34,7 @@ const GroupMembers = ({ group }: { group: SnobGroup }) => {
               key={member.snob.id}
               member={member}
               group={group}
+              readOnly={readOnly}
             />
           ))}
         </AccordionDetails>
