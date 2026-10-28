@@ -37,7 +37,7 @@ export interface SqliteResponse {
 }
 
 const VFS_NAME = "opfs-coop";
-const VFS_FALLBACK = "idb-batch"; 
+const VFS_FALLBACK = "idb-batch";
 
 let sqlite3: SQLite.SQLiteAPI | null = null;
 let db: SQLite.SQLiteDB | null = null;
@@ -71,16 +71,38 @@ async function init(databaseName: string): Promise<string> {
 
   const wasmModule = await SQLiteESMFactory();
 
-  // OPFSCoopSyncVFS requires a Worker + OPFS. When OPFS is unavailable (older
-  // Safari, insecure context) we fall back to IDBBatchAtomicVFS.
   let vfs: unknown;
-  let vfsName = VFS_NAME;
-  try {
-    vfs = await OPFSCoopSyncVFS.create(VFS_NAME, wasmModule);
-  } catch (error) {
-    console.warn("Falling back to IndexedDB VFS for offline SQLite:", error);
-    vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
-    vfsName = VFS_FALLBACK;
+  let vfsName: string;
+
+  const isolated =
+    typeof self !== "undefined" &&
+    "crossOriginIsolated" in self &&
+    (self as Window & { crossOriginIsolated?: boolean }).crossOriginIsolated ===
+      true;
+
+  if (!isolated) {
+    try {
+      vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
+      vfsName = VFS_FALLBACK;
+    } catch (error) {
+      console.warn("IDB VFS failed, trying OPFS as last resort:", error);
+      try {
+        vfs = await OPFSCoopSyncVFS.create(VFS_NAME, wasmModule);
+        vfsName = VFS_NAME;
+      } catch (err) {
+        console.error("Both VFSes failed:", err);
+        throw err;
+      }
+    }
+  } else {
+    try {
+      vfs = await OPFSCoopSyncVFS.create(VFS_NAME, wasmModule);
+      vfsName = VFS_NAME;
+    } catch (error) {
+      console.warn("OPFS failed, falling back to IndexedDB VFS:", error);
+      vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
+      vfsName = VFS_FALLBACK;
+    }
   }
 
   sqlite3 = SQLite.Factory(wasmModule);
@@ -105,8 +127,6 @@ async function init(databaseName: string): Promise<string> {
     );
   }
 
-  // Tuning for a mostly read-only mirror. `statements()` handles journal mode
-  // fine; synchronous=NORMAL keeps bulk writes fast while staying durable.
   await sqlite3.exec(db, "PRAGMA journal_mode = WAL;");
   await sqlite3.exec(db, "PRAGMA foreign_keys = ON;");
   await sqlite3.exec(db, "PRAGMA synchronous = NORMAL;");
