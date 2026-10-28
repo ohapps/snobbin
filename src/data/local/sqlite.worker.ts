@@ -125,7 +125,7 @@ async function init(databaseName: string): Promise<string> {
           ? String(cause)
           : "";
     const errorText = error instanceof Error ? error.message : String(error);
-    const vfsErr = (vfs as any)?.lastError;
+    const vfsErr = (vfs as { lastError?: unknown })?.lastError;
     const vfsErrText =
       vfsErr instanceof Error ? `${vfsErr.name}: ${vfsErr.message}` : vfsErr ? String(vfsErr) : "";
     throw new Error(
