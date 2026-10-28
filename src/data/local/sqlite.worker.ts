@@ -128,10 +128,26 @@ async function init(databaseName: string): Promise<string> {
     const vfsErr = (vfs as { lastError?: unknown })?.lastError;
     const vfsErrText =
       vfsErr instanceof Error ? `${vfsErr.name}: ${vfsErr.message}` : vfsErr ? String(vfsErr) : "";
+    const vfsJ = vfs as { jGetLastError?: (buf: Uint8Array) => number };
+    const vfsExtra =
+      typeof vfsJ?.jGetLastError === "function"
+        ? (() => {
+            try {
+              const buf = new Uint8Array(256);
+              vfsJ.jGetLastError(buf);
+              const s = new TextDecoder().decode(buf).replace(/\0.*$/, "");
+              return s;
+            } catch {
+              return "";
+            }
+          })()
+        : "";
     throw new Error(
       `sqlite3_open_v2 failed (code ${code ?? "?"}, vfs ${vfsName}): ${errorText}${
         causeText ? ` — ${causeText}` : ""
-      }${vfsErrText ? ` | vfs.lastError: ${vfsErrText}` : ""}`,
+      }${vfsErrText ? ` | vfs.lastError: ${vfsErrText}` : ""}${
+        vfsExtra ? ` | vfsErr: ${vfsExtra}` : ""
+      }`,
     );
   }
 
