@@ -125,10 +125,11 @@ async function init(databaseName: string): Promise<string> {
           ? String(cause)
           : "";
     const errorText = error instanceof Error ? error.message : String(error);
+    const vfsErr = (vfs as any)?.getLastError?.() || "";
     throw new Error(
       `sqlite3_open_v2 failed (code ${code ?? "?"}, vfs ${vfsName}): ${errorText}${
         causeText ? ` — ${causeText}` : ""
-      }`,
+      }${vfsErr ? ` | ${vfsErr}` : ""}`,
     );
   }
 
