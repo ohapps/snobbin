@@ -75,6 +75,9 @@ async function init(databaseName: string): Promise<string> {
   let vfs: unknown;
   let vfsName: string;
 
+  const forceVfs =
+    typeof process !== "undefined" &&
+    (process.env as Record<string, string | undefined>).NEXT_PUBLIC_OFFLINE_FORCE_VFS;
   const isolated =
     typeof self !== "undefined" &&
     "crossOriginIsolated" in self &&
@@ -86,11 +89,22 @@ async function init(databaseName: string): Promise<string> {
     SQLITE_WORKER_VERSION,
     "isolated:",
     isolated,
+    "forceVfs:",
+    forceVfs,
     "location:",
     typeof location !== "undefined" ? location.href : undefined,
   );
 
-  if (!isolated) {
+  if (forceVfs === "idb") {
+    try {
+      vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
+      vfsName = VFS_FALLBACK;
+      console.log("[sqlite.worker] forced IDB VFS");
+    } catch (error) {
+      console.error("[sqlite.worker] forced IDB VFS failed:", error);
+      throw error;
+    }
+  } else if (!isolated) {
     try {
       vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
       vfsName = VFS_FALLBACK;
