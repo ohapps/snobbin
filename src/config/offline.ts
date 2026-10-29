@@ -22,3 +22,4 @@ export function offlineDbNameFor(sub: string | null | undefined): string {
   const safe = sub.replace(/[^a-zA-Z0-9_-]/g, "_");
   return `snobbin-offline-${safe}.sqlite3`;
 }
+/* force Wed Oct 28 21:29:17 CDT 2026 */
