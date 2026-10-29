@@ -73,11 +73,13 @@ class SqliteClient {
         if (event.data.ok) {
           pending.resolve(event.data);
         } else {
+          console.error("[sqlite-client] worker error:", event.data.error);
           pending.reject(new Error(event.data.error ?? "SQLite error"));
         }
       };
 
       worker.onerror = (event) => {
+        console.error("[sqlite-client] worker onerror:", event.message, event.error);
         const error = new Error(event.message || "SQLite worker crashed");
         for (const item of Array.from(this.pending.values())) {
           item.reject(error);
