@@ -38,6 +38,7 @@ export interface SqliteResponse {
 
 const VFS_NAME = "opfs-coop";
 const VFS_FALLBACK = "idb-batch";
+const SQLITE_WORKER_VERSION = "20251029-verbose-v2";
 
 let sqlite3: SQLite.SQLiteAPI | null = null;
 let db: SQLite.SQLiteDB | null = null;
@@ -80,17 +81,28 @@ async function init(databaseName: string): Promise<string> {
     (self as Window & { crossOriginIsolated?: boolean }).crossOriginIsolated ===
       true;
 
+  console.log(
+    "[sqlite.worker]",
+    SQLITE_WORKER_VERSION,
+    "isolated:",
+    isolated,
+    "location:",
+    typeof location !== "undefined" ? location.href : undefined,
+  );
+
   if (!isolated) {
     try {
       vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
       vfsName = VFS_FALLBACK;
+      console.log("[sqlite.worker] using IDB VFS");
     } catch (error) {
-      console.warn("IDB VFS failed, trying OPFS as last resort:", error);
+      console.warn("[sqlite.worker] IDB VFS failed, trying OPFS as last resort:", error);
       try {
         vfs = await OPFSCoopSyncVFS.create(VFS_NAME, wasmModule);
         vfsName = VFS_NAME;
+        console.log("[sqlite.worker] using OPFS VFS (last resort)");
       } catch (err) {
-        console.error("Both VFSes failed:", err);
+        console.error("[sqlite.worker] Both VFSes failed:", err);
         throw err;
       }
     }
@@ -98,10 +110,17 @@ async function init(databaseName: string): Promise<string> {
     try {
       vfs = await OPFSCoopSyncVFS.create(VFS_NAME, wasmModule);
       vfsName = VFS_NAME;
+      console.log("[sqlite.worker] using OPFS VFS");
     } catch (error) {
-      console.warn("OPFS failed, falling back to IndexedDB VFS:", error);
-      vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
-      vfsName = VFS_FALLBACK;
+      console.warn("[sqlite.worker] OPFS failed, falling back to IndexedDB VFS:", error);
+      try {
+        vfs = await IDBBatchAtomicVFS.create(databaseName, wasmModule);
+        vfsName = VFS_FALLBACK;
+        console.log("[sqlite.worker] using IDB VFS (fallback)");
+      } catch (err) {
+        console.error("[sqlite.worker] OPFS failed and IDB fallback failed:", err);
+        throw err;
+      }
     }
   }
 
