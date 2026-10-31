@@ -174,7 +174,7 @@ export async function getLocalItemsDexie(
     keyword?: string;
     attributeFilters?: Record<string, string[]>;
   } = {},
-): Promise<PaginatedResults<RankingItem>> {
+): Promise<{ data: RankingItem[]; total: number; currentPage: number; totalPages: number }> {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
   const page = options.page ?? 1;
