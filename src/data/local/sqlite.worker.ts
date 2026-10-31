@@ -145,14 +145,20 @@ async function init(databaseName: string): Promise<string> {
   }
 
   sqlite3 = SQLite.Factory(wasmModule);
-  sqlite3.vfs_register(vfs as never, true);
+  if (vfs) {
+    try {
+      sqlite3.vfs_register(vfs as never, true);
+    } catch (e) {
+      console.warn("[sqlite.worker] vfs_register failed:", e);
+    }
+  }
   activeVfsName = vfsName;
 
   try {
     db = await sqlite3.open_v2(
       databaseName,
       SQLite.SQLITE_OPEN_READWRITE | SQLite.SQLITE_OPEN_CREATE,
-      vfsName,
+      vfs ? vfsName : undefined,
     );
   } catch (error) {
     const code = (error as { code?: number }).code;
