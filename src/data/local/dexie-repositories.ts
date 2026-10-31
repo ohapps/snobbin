@@ -241,8 +241,6 @@ export async function getLocalItemsDexie(
       imageId: item.imageId ?? null,
       createdDate: item.createdDate ? new Date(item.createdDate) : new Date(),
       updatedDate: item.updatedDate ? new Date(item.updatedDate) : new Date(),
-      createdBySnob: null,
-      updatedBySnob: null,
     } as RankingItem);
   }
   return {
