@@ -9,6 +9,7 @@
  */
 
 import { sqliteClient } from "./sqlite-client";
+import { resetDexieDb } from "./dexie-db";
 
 /** Dependents first, so the wipe is safe even if FKs are ever enabled. */
 const TABLES = [
@@ -34,6 +35,18 @@ export async function clearOfflineData(): Promise<void> {
     }
   } catch {
     // Nothing to clear (no mirror on this device) — not an error for the caller.
+  }
+  try {
+    resetDexieDb();
+  } catch {
+    // ignore
+  }
+  if (typeof indexedDB !== "undefined") {
+    try {
+      indexedDB.deleteDatabase(getOfflineDbName().replace(/\.sqlite3$/, ".db"));
+    } catch {
+      // ignore
+    }
   }
 
   if (typeof caches !== "undefined") {
