@@ -140,12 +140,7 @@ export async function getLocalGroupInvitesDexie(): Promise<SnobGroupInvite[]> {
       groupId: inv.groupId,
       email: inv.email,
       status: inv.status as SnobGroupInvite["status"],
-      group: {
-        id: group.id,
-        name: group.name,
-        description: group.description,
-        pictureUrl: group.pictureUrl ?? undefined,
-      } as SnobGroupInvite["group"],
+      groupName: group.name,
     });
   }
   return result;
