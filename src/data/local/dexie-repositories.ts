@@ -278,16 +278,10 @@ export async function getLocalRecentRankingsDexie(limit = 10): Promise<RecentRan
     if (!group) continue;
     results.push({
       id: r.id,
-      ranking: r.ranking,
-      notes: r.notes,
-      item: {
-        id: item.id,
-        description: item.description,
-        imageUrl: item.imageUrl ?? undefined,
-      } as RecentRankingItem["item"],
-      group: { id: group.id, name: group.name } as RecentRankingItem["group"],
+      groupId: group.id,
+      groupName: group.name,
+      description: item.description,
       createdDate: r.createdDate ? new Date(r.createdDate) : new Date(),
-      updatedDate: r.updatedDate ? new Date(r.updatedDate) : new Date(),
     });
   }
   return results;
