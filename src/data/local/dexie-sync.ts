@@ -192,16 +192,15 @@ export async function syncGroupDexie(groupId: string): Promise<void> {
     });
 
     complete = data.complete;
-    if (complete) {
-      await db.sync_meta.put({
-        groupId,
-        complete: true,
-        highestPageSynced: page,
-        totalItems: data.total,
-        lastSyncedAt: new Date().toISOString(),
-        state: null,
-      } as LocalSyncMeta);
-    } else {
+    await db.sync_meta.put({
+      groupId,
+      complete: complete,
+      highestPageSynced: page,
+      totalItems: data.total,
+      lastSyncedAt: new Date().toISOString(),
+      state: null,
+    } as LocalSyncMeta);
+    if (!complete) {
       page += 1;
     }
   }

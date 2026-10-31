@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { syncBootstrap, syncGroup } from "@/data/local/sync";
 import { syncBootstrapDexie, syncGroupDexie } from "@/data/local/dexie-sync";
 import { getGroupSyncState } from "@/data/local/repositories";
+import { getAllGroupSyncStatesDexie } from "@/data/local/dexie-repositories";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
@@ -112,7 +113,17 @@ export function refreshBootstrap(): Promise<void> {
  * for that group.
  */
 async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> {
-  const state = await getGroupSyncState(groupId);
+  let state: any = null;
+  try {
+    state = await getGroupSyncState(groupId);
+  } catch {
+    try {
+      const states = await getAllGroupSyncStatesDexie();
+      state = states.find((s) => s.groupId === groupId) ?? null;
+    } catch {
+      state = null;
+    }
+  }
 
   // Skip only if the mirror is complete *and* recent. A stale mirror is
   // re-mirrored so offline data does not drift indefinitely.
@@ -130,6 +141,13 @@ async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> 
   const fromStart = state?.complete === true;
 
   try {
+    await syncGroupDexie(groupId);
+    return;
+  } catch {
+    // ignore
+  }
+
+  try {
     await syncGroup(groupId, {
       fromStart,
       signal,
@@ -142,11 +160,7 @@ async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> 
       },
     });
   } catch {
-    try {
-      await syncGroupDexie(groupId);
-    } catch {
-      // ignore
-    }
+    // ignore
   }
 }
 
