@@ -25,6 +25,7 @@ import {
   getAllGroupSyncStates,
   getLocalGroups,
 } from "@/data/local/repositories";
+import { getAllGroupSyncStatesDexie, getLocalGroupsDexie } from "@/data/local/dexie-repositories";
 import { formatBytes, formatRelativeTime } from "@/utils/format-offline";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
@@ -73,9 +74,30 @@ const OfflineDataSettings = () => {
       }
 
       try {
+        try {
+          const [states, groups] = await Promise.all([
+            getAllGroupSyncStates(),
+            getLocalGroups(),
+          ]);
+          const names = new Map(groups.map((group) => [group.id, group.name]));
+          if (!cancelled) {
+            setSyncStates(
+              states.map((state) => ({
+                groupId: state.groupId,
+                name: names.get(state.groupId) ?? "Unknown group",
+                lastSyncedAt: state.lastSyncedAt,
+                complete: state.complete,
+                totalItems: state.totalItems,
+              })),
+            );
+          }
+          return;
+        } catch (e) {
+          // Try Dexie
+        }
         const [states, groups] = await Promise.all([
-          getAllGroupSyncStates(),
-          getLocalGroups(),
+          getAllGroupSyncStatesDexie(),
+          getLocalGroupsDexie(),
         ]);
         const names = new Map(groups.map((group) => [group.id, group.name]));
         if (!cancelled) {

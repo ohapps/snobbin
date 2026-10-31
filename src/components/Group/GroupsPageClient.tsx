@@ -6,6 +6,7 @@ import GroupList from "@/components/Group/GroupList";
 import GroupToolbar from "@/components/Group/GroupToolbar";
 import { OFFLINE_ENABLED } from "@/config/offline";
 import { getLocalGroups } from "@/data/local/repositories";
+import { getLocalGroupsDexie } from "@/data/local/dexie-repositories";
 import type { SnobGroup } from "@/types/snobGroup";
 import { useConnectivity } from "@/hooks/useConnectivity";
 
@@ -41,7 +42,18 @@ const GroupsPageClient = ({
 
     const load = async () => {
       try {
-        const local = await getLocalGroups();
+        try {
+          const local = await getLocalGroups();
+          if (!cancelled) {
+            setGroups(local);
+            setSource("local");
+            setError(null);
+            return;
+          }
+        } catch (e) {
+          // Try Dexie fallback
+        }
+        const local = await getLocalGroupsDexie();
         if (!cancelled) {
           setGroups(local);
           setSource("local");
