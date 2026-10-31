@@ -232,6 +232,7 @@ export async function getLocalItemsDexie(
     }));
     results.push({
       id: item.id,
+      groupId: item.groupId,
       description: item.description,
       averageRanking: item.averageRanking ?? null,
       rankings: rankingItems,
