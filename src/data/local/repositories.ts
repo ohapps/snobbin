@@ -48,9 +48,18 @@ const PAGE_SIZE = 20;
 
 /** True when the user has any mirrored data at all. */
 export async function localDataAvailable(): Promise<boolean> {
-  await ensureLocalSchema();
-  const rows = await localDb.select().from(groupsTable).limit(1);
-  return rows.length > 0;
+  try {
+    await ensureLocalSchema();
+    const rows = await localDb.select().from(groupsTable).limit(1);
+    return rows.length > 0;
+  } catch {
+    try {
+      const { localDataAvailableDexie } = await import("./dexie-repositories");
+      return localDataAvailableDexie();
+    } catch {
+      return false;
+    }
+  }
 }
 
 export interface GroupSyncState {
