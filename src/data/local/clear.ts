@@ -10,6 +10,7 @@
 
 import { sqliteClient } from "./sqlite-client";
 import { resetDexieDb } from "./dexie-db";
+import { getOfflineDbName } from "./identity";
 
 /** Dependents first, so the wipe is safe even if FKs are ever enabled. */
 const TABLES = [
