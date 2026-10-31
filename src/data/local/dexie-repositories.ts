@@ -225,13 +225,18 @@ export async function getLocalItemsDexie(
         };
       })
       .filter((r): r is NonNullable<typeof r> => r !== null);
+    const attributesArr = Array.from(attributeMap.entries()).map(([name, value]) => ({
+      id: name,
+      attributeId: name,
+      attributeValue: value,
+    }));
     results.push({
       id: item.id,
       description: item.description,
       averageRanking: item.averageRanking ?? null,
       rankings: rankingItems,
       ranked: item.ranked,
-      attributes: attributeMap,
+      attributes: attributesArr,
       imageUrl: item.imageUrl ?? null,
       imageId: item.imageId ?? null,
       createdDate: item.createdDate ? new Date(item.createdDate) : new Date(),
