@@ -43,7 +43,7 @@ const GroupsPageClient = ({
     const load = async () => {
       try {
         try {
-          const local = await getLocalGroups();
+          const local = await getLocalGroupsDexie();
           if (!cancelled) {
             setGroups(local);
             setSource("local");
@@ -51,9 +51,9 @@ const GroupsPageClient = ({
             return;
           }
         } catch (e) {
-          // Try Dexie fallback
+          // Try SQLite fallback
         }
-        const local = await getLocalGroupsDexie();
+        const local = await getLocalGroups();
         if (!cancelled) {
           setGroups(local);
           setSource("local");

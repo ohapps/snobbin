@@ -76,8 +76,8 @@ const OfflineDataSettings = () => {
       try {
         try {
           const [states, groups] = await Promise.all([
-            getAllGroupSyncStates(),
-            getLocalGroups(),
+            getAllGroupSyncStatesDexie(),
+            getLocalGroupsDexie(),
           ]);
           const names = new Map(groups.map((group) => [group.id, group.name]));
           if (!cancelled) {
@@ -93,11 +93,11 @@ const OfflineDataSettings = () => {
           }
           return;
         } catch (e) {
-          // Try Dexie
+          // Try SQLite
         }
         const [states, groups] = await Promise.all([
-          getAllGroupSyncStatesDexie(),
-          getLocalGroupsDexie(),
+          getAllGroupSyncStates(),
+          getLocalGroups(),
         ]);
         const names = new Map(groups.map((group) => [group.id, group.name]));
         if (!cancelled) {
