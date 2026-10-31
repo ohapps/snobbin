@@ -6,7 +6,7 @@ import { getDexieDb } from "./dexie-db";
 import { getOfflineDbName } from "./identity";
 import { getRememberedSnobId } from "./identity";
 import type { SnobGroup, SnobGroupAttributeSummary, SnobGroupInvite, SnobGroupMember } from "@/types/snobGroup";
-import type { PaginatedResults, RankingItem, RankingItemSoryBy, RecentRankingItem } from "@/types/rankings";
+import type { RankingItem, RankingItemSoryBy, RecentRankingItem } from "@/types/rankings";
 import type { Snob } from "@/types/snob";
 import type { GroupSyncState } from "./repositories";
 
