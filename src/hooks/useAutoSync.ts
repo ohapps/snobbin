@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { syncBootstrap, syncGroup } from "@/data/local/sync";
 import { syncBootstrapDexie, syncGroupDexie } from "@/data/local/dexie-sync";
 import { getGroupSyncState } from "@/data/local/repositories";
-import { getAllGroupSyncStatesDexie } from "@/data/local/dexie-repositories";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
@@ -79,11 +78,7 @@ function ensureBootstrap(force = false): Promise<void> {
     try {
       await syncBootstrap();
     } catch {
-      try {
-        await syncBootstrapDexie();
-      } catch (e) {
-        throw e;
-      }
+      await syncBootstrapDexie();
     }
     bootstrapSyncedAt = Date.now();
   })();

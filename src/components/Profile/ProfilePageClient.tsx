@@ -8,7 +8,6 @@ import { OFFLINE_ENABLED } from "@/config/offline";
 import { getLocalCurrentUser } from "@/data/local/repositories";
 import type { Snob } from "@/types/snob";
 import { useConnectivity } from "@/hooks/useConnectivity";
-import { getLocalCurrentUserDexie } from "@/data/local/dexie-repositories";
 
 const Container = styled(Card)(({ theme }) => ({
   maxWidth: theme.breakpoints.values.sm,

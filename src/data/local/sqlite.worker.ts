@@ -117,13 +117,9 @@ async function init(databaseName: string): Promise<string> {
         console.log("[sqlite.worker] using OPFS VFS (last resort)");
       } catch (err) {
         console.error("[sqlite.worker] Both VFSes failed:", err);
-        try {
-          // Last resort: try default VFS
-          vfs = null;
-          vfsName = "default";
-        } catch (e2) {
-          throw err;
-        }
+        // Last resort: try default VFS
+        vfs = null;
+        vfsName = "default";
       }
     }
   } else {

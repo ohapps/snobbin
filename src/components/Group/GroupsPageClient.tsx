@@ -50,7 +50,7 @@ const GroupsPageClient = ({
             setError(null);
             return;
           }
-        } catch (e) {
+        } catch {
           // Try SQLite fallback
         }
         const local = await getLocalGroups();

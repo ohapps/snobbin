@@ -40,7 +40,15 @@ export async function getAllGroupSyncStatesDexie(): Promise<
     });
 }
 
-function toSnob(row: any): Snob {
+function toSnob(row: {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  pictureUrl: string | null;
+  lastGroupId: string | null;
+  isPremium: boolean;
+}): Snob {
   return {
     id: row.id,
     email: row.email,
@@ -64,22 +72,26 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
   ]);
 
   const activeGroupIds = new Set(
-    memberRows.filter((m: any) => m.role !== "DISABLED").map((m: any) => m.groupId),
+    memberRows.filter((m) => m.role !== "DISABLED").map((m) => m.groupId),
   );
 
   const result: SnobGroup[] = [];
-  for (const g of groups.filter((g: any) => !g.deleted && activeGroupIds.has(g.id))) {
+  for (const g of groups.filter((g) => !g.deleted && activeGroupIds.has(g.id))) {
     const members = await db.group_members.where("groupId").equals(g.id).toArray();
-    const snobIds = members.map((m: any) => m.snobId);
+    const snobIds = members.map((m) => m.snobId);
     const snobs = await db.snobs.where("id").anyOf(snobIds).toArray();
-    const snobMap = new Map(snobs.map((s: any) => [s.id, toSnob(s)]));
-    const groupMembers: SnobGroupMember[] = members.map((m: any) => ({
-      id: m.id,
-      snobId: m.snobId,
-      groupId: m.groupId,
-      role: m.role as any,
-      snob: snobMap.get(m.snobId)!,
-    }));
+    const snobMap = new Map(snobs.map((s) => [s.id, toSnob(s)]));
+    const groupMembers: SnobGroupMember[] = members.map((m) => {
+      const snob = snobMap.get(m.snobId);
+      if (!snob) throw new Error("Missing snob");
+      return {
+        id: m.id,
+        snobId: m.snobId,
+        groupId: m.groupId,
+        role: m.role as SnobGroupMember["role"],
+        snob,
+      };
+    });
     result.push({
       id: g.id,
       name: g.name,
@@ -127,13 +139,13 @@ export async function getLocalGroupInvitesDexie(): Promise<SnobGroupInvite[]> {
       id: inv.id,
       groupId: inv.groupId,
       email: inv.email,
-      status: inv.status as any,
+      status: inv.status as SnobGroupInvite["status"],
       group: {
         id: group.id,
         name: group.name,
         description: group.description,
         pictureUrl: group.pictureUrl ?? undefined,
-      } as any,
+      } as SnobGroupInvite["group"],
     });
   }
   return result;
@@ -172,31 +184,13 @@ export async function getLocalItemsDexie(
   let items = await db.items.where("groupId").equals(groupId).toArray();
 
   if (options.rankedStatus === "ranked") {
-    items = items.filter((i: any) => i.ranked);
+    items = items.filter((i) => i.ranked);
   } else if (options.rankedStatus === "unranked") {
-    items = items.filter((i: any) => !i.ranked);
+    items = items.filter((i) => !i.ranked);
   }
 
   if (keyword) {
-    items = items.filter((i: any) => (i.description || "").toLowerCase().includes(keyword));
-  }
-
-  // Simple attribute filtering
-  if (options.attributeFilters && Object.keys(options.attributeFilters).length > 0) {
-    const attributeIds = Object.keys(options.attributeFilters);
-    const requiredValues = options.attributeFilters;
-    items = items.filter((item: any) => {
-      return attributeIds.every((attrId) => {
-        const allowed = new Set(requiredValues[attrId] || []);
-        if (allowed.size === 0) return true;
-        return db.item_attributes
-          .where({ itemId: item.id, attributeId: attrId })
-          .toArray()
-          .then((rows: any[]) => rows.some((r: any) => allowed.has(r.attributeValue)))
-          .then((res) => res);
-      });
-    });
-    // Simpler approach for now
+    items = items.filter((i) => (i.description || "").toLowerCase().includes(keyword));
   }
 
   const total = items.length;
@@ -213,19 +207,25 @@ export async function getLocalItemsDexie(
       if (attr) attributeMap.set(attr.name, ia.attributeValue);
     }
     const members = await db.group_members.where("groupId").equals(groupId).toArray();
-    const memberSnobs = new Map();
+    const memberSnobs = new Map<string, Snob>();
     for (const m of members) {
       const s = await db.snobs.get(m.snobId);
       if (s) memberSnobs.set(m.id, toSnob(s));
     }
-    const rankingItems = rankings.map((r: any) => ({
-      id: r.id,
-      ranking: r.ranking,
-      notes: r.notes,
-      snob: memberSnobs.get(r.groupMemberId)!,
-      createdDate: r.createdDate ? new Date(r.createdDate) : new Date(),
-      updatedDate: r.updatedDate ? new Date(r.updatedDate) : new Date(),
-    }));
+    const rankingItems = rankings
+      .map((r) => {
+        const snob = memberSnobs.get(r.groupMemberId);
+        if (!snob) return null;
+        return {
+          id: r.id,
+          ranking: r.ranking,
+          notes: r.notes,
+          snob,
+          createdDate: r.createdDate ? new Date(r.createdDate) : new Date(),
+          updatedDate: r.updatedDate ? new Date(r.updatedDate) : new Date(),
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
     results.push({
       id: item.id,
       description: item.description,
@@ -260,8 +260,8 @@ export async function getLocalRecentRankingsDexie(limit = 10): Promise<RecentRan
   const memberIds = new Set(memberRows.map((m: any) => m.id));
   const allRankings = await db.rankings.toArray();
   const userRankings = allRankings
-    .filter((r: any) => memberIds.has(r.groupMemberId))
-    .sort((a: any, b: any) => {
+    .filter((r) => memberIds.has(r.groupMemberId))
+    .sort((a, b) => {
       const ad = a.updatedDate || a.createdDate || "";
       const bd = b.updatedDate || b.createdDate || "";
       return bd.localeCompare(ad);
@@ -281,8 +281,8 @@ export async function getLocalRecentRankingsDexie(limit = 10): Promise<RecentRan
         id: item.id,
         description: item.description,
         imageUrl: item.imageUrl ?? undefined,
-      } as any,
-      group: { id: group.id, name: group.name } as any,
+      } as RecentRankingItem["item"],
+      group: { id: group.id, name: group.name } as RecentRankingItem["group"],
       createdDate: r.createdDate ? new Date(r.createdDate) : new Date(),
       updatedDate: r.updatedDate ? new Date(r.updatedDate) : new Date(),
     });

@@ -13,8 +13,6 @@ import {
 import type { RecentRankingItem } from "@/types/rankings";
 import type { SnobGroupInvite } from "@/types/snobGroup";
 import { useConnectivity } from "@/hooks/useConnectivity";
-import { getLocalRecentRankingsDexie } from "@/data/local/dexie-repositories";
-import { getLocalGroupInvitesDexie } from "@/data/local/dexie-repositories";
 
 interface ActivityData {
   invites: SnobGroupInvite[];

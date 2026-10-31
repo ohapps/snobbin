@@ -92,7 +92,7 @@ const OfflineDataSettings = () => {
             );
           }
           return;
-        } catch (e) {
+        } catch {
           // Try SQLite
         }
         const [states, groups] = await Promise.all([
