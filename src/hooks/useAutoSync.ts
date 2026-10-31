@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { syncBootstrap, syncGroup } from "@/data/local/sync";
+import { syncBootstrapDexie, syncGroupDexie } from "@/data/local/dexie-sync";
 import { getGroupSyncState } from "@/data/local/repositories";
+import { getAllGroupSyncStatesDexie } from "@/data/local/dexie-repositories";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
@@ -73,9 +75,18 @@ function ensureBootstrap(force = false): Promise<void> {
     return Promise.resolve();
   }
 
-  const run = syncBootstrap().then(() => {
+  const run = (async () => {
+    try {
+      await syncBootstrap();
+    } catch {
+      try {
+        await syncBootstrapDexie();
+      } catch (e) {
+        throw e;
+      }
+    }
     bootstrapSyncedAt = Date.now();
-  });
+  })();
   bootstrapPromise = run;
   // Clear the in-flight marker once settled: on success the TTL takes over, and
   // on failure a later attempt (next navigation or reconnect) may retry.
@@ -123,17 +134,25 @@ async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> 
   // past the last page and refresh nothing. An incomplete group resumes.
   const fromStart = state?.complete === true;
 
-  await syncGroup(groupId, {
-    fromStart,
-    signal,
-    onProgress: (progress) => {
-      if (process.env.NODE_ENV !== "production" && progress.done) {
-        console.debug(
-          `[offline] mirrored group ${groupId}: ${progress.totalItems} items`,
-        );
-      }
-    },
-  });
+  try {
+    await syncGroup(groupId, {
+      fromStart,
+      signal,
+      onProgress: (progress) => {
+        if (process.env.NODE_ENV !== "production" && progress.done) {
+          console.debug(
+            `[offline] mirrored group ${groupId}: ${progress.totalItems} items`,
+          );
+        }
+      },
+    });
+  } catch {
+    try {
+      await syncGroupDexie(groupId);
+    } catch {
+      // ignore
+    }
+  }
 }
 
 export function useAutoSync(
