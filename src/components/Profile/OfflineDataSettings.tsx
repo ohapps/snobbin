@@ -92,7 +92,12 @@ const OfflineDataSettings = () => {
       } catch (err) {
         // No mirror yet, or the local database could not be opened.
         if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : String(err));
+          const msg = err instanceof Error ? err.message : String(err);
+          setLoadError(
+            msg.includes("crossOriginIsolated") || msg.includes("OPFS") || msg.includes("VFS")
+              ? "Offline storage is not available in this browser/environment (missing secure context or storage permissions)."
+              : msg,
+          );
         }
       }
     };
