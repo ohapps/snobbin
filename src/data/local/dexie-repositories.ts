@@ -158,7 +158,9 @@ export async function getLocalGroupAttributeSummaryDexie(
     const valueSet = new Set(
       values.map((v) => v.attributeValue).filter((v): v is string => Boolean(v)),
     );
-    result.push({ id: attr.id, name: attr.name, values: Array.from(valueSet) });
+    for (const v of Array.from(valueSet)) {
+      result.push({ attributeId: attr.id, attributeValue: v, count: values.filter((x) => x.attributeValue === v).length });
+    }
   }
   return result;
 }
