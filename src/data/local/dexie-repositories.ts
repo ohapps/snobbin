@@ -242,7 +242,7 @@ export async function getLocalItemsDexie(
       imageId: item.imageId ?? null,
       createdDate: item.createdDate ? new Date(item.createdDate) : new Date(),
       updatedDate: item.updatedDate ? new Date(item.updatedDate) : new Date(),
-    } as RankingItem);
+    } as unknown as RankingItem);
   }
   return {
     data: results,
