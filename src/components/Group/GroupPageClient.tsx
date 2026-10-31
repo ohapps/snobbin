@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useGroupPageData";
 import { useAutoSync } from "@/hooks/useAutoSync";
 import { useConnectivity } from "@/hooks/useConnectivity";
+import { getLocalGroupForCurrentUserDexie, getLocalItemsDexie, getLocalGroupAttributeSummaryDexie } from "@/data/local/dexie-repositories";
 
 /**
  * Client shell for the group page.
