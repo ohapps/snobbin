@@ -160,7 +160,9 @@ export async function getLocalGroupAttributeSummaryDexie(
   const result: SnobGroupAttributeSummary[] = [];
   for (const attr of attributes) {
     const values = await db.item_attributes.where("attributeId").equals(attr.id).toArray();
-    const valueSet = new Set(values.map((v: any) => v.attributeValue).filter(Boolean));
+    const valueSet = new Set(
+      values.map((v) => v.attributeValue).filter((v): v is string => Boolean(v)),
+    );
     result.push({ id: attr.id, name: attr.name, values: Array.from(valueSet) });
   }
   return result;
@@ -257,7 +259,7 @@ export async function getLocalRecentRankingsDexie(limit = 10): Promise<RecentRan
   const snob = await db.snobs.get(snobId);
   if (!snob) return [];
   const memberRows = await db.group_members.where("snobId").equals(snobId).toArray();
-  const memberIds = new Set(memberRows.map((m: any) => m.id));
+  const memberIds = new Set(memberRows.map((m) => m.id));
   const allRankings = await db.rankings.toArray();
   const userRankings = allRankings
     .filter((r) => memberIds.has(r.groupMemberId))
