@@ -28,15 +28,15 @@ export async function syncBootstrapDexie(): Promise<{
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
   const snobId = getRememberedSnobId();
-  console.log('[dexie-sync] bootstrap start, snobId:', snobId, 'db:', dbName);
+  console.warn('[dexie-sync] bootstrap start, snobId:', snobId, 'db:', dbName);
   if (!snobId) return { ok: false, reason: "no-identity" };
 
   try {
     const res = await fetch("/api/offline/bootstrap");
-    console.log('[dexie-sync] bootstrap resp:', res.status);
+    console.warn('[dexie-sync] bootstrap resp:', res.status);
     if (!res.ok) return { ok: false, reason: `http-${res.status}` };
     const data: BootstrapResponse = await res.json();
-    console.log('[dexie-sync] bootstrap data groups:', data.groups?.length);
+    console.warn('[dexie-sync] bootstrap data groups:', data.groups?.length);
 
     await db.transaction(
       "rw",
