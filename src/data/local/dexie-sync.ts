@@ -1,5 +1,5 @@
 import { getDexieDb } from "./dexie-db";
-import { getOfflineDbName, getRememberedSnobId } from "./identity";
+import { getOfflineDbName, getRememberedSnobId, setRememberedSnobId } from "./identity";
 import type { BootstrapResponse, GroupItemsPageResponse, GroupMetaResponse } from "./api-types";
 import type { LocalGroup, LocalSnob, LocalGroupMember, LocalGroupInvite, LocalGroupAttribute, LocalItem, LocalItemAttribute, LocalRanking, LocalSyncMeta } from "./schema";
 
@@ -58,6 +58,11 @@ export async function syncBootstrapDexie(): Promise<{ ok: boolean; reason?: stri
         } as LocalGroupMember);
       }
     });
+    try {
+      setRememberedSnobId(data.snob.id);
+    } catch {
+      // ignore
+    }
 
     // Sync meta for each group
     for (const g of data.groups) {

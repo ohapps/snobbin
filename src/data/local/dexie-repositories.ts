@@ -19,12 +19,34 @@ export async function localDataAvailableDexie(): Promise<boolean> {
   return count > 0;
 }
 
+export async function getGroupSyncStateDexie(groupId: string): Promise<GroupSyncState | null> {
+  const dbName = getOfflineDbName();
+  const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
+  const row = await db.sync_meta.get(groupId);
+  if (!row) return null;
+  return {
+    complete: row.complete,
+    highestPageSynced: row.highestPageSynced,
+    totalItems: row.totalItems ?? null,
+    lastSyncedAt: row.lastSyncedAt ?? null,
+  };
+}
+
 export async function getAllGroupSyncStatesDexie(): Promise<
   Array<GroupSyncState & { groupId: string }>
 > {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
-  const rows = await db.sync_meta.toArray();
+  let rows = await db.sync_meta.toArray();
+  if (rows.length === 0) {
+    // Fallback to anonymous db
+    try {
+      const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+      rows = await anonDb.sync_meta.toArray();
+    } catch {
+      // ignore
+    }
+  }
   return rows
     .map((row) => ({
       groupId: row.groupId,
@@ -63,13 +85,70 @@ function toSnob(row: {
 export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
-  const snobId = getRememberedSnobId();
+  let snobId = getRememberedSnobId();
+  if (!snobId) {
+    try {
+      const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+      const snobs = await anonDb.snobs.toArray();
+      if (snobs.length > 0) {
+        snobId = snobs[0].id;
+      }
+    } catch {
+      // ignore
+    }
+  }
   if (!snobId) return [];
 
-  const [groups, memberRows] = await Promise.all([
+  let [groups, memberRows] = await Promise.all([
     db.groups.toArray(),
     db.group_members.where("snobId").equals(snobId).toArray(),
   ]);
+  if (groups.length === 0 || memberRows.length === 0) {
+    try {
+      const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+      groups = await anonDb.groups.toArray();
+      memberRows = await anonDb.group_members.where("snobId").equals(snobId).toArray();
+      if (groups.length > 0 || memberRows.length > 0) {
+        // use anon db data
+        const activeGroupIds = new Set(
+          memberRows.filter((m) => m.role !== "DISABLED").map((m) => m.groupId),
+        );
+        const result: SnobGroup[] = [];
+        for (const g of groups.filter((g) => !g.deleted && activeGroupIds.has(g.id))) {
+          const members = await anonDb.group_members.where("groupId").equals(g.id).toArray();
+          const snobIds = members.map((m) => m.snobId);
+          const snobs = await anonDb.snobs.where("id").anyOf(snobIds).toArray();
+          const snobMap = new Map(snobs.map((s) => [s.id, toSnob(s)]));
+          const groupMembers: SnobGroupMember[] = members.map((m) => {
+            const snob = snobMap.get(m.snobId);
+            if (!snob) throw new Error("Missing snob");
+            return {
+              id: m.id,
+              snobId: m.snobId,
+              groupId: m.groupId,
+              role: m.role as SnobGroupMember["role"],
+              snob,
+            };
+          });
+          result.push({
+            id: g.id,
+            name: g.name,
+            description: g.description,
+            minRanking: g.minRanking,
+            maxRanking: g.maxRanking,
+            increments: g.increments,
+            rankIcon: g.rankIcon,
+            rankingsRequired: g.rankingsRequired,
+            pictureUrl: g.pictureUrl ?? undefined,
+            members: groupMembers,
+          } as SnobGroup);
+        }
+        return result;
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   const activeGroupIds = new Set(
     memberRows.filter((m) => m.role !== "DISABLED").map((m) => m.groupId),
@@ -250,6 +329,30 @@ export async function getLocalItemsDexie(
     currentPage: page,
     totalPages,
   };
+}
+
+export async function getLocalPendingInvitesDexie(): Promise<SnobGroupInvite[]> {
+  const dbName = getOfflineDbName();
+  const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
+  const snobId = getRememberedSnobId();
+  if (!snobId) return [];
+  const snob = await db.snobs.get(snobId);
+  if (!snob?.email) return [];
+  const invites = await db.group_invites.where("email").equals(snob.email).toArray();
+  const result: SnobGroupInvite[] = [];
+  for (const inv of invites) {
+    const group = await db.groups.get(inv.groupId);
+    if (!group) continue;
+    if (inv.status === "ACCEPTED" || inv.status === "DECLINED") continue;
+    result.push({
+      id: inv.id,
+      groupId: inv.groupId,
+      email: inv.email,
+      status: inv.status as SnobGroupInvite["status"],
+      groupName: group.name,
+    });
+  }
+  return result;
 }
 
 export async function getLocalRecentRankingsDexie(limit = 10): Promise<RecentRankingItem[]> {

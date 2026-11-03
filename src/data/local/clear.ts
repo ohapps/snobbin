@@ -8,35 +8,16 @@
  * privacy.
  */
 
-import { sqliteClient } from "./sqlite-client";
+// Using Dexie only now
 import { resetDexieDb } from "./dexie-db";
 import { getOfflineDbName } from "./identity";
 
 /** Dependents first, so the wipe is safe even if FKs are ever enabled. */
-const TABLES = [
-  "rankings",
-  "item_attributes",
-  "items",
-  "group_invites",
-  "group_attributes",
-  "group_members",
-  "groups",
-  "snobs",
-  "sync_meta",
-] as const;
 
 /** Runtime caches that hold user-specific content (e.g. Cloudinary images). */
 const RUNTIME_CACHES = ["cloudinary-images", "next-image"] as const;
 
 export async function clearOfflineData(): Promise<void> {
-  try {
-    await sqliteClient.init();
-    for (const table of TABLES) {
-      await sqliteClient.exec(`DELETE FROM ${table}`);
-    }
-  } catch {
-    // Nothing to clear (no mirror on this device) — not an error for the caller.
-  }
   try {
     resetDexieDb();
   } catch {
@@ -63,13 +44,15 @@ export async function clearOfflineData(): Promise<void> {
  */
 export async function clearOfflineDataFor(dbName: string): Promise<void> {
   try {
-    await sqliteClient.init(dbName);
-    for (const table of TABLES) {
-      await sqliteClient.exec(`DELETE FROM ${table}`);
-    }
+    resetDexieDb();
   } catch {
-    // Ignore: a missing/never-created database has nothing to wipe.
-  } finally {
-    sqliteClient.reset();
+    // ignore
+  }
+  if (typeof indexedDB !== "undefined") {
+    try {
+      indexedDB.deleteDatabase(dbName.replace(/\.sqlite3$/, ".db"));
+    } catch {
+      // ignore
+    }
   }
 }

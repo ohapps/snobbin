@@ -12,7 +12,7 @@ const nextConfig = {
 
 const withPWA = withPWAInit({
   dest: "public",
-  disable: process.env.NODE_ENV === "development",
+  disable: false,
   // `next-pwa`'s auto-register injects into the Pages Router `main.js` entry,
   // which the App Router never loads, so it silently does nothing. We register
   // the worker ourselves in `src/initializers/PwaInitializer.tsx` instead.

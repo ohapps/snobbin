@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { syncBootstrap, syncGroup } from "@/data/local/sync";
 import { syncBootstrapDexie, syncGroupDexie } from "@/data/local/dexie-sync";
 import { getGroupSyncState } from "@/data/local/repositories";
 import { getAllGroupSyncStatesDexie } from "@/data/local/dexie-repositories";
@@ -77,9 +76,9 @@ function ensureBootstrap(force = false): Promise<void> {
 
   const run = (async () => {
     try {
-      await syncBootstrap();
-    } catch {
       await syncBootstrapDexie();
+    } catch {
+      // ignore
     }
     bootstrapSyncedAt = Date.now();
   })();
@@ -112,8 +111,8 @@ export function refreshBootstrap(): Promise<void> {
  * or rejects on error. Failures are non-fatal: the app simply stays online-only
  * for that group.
  */
-async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> {
-  let state: any = null;
+async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> { void signal;
+  let state: Awaited<ReturnType<typeof getGroupSyncState>> = null;
   try {
     state = await getGroupSyncState(groupId);
   } catch {
@@ -138,27 +137,9 @@ async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> 
 
   // A complete-but-stale group must restart from page 1: resuming would start
   // past the last page and refresh nothing. An incomplete group resumes.
-  const fromStart = state?.complete === true;
-
   try {
     await syncGroupDexie(groupId);
     return;
-  } catch {
-    // ignore
-  }
-
-  try {
-    await syncGroup(groupId, {
-      fromStart,
-      signal,
-      onProgress: (progress) => {
-        if (process.env.NODE_ENV !== "production" && progress.done) {
-          console.debug(
-            `[offline] mirrored group ${groupId}: ${progress.totalItems} items`,
-          );
-        }
-      },
-    });
   } catch {
     // ignore
   }

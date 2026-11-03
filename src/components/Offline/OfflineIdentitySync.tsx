@@ -8,7 +8,7 @@ import {
   getRememberedSub,
   setRememberedSub,
 } from "@/data/local/identity";
-import { sqliteClient } from "@/data/local/sqlite-client";
+import { resetDexieDb } from "@/data/local/dexie-db";
 
 /**
  * Keeps the on-device mirror namespaced to the signed-in user.
@@ -43,7 +43,7 @@ const OfflineIdentitySync = () => {
       if (cancelled) return;
       setRememberedSub(sub);
       // Force the next query to open the new identity's database.
-      sqliteClient.reset();
+      resetDexieDb();
     };
 
     void adopt();

@@ -9,14 +9,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "build:offline": "NEXT_PUBLIC_OFFLINE_ENABLED=true next build",
-    "start:offline": "NEXT_PUBLIC_OFFLINE_ENABLED=true next start",
-    "offline": "npm run build:offline && npm run start:offline",
     "lint": "next lint",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "pre-commit": "npm run format && npm run lint",
+    "pre-commit": "npm run format && npm run lint && npm run build",
     "prepare": "husky"
   },
   "dependencies": {

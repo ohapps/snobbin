@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { clearOfflineData } from "@/data/local/clear";
 import { setRememberedSub } from "@/data/local/identity";
-import { sqliteClient } from "@/data/local/sqlite-client";
+import { resetDexieDb } from "@/data/local/dexie-db";
 
 /**
  * Logout handler that removes on-device data before leaving.
@@ -20,7 +20,7 @@ export function useOfflineLogout() {
       await clearOfflineData();
     } finally {
       setRememberedSub(null);
-      sqliteClient.reset();
+      resetDexieDb();
       window.location.href = "/api/auth/logout";
     }
   }, []);

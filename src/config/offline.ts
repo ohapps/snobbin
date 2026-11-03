@@ -1,14 +1,7 @@
 /**
- * Build-time feature flags for the offline (read-only mirror) experiment.
- *
- * The offline feature can be disabled instantly by unsetting / falsifying
- * `NEXT_PUBLIC_OFFLINE_ENABLED` and redeploying. All offline code paths must
- * check `OFFLINE_ENABLED` before doing anything.
- *
- * See `docs/OFFLINE_PLAN.md`.
+ * Offline support is always enabled (using IndexedDB/Dexie).
  */
-export const OFFLINE_ENABLED =
-  process.env.NEXT_PUBLIC_OFFLINE_ENABLED === "true";
+export const OFFLINE_ENABLED = true;
 
 /**
  * Name of the local SQLite file for a given user.
