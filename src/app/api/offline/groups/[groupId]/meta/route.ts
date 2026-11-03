@@ -37,10 +37,7 @@ export async function GET(
 
   const [groupRows, members, attributes, invites, itemCountRows] =
     await Promise.all([
-      db
-        .select()
-        .from(snobGroupsTable)
-        .where(eq(snobGroupsTable.id, groupId)),
+      db.select().from(snobGroupsTable).where(eq(snobGroupsTable.id, groupId)),
       db
         .select()
         .from(snobGroupMembersTable)

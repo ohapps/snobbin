@@ -111,7 +111,11 @@ export function refreshBootstrap(): Promise<void> {
  * or rejects on error. Failures are non-fatal: the app simply stays online-only
  * for that group.
  */
-async function mirrorGroup(groupId: string, signal: AbortSignal): Promise<void> { void signal;
+async function mirrorGroup(
+  groupId: string,
+  signal: AbortSignal,
+): Promise<void> {
+  void signal;
   let state: Awaited<ReturnType<typeof getGroupSyncState>> = null;
   try {
     state = await getGroupSyncState(groupId);
@@ -170,7 +174,10 @@ export function useAutoSync(
         // expected; the group stays online-only and will retry on next visit.
         if (controller.signal.aborted) return;
         if (process.env.NODE_ENV !== "production") {
-          console.warn(`[offline] background sync failed for ${groupId}`, error);
+          console.warn(
+            `[offline] background sync failed for ${groupId}`,
+            error,
+          );
         }
       })
       .finally(() => {

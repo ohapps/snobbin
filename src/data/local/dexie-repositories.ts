@@ -5,8 +5,17 @@
 import { getDexieDb } from "./dexie-db";
 import { getOfflineDbName } from "./identity";
 import { getRememberedSnobId } from "./identity";
-import type { SnobGroup, SnobGroupAttributeSummary, SnobGroupInvite, SnobGroupMember } from "@/types/snobGroup";
-import type { RankingItem, RankingItemSoryBy, RecentRankingItem } from "@/types/rankings";
+import type {
+  SnobGroup,
+  SnobGroupAttributeSummary,
+  SnobGroupInvite,
+  SnobGroupMember,
+} from "@/types/snobGroup";
+import type {
+  RankingItem,
+  RankingItemSoryBy,
+  RecentRankingItem,
+} from "@/types/rankings";
 import type { Snob } from "@/types/snob";
 import type { GroupSyncState } from "./repositories";
 
@@ -19,7 +28,9 @@ export async function localDataAvailableDexie(): Promise<boolean> {
   return count > 0;
 }
 
-export async function getGroupSyncStateDexie(groupId: string): Promise<GroupSyncState | null> {
+export async function getGroupSyncStateDexie(
+  groupId: string,
+): Promise<GroupSyncState | null> {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
   const row = await db.sync_meta.get(groupId);
@@ -107,15 +118,23 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
     try {
       const anonDb = getDexieDb("snobbin-offline-anonymous.db");
       groups = await anonDb.groups.toArray();
-      memberRows = await anonDb.group_members.where("snobId").equals(snobId).toArray();
+      memberRows = await anonDb.group_members
+        .where("snobId")
+        .equals(snobId)
+        .toArray();
       if (groups.length > 0 || memberRows.length > 0) {
         // use anon db data
         const activeGroupIds = new Set(
           memberRows.filter((m) => m.role !== "DISABLED").map((m) => m.groupId),
         );
         const result: SnobGroup[] = [];
-        for (const g of groups.filter((g) => !g.deleted && activeGroupIds.has(g.id))) {
-          const members = await anonDb.group_members.where("groupId").equals(g.id).toArray();
+        for (const g of groups.filter(
+          (g) => !g.deleted && activeGroupIds.has(g.id),
+        )) {
+          const members = await anonDb.group_members
+            .where("groupId")
+            .equals(g.id)
+            .toArray();
           const snobIds = members.map((m) => m.snobId);
           const snobs = await anonDb.snobs.where("id").anyOf(snobIds).toArray();
           const snobMap = new Map(snobs.map((s) => [s.id, toSnob(s)]));
@@ -155,8 +174,13 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
   );
 
   const result: SnobGroup[] = [];
-  for (const g of groups.filter((g) => !g.deleted && activeGroupIds.has(g.id))) {
-    const members = await db.group_members.where("groupId").equals(g.id).toArray();
+  for (const g of groups.filter(
+    (g) => !g.deleted && activeGroupIds.has(g.id),
+  )) {
+    const members = await db.group_members
+      .where("groupId")
+      .equals(g.id)
+      .toArray();
     const snobIds = members.map((m) => m.snobId);
     const snobs = await db.snobs.where("id").anyOf(snobIds).toArray();
     const snobMap = new Map(snobs.map((s) => [s.id, toSnob(s)]));
@@ -197,7 +221,9 @@ export async function getLocalCurrentUserDexie(): Promise<Snob | null> {
   return toSnob(snob);
 }
 
-export async function getLocalGroupForCurrentUserDexie(groupId: string): Promise<SnobGroup | null> {
+export async function getLocalGroupForCurrentUserDexie(
+  groupId: string,
+): Promise<SnobGroup | null> {
   const groups = await getLocalGroupsDexie();
   return groups.find((g) => g.id === groupId) ?? null;
 }
@@ -209,7 +235,10 @@ export async function getLocalGroupInvitesDexie(): Promise<SnobGroupInvite[]> {
   if (!snobId) return [];
   const snob = await db.snobs.get(snobId);
   if (!snob?.email) return [];
-  const invites = await db.group_invites.where("email").equals(snob.email).toArray();
+  const invites = await db.group_invites
+    .where("email")
+    .equals(snob.email)
+    .toArray();
   const result: SnobGroupInvite[] = [];
   for (const inv of invites) {
     const group = await db.groups.get(inv.groupId);
@@ -230,15 +259,27 @@ export async function getLocalGroupAttributeSummaryDexie(
 ): Promise<SnobGroupAttributeSummary[]> {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
-  const attributes = await db.group_attributes.where("groupId").equals(groupId).toArray();
+  const attributes = await db.group_attributes
+    .where("groupId")
+    .equals(groupId)
+    .toArray();
   const result: SnobGroupAttributeSummary[] = [];
   for (const attr of attributes) {
-    const values = await db.item_attributes.where("attributeId").equals(attr.id).toArray();
+    const values = await db.item_attributes
+      .where("attributeId")
+      .equals(attr.id)
+      .toArray();
     const valueSet = new Set(
-      values.map((v) => v.attributeValue).filter((v): v is string => Boolean(v)),
+      values
+        .map((v) => v.attributeValue)
+        .filter((v): v is string => Boolean(v)),
     );
     for (const v of Array.from(valueSet)) {
-      result.push({ attributeId: attr.id, attributeValue: v, count: values.filter((x) => x.attributeValue === v).length });
+      result.push({
+        attributeId: attr.id,
+        attributeValue: v,
+        count: values.filter((x) => x.attributeValue === v).length,
+      });
     }
   }
   return result;
@@ -253,7 +294,12 @@ export async function getLocalItemsDexie(
     keyword?: string;
     attributeFilters?: Record<string, string[]>;
   } = {},
-): Promise<{ data: RankingItem[]; total: number; currentPage: number; totalPages: number }> {
+): Promise<{
+  data: RankingItem[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+}> {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
   const page = options.page ?? 1;
@@ -268,7 +314,9 @@ export async function getLocalItemsDexie(
   }
 
   if (keyword) {
-    items = items.filter((i) => (i.description || "").toLowerCase().includes(keyword));
+    items = items.filter((i) =>
+      (i.description || "").toLowerCase().includes(keyword),
+    );
   }
 
   const total = items.length;
@@ -277,14 +325,23 @@ export async function getLocalItemsDexie(
 
   const results: RankingItem[] = [];
   for (const item of paginatedItems) {
-    const rankings = await db.rankings.where("itemId").equals(item.id).toArray();
-    const itemAttrs = await db.item_attributes.where("itemId").equals(item.id).toArray();
+    const rankings = await db.rankings
+      .where("itemId")
+      .equals(item.id)
+      .toArray();
+    const itemAttrs = await db.item_attributes
+      .where("itemId")
+      .equals(item.id)
+      .toArray();
     const attributeMap = new Map<string, string>();
     for (const ia of itemAttrs) {
       const attr = await db.group_attributes.get(ia.attributeId);
       if (attr) attributeMap.set(attr.name, ia.attributeValue);
     }
-    const members = await db.group_members.where("groupId").equals(groupId).toArray();
+    const members = await db.group_members
+      .where("groupId")
+      .equals(groupId)
+      .toArray();
     const memberSnobs = new Map<string, Snob>();
     for (const m of members) {
       const s = await db.snobs.get(m.snobId);
@@ -304,11 +361,13 @@ export async function getLocalItemsDexie(
         };
       })
       .filter((r): r is NonNullable<typeof r> => r !== null);
-    const attributesArr = Array.from(attributeMap.entries()).map(([name, value]) => ({
-      id: name,
-      attributeId: name,
-      attributeValue: value,
-    }));
+    const attributesArr = Array.from(attributeMap.entries()).map(
+      ([name, value]) => ({
+        id: name,
+        attributeId: name,
+        attributeValue: value,
+      }),
+    );
     results.push({
       id: item.id,
       groupId: item.groupId,
@@ -331,14 +390,19 @@ export async function getLocalItemsDexie(
   };
 }
 
-export async function getLocalPendingInvitesDexie(): Promise<SnobGroupInvite[]> {
+export async function getLocalPendingInvitesDexie(): Promise<
+  SnobGroupInvite[]
+> {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
   const snobId = getRememberedSnobId();
   if (!snobId) return [];
   const snob = await db.snobs.get(snobId);
   if (!snob?.email) return [];
-  const invites = await db.group_invites.where("email").equals(snob.email).toArray();
+  const invites = await db.group_invites
+    .where("email")
+    .equals(snob.email)
+    .toArray();
   const result: SnobGroupInvite[] = [];
   for (const inv of invites) {
     const group = await db.groups.get(inv.groupId);
@@ -355,14 +419,19 @@ export async function getLocalPendingInvitesDexie(): Promise<SnobGroupInvite[]> 
   return result;
 }
 
-export async function getLocalRecentRankingsDexie(limit = 10): Promise<RecentRankingItem[]> {
+export async function getLocalRecentRankingsDexie(
+  limit = 10,
+): Promise<RecentRankingItem[]> {
   const dbName = getOfflineDbName();
   const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
   const snobId = getRememberedSnobId();
   if (!snobId) return [];
   const snob = await db.snobs.get(snobId);
   if (!snob) return [];
-  const memberRows = await db.group_members.where("snobId").equals(snobId).toArray();
+  const memberRows = await db.group_members
+    .where("snobId")
+    .equals(snobId)
+    .toArray();
   const memberIds = new Set(memberRows.map((m) => m.id));
   const allRankings = await db.rankings.toArray();
   const userRankings = allRankings

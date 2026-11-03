@@ -9,7 +9,7 @@ Two additional requirements drive the design:
 - **Large groups.** Some groups have ~1,600 items. A single all-at-once snapshot is
   not viable. Sync must be **per-group, paginated, resumable, and progressive**.
 - **Server-down tolerance.** The app must keep working when the API server itself is
-  unreachable — not only when the device is offline. "Server down" looks *online* to
+  unreachable — not only when the device is offline. "Server down" looks _online_ to
   the browser, so request failure must be treated as an offline trigger too.
 
 Dominant real-world use is a **pure read**: "has this item been ranked yet?" That is
@@ -95,14 +95,14 @@ or depend on the GitHub tag. Decide the exact mechanism in Phase 1.
 
 #### Backend comparison (why we avoid the official build)
 
-| Backend | Needs COOP/COEP? | Notes |
-| --- | --- | --- |
-| wa-sqlite `OPFSCoopSyncVFS` | **No** | **Chosen.** OPFS, worker, sync, multi-connection. |
-| wa-sqlite `IDBBatchAtomicVFS` | **No** | Fallback. IndexedDB, all contexts. |
-| wa-sqlite `AccessHandlePoolVFS` | **No** | OPFS, single connection only. |
-| SQLocal (official `opfs` VFS) | **Yes** | **Ruled out** — see spike finding. |
-| official `sqlite-wasm` `opfs` | Yes | Requires the headers; puts Cloudinary/Auth0 at risk. |
-| `opfs-sahpool` (official) | No | Not exposed by SQLocal; only reachable via the official build directly. |
+| Backend                         | Needs COOP/COEP? | Notes                                                                   |
+| ------------------------------- | ---------------- | ----------------------------------------------------------------------- |
+| wa-sqlite `OPFSCoopSyncVFS`     | **No**           | **Chosen.** OPFS, worker, sync, multi-connection.                       |
+| wa-sqlite `IDBBatchAtomicVFS`   | **No**           | Fallback. IndexedDB, all contexts.                                      |
+| wa-sqlite `AccessHandlePoolVFS` | **No**           | OPFS, single connection only.                                           |
+| SQLocal (official `opfs` VFS)   | **Yes**          | **Ruled out** — see spike finding.                                      |
+| official `sqlite-wasm` `opfs`   | Yes              | Requires the headers; puts Cloudinary/Auth0 at risk.                    |
+| `opfs-sahpool` (official)       | No               | Not exposed by SQLocal; only reachable via the official build directly. |
 
 #### 2.1.1 What COOP/COEP actually are (plain-language)
 
@@ -116,8 +116,8 @@ Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
 
-Effectively: *"this page is a sealed room — nothing from other origins may load unless
-it explicitly opts in."* That is why we prefer the backends above that don't need it.
+Effectively: _"this page is a sealed room — nothing from other origins may load unless
+it explicitly opts in."_ That is why we prefer the backends above that don't need it.
 
 For this app the headers put three things at risk:
 
@@ -132,13 +132,13 @@ For this app the headers put three things at risk:
 
 Alternatives considered:
 
-| Option | Notes |
-| --- | --- |
-| `@sqlite.org/sqlite-wasm` (official) | Lowest-level; only `opfs-sahpool` avoids headers; you manage the worker/VFS/adapter yourself. |
-| SQLocal | **Ruled out** — forces the header-requiring `opfs` VFS (spike finding above). |
-| `sql.js` + `absurd-sql` | Older; IndexedDB-backed; higher overhead. |
-| IndexedDB directly (Dexie) | No SQL; would require rewriting every query shape. |
-| Replicache / PowerSync / TinyBase / cr-sqlite | Full sync engines — more than needed for read-only offline, and/or add cost/complexity. |
+| Option                                        | Notes                                                                                         |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `@sqlite.org/sqlite-wasm` (official)          | Lowest-level; only `opfs-sahpool` avoids headers; you manage the worker/VFS/adapter yourself. |
+| SQLocal                                       | **Ruled out** — forces the header-requiring `opfs` VFS (spike finding above).                 |
+| `sql.js` + `absurd-sql`                       | Older; IndexedDB-backed; higher overhead.                                                     |
+| IndexedDB directly (Dexie)                    | No SQL; would require rewriting every query shape.                                            |
+| Replicache / PowerSync / TinyBase / cr-sqlite | Full sync engines — more than needed for read-only offline, and/or add cost/complexity.       |
 
 Because the requirement is **read-only offline**, we do not need a full bidirectional
 sync engine. We only need a one-way **server → local mirror** plus a local query layer.
@@ -237,11 +237,12 @@ changes are needed:
      the server is unavailable, and only calls the server path when it is reachable.
 
 Concretely:
-   - Move the "is the user logged in" decision out of the RSC `redirect` path for the
-     offline case. `AuthInitializer` should still use `getSession()` when the server is
-     reachable, but when it is not it must **not** redirect to `/api/auth/login`.
-   - Introduce a small client `ConnectivityProvider` that tracks connectivity and
-     local-data availability (see §2.4.1).
+
+- Move the "is the user logged in" decision out of the RSC `redirect` path for the
+  offline case. `AuthInitializer` should still use `getSession()` when the server is
+  reachable, but when it is not it must **not** redirect to `/api/auth/login`.
+- Introduce a small client `ConnectivityProvider` that tracks connectivity and
+  local-data availability (see §2.4.1).
 
 #### 2.4.1 "Offline" means "server unreachable", not just `navigator.onLine`
 
@@ -304,6 +305,7 @@ intent of `ILIKE` for the common case.
 
 SSE (`useGroupEvents`) will fail offline. `EventSource.onerror` is already tolerated,
 so no crash — but we should:
+
 - Skip opening the `EventSource` when offline.
 - Re-open it on `online` and trigger a resync.
 
@@ -344,12 +346,14 @@ Plan:
 ## 4. Phased implementation plan
 
 ### Phase 0 — Foundations & decisions (SPIKE FIRST)
+
 - Spike **done for the library/header question**: SQLocal ruled out (needs COOP/COEP);
   **wa-sqlite + `OPFSCoopSyncVFS`** chosen (headers-free). See §2.1 / §9.
 - Add feature flag `NEXT_PUBLIC_OFFLINE_ENABLED` (build-time env var) to gate the
   offline code path so it can be disabled instantly.
 
 ### Phase 1 — wa-sqlite plumbing + local schema
+
 - Vendor wa-sqlite from GitHub `dist/` (`.mjs` + `.wasm`) and the needed `src/` files
   (VFS classes) — do **not** use the stale npm mirror.
 - Stand up the worker + `OPFSCoopSyncVFS`; verify OPFS persistence with
@@ -364,6 +368,7 @@ Plan:
   `highest_page_synced`) and a `localDataAvailable()` capability check.
 
 ### Phase 2 — Paginated, resumable sync
+
 - Add the paginated offline endpoints (§2.3): `/api/offline/bootstrap`,
   `/groups/:groupId/items?page=N`, `/groups/:groupId/meta`, `/groups/:groupId/rankings`,
   `/api/offline/activity`. Reuse the `mobile-formatters` helpers and the same
@@ -382,6 +387,7 @@ Plan:
 - Warm the image cache for whatever was synced; call `navigator.storage.persist()`.
 
 ### Phase 3 — Connectivity / session shell
+
 - Add `ConnectivityProvider` exposing `isOnline` (network **and** server reachability),
   `hasLocalData`, `lastSyncedAt`, plus a backoff retry against `/api/offline/bootstrap`.
 - Treat **request failure / 5xx / session-check error** as offline, not just
@@ -395,6 +401,7 @@ Plan:
 - Disable/hide all mutation entry points while offline (see Phase 6).
 
 ### Phase 4 — Offline read paths
+
 > **Status: done (2026-10-22).** All four route groups render from the mirror when
 > the server render fails or the API is unreachable.
 >
@@ -411,8 +418,8 @@ Plan:
 > the client shell then reads the mirror. Local queries mirror the server utils,
 > including membership/soft-delete filtering for groups.
 
-
 ### Phase 5 — Image caching
+
 - Cloudinary `CacheFirst` rule (3000 entries / 30 days) lives in `sw.js`; verified
   serving cached thumbnails offline.
 - Add image warm-up after sync.
@@ -420,7 +427,8 @@ Plan:
 - Verify offline rendering of item images, group avatars, and profile avatars.
 
 ### Phase 6 — Read-only enforcement
-> **Status: done (2026-10-22).** Write affordances are *hidden* offline (not just
+
+> **Status: done (2026-10-22).** Write affordances are _hidden_ offline (not just
 > disabled) so the read experience stays clean.
 >
 > Gated surface: `NewItemButton` (FAB), `ItemCardMenu` (copy/edit/delete),
@@ -439,34 +447,37 @@ Plan:
 > ~1s while the cached page is still displayed; reconnect → controls return.
 
 ### Phase 7 — Realtime + resync
+
 > **Status: done (2026-10-22).** On reconnect the app reconciles automatically.
 
 - [x] Skip `EventSource` when offline/unreachable (`useGroupEvents` disabled when
-  `readOnly`).
+      `readOnly`).
 - [x] On reconnect: `OfflineReconnect` calls `refreshBootstrap()` (groups/memberships/
-  invites) and `router.refresh()` so cached RSC/mirror data swaps to fresh server
-  data; throttled to avoid flapping. `useConnectivity` now probes immediately on
-  `online`. `useAutoSync` bootstrap uses a 15-min TTL with reconnect forcing a
-  refresh.
+      invites) and `router.refresh()` so cached RSC/mirror data swaps to fresh server
+      data; throttled to avoid flapping. `useConnectivity` now probes immediately on
+      `online`. `useAutoSync` bootstrap uses a 15-min TTL with reconnect forcing a
+      refresh.
 - [x] Background mirroring resumes (keyed off connectivity + identity). Write
-  affordances return automatically once `readOnly` flips off.
+      affordances return automatically once `readOnly` flips off.
 
 ### Phase 8 — UX polish
+
 - [x] Offline indication in the header (`OfflineIndicator`) — a small cloud-off
-  icon instead of a full-width banner, so it costs no vertical space on mobile;
-  tapping it opens a menu with the "showing saved data / changes disabled" copy.
+      icon instead of a full-width banner, so it costs no vertical space on mobile;
+      tapping it opens a menu with the "showing saved data / changes disabled" copy.
 - [x] Storage usage + "Clear offline data" in profile/settings
-  (`src/components/Profile/OfflineDataSettings.tsx`): shows estimated storage,
-  last sync time, and per-group mirror status; clears the local SQLite mirror
-  and runtime caches and reloads the app. The offline header indicator also shows
-  "Last synced …". `getAllGroupSyncStates()` added to repositories. `formatBytes`/
-  `formatRelativeTime` in `src/utils/format-offline.ts`.
+      (`src/components/Profile/OfflineDataSettings.tsx`): shows estimated storage,
+      last sync time, and per-group mirror status; clears the local SQLite mirror
+      and runtime caches and reloads the app. The offline header indicator also shows
+      "Last synced …". `getAllGroupSyncStates()` added to repositories. `formatBytes`/
+      `formatRelativeTime` in `src/utils/format-offline.ts`.
 - ~~Per-group "Sync for offline" button~~ — removed: mirroring is automatic and
   background (`useAutoSync`).
 - [ ] First-run explanation that installing/using the app caches data for offline use.
 - [x] Handle multiple accounts on one device (per-`sub` database; clear on logout).
 
 ### Phase 9 — Testing & rollout
+
 - Unit tests (Vitest, already configured) for local repositories (paging/search/
   filter parity vs. server SQL), including a 1,600-item group fixture.
 - Worker/OPFS integration test in a browser context.
@@ -535,6 +546,7 @@ Recovered
 ## 7. Files likely touched
 
 Server / sync:
+
 - `src/app/api/offline/bootstrap/route.ts` (new)
 - `src/app/api/offline/groups/[groupId]/items/route.ts` (new, paginated)
 - `src/app/api/offline/groups/[groupId]/meta/route.ts` (new)
@@ -544,6 +556,7 @@ Server / sync:
 - `src/server/db/schema.ts` (reference for the mirror)
 
 Client data layer:
+
 - `src/data/local/schema.ts` (new, SQLite mirror schema)
 - `src/data/local/migrations.ts` (new, idempotent)
 - `src/data/local/sqlite-client.ts` + `sqlite-worker.ts` (new, wa-sqlite over OPFS)
@@ -554,6 +567,7 @@ Client data layer:
   `useOfflineIdentity.ts`, `useOfflineLogout.ts`
 
 Shell / connectivity:
+
 - `src/initializers/AuthInitializer.tsx`
 - `src/initializers/PwaInitializer.tsx` (explicit SW registration)
 - `src/components/Offline/OfflineIndicator.tsx`, `OfflineIdentitySync.tsx`,
@@ -566,6 +580,7 @@ Shell / connectivity:
   `src/components/Profile/ProfilePageClient.tsx`
 
 Read-only gating (all via a `readOnly` prop, `false` = existing behaviour):
+
 - `src/components/RankingItem/`: `NewItemButton.tsx`, `ItemCardMenu.tsx`,
   `ItemCard.tsx`, `ItemList.tsx`, `ItemListPage.tsx`, `ItemRankings.tsx`
   (hides the ranking editor; shows the saved ranking read-only), `ItemForm.tsx`
@@ -577,6 +592,7 @@ Read-only gating (all via a `readOnly` prop, `false` = existing behaviour):
 - `src/components/Profile/EditProfileForm.tsx`
 
 Images / SW:
+
 - `sw.js` (new, project root) — custom service worker (InjectManifest) with all
   runtime caching, including the 5xx-aware navigation handler. Replaces the
   `runtimeCaching` array that used to live in `next.config.mjs`.
@@ -585,9 +601,11 @@ Images / SW:
 - `public/manifest.json` (storage/permissions notes as needed)
 
 Realtime:
+
 - `src/hooks/useGroupEvents.ts`
 
 Dependencies:
+
 - Vendor wa-sqlite from GitHub `dist/` (see §2.1); **do not** use the stale npm package.
 - Add a small Drizzle `sqlite-proxy` driver adapter over wa-sqlite (one file).
 
@@ -680,13 +698,12 @@ After rebuilding, all **69** precache entries return 200 and the worker activate
 > feature existed to depend on the service worker. It affects the current production app
 > too — the PWA has never had a working service worker.
 
-
 **Offline read-path fixes (2026-10-20)**
 
-Beyond the spike, making the *actual* app work offline required four fixes to
+Beyond the spike, making the _actual_ app work offline required four fixes to
 shared code, all found during production validation:
 
-1. **`AuthInitializer` must not force a re-login when the session check *fails*.**
+1. **`AuthInitializer` must not force a re-login when the session check _fails_.**
    Previously `LoginCheck` called `getSession()` and redirected to
    `/api/auth/login` on any falsy result — and threw if the backend errored
    (DB/API down). Now, when `OFFLINE_ENABLED`, a **thrown** session check (or a
@@ -710,7 +727,7 @@ shared code, all found during production validation:
    2026-10-20). `next-pwa`'s default cache config contains exactly one navigation
    rule — a `NetworkFirst` hardcoded to the exact path `/` — and registers **no**
    `NavigationRoute` or navigation fallback. A hard reload of a deep URL such as
-   `/groups/<id>` is therefore a *navigation* request that matches only the generic
+   `/groups/<id>` is therefore a _navigation_ request that matches only the generic
    `others` rule (`NetworkFirst`, `networkTimeoutSeconds: 10`, `maxEntries: 32`).
    Client-side navigation worked, but a full reload failed: a navigation request
    that is not the homepage had no reliable cached-document handler.
@@ -724,7 +741,7 @@ shared code, all found during production validation:
    > survive a hard reload of any non-home route while offline.
 
 5. **A 5xx response must be treated as "server unreachable"** (found 2026-10-22).
-   Workbox's stock `NetworkFirst` returns *any* resolved response — including a
+   Workbox's stock `NetworkFirst` returns _any_ resolved response — including a
    `502/503`. When the app runs behind a reverse proxy (Coolify/nginx) a crashed
    backend usually returns **502**, so a reload would show the proxy's error page
    instead of the cached app (verified: `browser.navigate` → `502 Bad Gateway`).
@@ -745,7 +762,7 @@ shared code, all found during production validation:
 `/groups`, `/activity`, `/profile` and `/` now fall back to the mirror too (see
 Phase 4). Supporting local reads: `getLocalGroups` (membership + soft-delete
 filtered), `getLocalCurrentUser`, `getLocalLastGroupId`, `getLocalPendingInvites`,
-`getLocalRecentItems`. `applyBootstrap` now records the *database* snob id in
+`getLocalRecentItems`. `applyBootstrap` now records the _database_ snob id in
 `localStorage` (separate from the Auth0 `sub`) so "me" can be resolved offline.
 
 **Production hardening (2026-10-22)**
@@ -759,20 +776,20 @@ Moving from the validated spike to a shippable read-only experience:
    identity so it never writes to the anonymous database.
 2. **Staleness TTL.** A fully-mirrored group is considered fresh for 24 h. After
    that it re-mirrors from page 1 in the background. This matters because resuming
-   a *complete* group would start past the last page and refresh nothing.
+   a _complete_ group would start past the last page and refresh nothing.
 3. **`navigator.storage.persist()`** is requested before syncing so the mirror is
    not treated as best-effort storage (Safari evicts site data after ~7 days of
    non-use; pressure eviction would silently disable offline reading).
 4. **Per-user mirror isolation + logout wipe.** The SQLite file name is derived
    from the Auth0 `sub` (`offlineDbNameFor`), kept in `localStorage` so it is
-   readable with no network. A different account opens a *different* database and
+   readable with no network. A different account opens a _different_ database and
    the previous user's rows are wiped on identity change (`OfflineIdentitySync`).
    Logout clears the mirror and the Cloudinary/next-image runtime caches before
    redirecting (`useOfflineLogout`). Previously a single shared database meant a
    second user on the same device could read the first user's cached groups.
 5. **API routes are no longer flag-gated.** `/api/offline/*` must stay reachable
    because background fill runs in the normal deployed app. The flag now gates the
-   offline read-only *UI* only.
+   offline read-only _UI_ only.
 6. **Removed** the `/offline-spike` debug page (it was publicly reachable) and the
    `SyncGroupButton` component.
 
@@ -781,13 +798,8 @@ Moving from the validated spike to a shippable read-only experience:
 - [x] Sync a real ~1,600-item group **through the API** page-by-page: "Beer Snobs"
       (1,624 items) → 82 pages / 6,683 ms; local mirror grew to ~91 MB.
 - [x] **Offline read works with the API unreachable** (simulated "network up, API
-      down" in a production build at `localhost:3000`):
-      - offline indicator (header icon) shown, write controls hidden;
-      - mirror reports "Saved 82 / 82 pages (1624 items)";
-      - item list renders real data from the mirror;
-      - **16/21 Cloudinary thumbnails served from cache** and rendered
-        (`naturalWidth > 0`);
-      - **no redirect to login** — the session check did not force re-auth.
+      down" in a production build at `localhost:3000`): - offline indicator (header icon) shown, write controls hidden; - mirror reports "Saved 82 / 82 pages (1624 items)"; - item list renders real data from the mirror; - **16/21 Cloudinary thumbnails served from cache** and rendered
+      (`naturalWidth > 0`); - **no redirect to login** — the session check did not force re-auth.
 - [x] **Offline pagination works** — page 2 loaded from the mirror with no
       navigation and no error (validates the `onUpdateQuery` override).
 - [x] **Offline search works** — "Samuel Smith" returned exactly the 3 matching
@@ -795,14 +807,14 @@ Moving from the validated spike to a shippable read-only experience:
 - [x] Cold-start (hard reload) with the **API down** serving the cached HTML shell.
       Verified 2026-10-22 with the server process stopped (502 from the proxy):
       `/groups`, `/activity`, `/profile`, `/` all loaded from Cache Storage.
-      *(Cross-browser-restart persistence still unverified — see below.)*
+      _(Cross-browser-restart persistence still unverified — see below.)_
 - [x] **Reconnect reconciles** — drop connectivity on a group page (cached RSC
-  still visible) → controls hidden + offline icon shown → restore connectivity →
-  `OfflineReconnect` runs `refreshBootstrap()` and `router.refresh()`; write
-  controls return and the page reverts to the live server view with no manual
-  reload required. Verified 2026-10-22.
+      still visible) → controls hidden + offline icon shown → restore connectivity →
+      `OfflineReconnect` runs `refreshBootstrap()` and `router.refresh()`; write
+      controls return and the page reverts to the live server view with no manual
+      reload required. Verified 2026-10-22.
 - [ ] Works on **Vercel** (initial target).
-- [ ] Works on a **Coolify self-hosted** build (incl. reverse-proxy config). *(critical)*
+- [ ] Works on a **Coolify self-hosted** build (incl. reverse-proxy config). _(critical)_
 - [ ] Works in the **installed PWA** on iOS Safari and Android Chrome.
 
 > Test note: the dev harness restarts periodically and clears the browser profile
@@ -827,7 +839,7 @@ The design is additive and gated, so rollback should be simple:
   - `src/initializers/AuthInitializer.tsx` — try/catch around the session check,
     gated by `OFFLINE_ENABLED`.
   - `src/initializers/PwaInitializer.tsx` — explicit service-worker registration
-    (this *replaces* `next-pwa`'s broken App Router auto-register).
+    (this _replaces_ `next-pwa`'s broken App Router auto-register).
   - `<group page>/page.tsx` + `/groups`, `/activity`, `/profile`, `/` — try/catch
     around the server fetch and small client shells that fall back to the mirror.
   - `GroupPageClient` / `GroupDetails` / `ItemList` / `ItemListPage` / `ItemCard` /
@@ -841,10 +853,13 @@ The design is additive and gated, so rollback should be simple:
   - `sw.js` (root) — custom service worker; deleting it and removing `swSrc` returns
     to next-pwa's generated worker (which reintroduces the 5xx/navigation bugs).
   - `src/hooks/useAutoSync.ts` + `src/components/Offline/OfflineIdentitySync.tsx`
-    + `src/hooks/useOfflineLogout.ts` — background fill and per-user isolation.
+    - `src/hooks/useOfflineLogout.ts` — background fill and per-user isolation.
   - Re-added manually if reverting: `SyncGroupButton`, `/offline-spike`.
 - **Note:** the `next-pwa` bugs (precache manifest 404s, missing App Router
   registration, missing navigation route, 5xx handling) are pre-existing and affect
-  the *current* production app, not just this experiment. Reverting them would return
+  the _current_ production app, not just this experiment. Reverting them would return
   the deployed app to having a non-functional offline experience.
+
+```
+
 ```

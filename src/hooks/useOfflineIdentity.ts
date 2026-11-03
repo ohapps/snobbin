@@ -8,9 +8,5 @@ import { getRememberedSub, subscribeIdentity } from "@/data/local/identity";
  * Re-renders when the identity is adopted after login.
  */
 export function useOfflineIdentity(): string | null {
-  return useSyncExternalStore(
-    subscribeIdentity,
-    getRememberedSub,
-    () => null,
-  );
+  return useSyncExternalStore(subscribeIdentity, getRememberedSub, () => null);
 }

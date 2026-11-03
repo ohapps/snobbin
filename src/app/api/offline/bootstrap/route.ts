@@ -75,7 +75,10 @@ export async function GET() {
   const snobIds = Array.from(new Set(memberships.map((m) => m.snobId)));
   const snobs =
     snobIds.length > 0
-      ? await db.select().from(snobsTable).where(inArray(snobsTable.id, snobIds))
+      ? await db
+          .select()
+          .from(snobsTable)
+          .where(inArray(snobsTable.id, snobIds))
       : [];
 
   return NextResponse.json({

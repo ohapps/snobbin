@@ -16,12 +16,7 @@ const ItemListPage = ({
   return (
     <Stack spacing={2}>
       {items.map((item) => (
-        <ItemCard
-          key={item.id}
-          group={group}
-          item={item}
-          readOnly={readOnly}
-        />
+        <ItemCard key={item.id} group={group} item={item} readOnly={readOnly} />
       ))}
     </Stack>
   );

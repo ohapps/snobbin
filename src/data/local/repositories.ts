@@ -2,9 +2,22 @@
  * Read-side repositories over the local IndexedDB mirror (Dexie).
  */
 
-import { getLocalGroupsDexie, getLocalCurrentUserDexie, getAllGroupSyncStatesDexie, localDataAvailableDexie } from "./dexie-repositories";
-import type { SnobGroup, SnobGroupAttributeSummary, SnobGroupInvite } from "@/types/snobGroup";
-import type { PaginatedResults, RankingItemSoryBy, RecentRankingItem } from "@/types/rankings";
+import {
+  getLocalGroupsDexie,
+  getLocalCurrentUserDexie,
+  getAllGroupSyncStatesDexie,
+  localDataAvailableDexie,
+} from "./dexie-repositories";
+import type {
+  SnobGroup,
+  SnobGroupAttributeSummary,
+  SnobGroupInvite,
+} from "@/types/snobGroup";
+import type {
+  PaginatedResults,
+  RankingItemSoryBy,
+  RecentRankingItem,
+} from "@/types/rankings";
 import type { Snob } from "@/types/snob";
 
 /** True when the user has any mirrored data at all. */
@@ -74,7 +87,9 @@ export async function getLocalLastGroupId(): Promise<string | null> {
 /** Mirrors `getPendingInvites` against the mirror. */
 export async function getLocalPendingInvites(): Promise<SnobGroupInvite[]> {
   try {
-    const { getLocalPendingInvitesDexie } = await import("./dexie-repositories");
+    const { getLocalPendingInvitesDexie } = await import(
+      "./dexie-repositories"
+    );
     return await getLocalPendingInvitesDexie();
   } catch {
     return [];
@@ -84,7 +99,9 @@ export async function getLocalPendingInvites(): Promise<SnobGroupInvite[]> {
 /** Mirrors `getRecentItems` (last 5 days, newest first, max 5). */
 export async function getLocalRecentItems(): Promise<RecentRankingItem[]> {
   try {
-    const { getLocalRecentRankingsDexie } = await import("./dexie-repositories");
+    const { getLocalRecentRankingsDexie } = await import(
+      "./dexie-repositories"
+    );
     return await getLocalRecentRankingsDexie(5);
   } catch {
     return [];
@@ -97,7 +114,9 @@ export async function getLocalGroupForCurrentUser(
   groupId: string,
 ): Promise<SnobGroup | null> {
   try {
-    const { getLocalGroupForCurrentUserDexie } = await import("./dexie-repositories");
+    const { getLocalGroupForCurrentUserDexie } = await import(
+      "./dexie-repositories"
+    );
     return await getLocalGroupForCurrentUserDexie(groupId);
   } catch {
     return null;
@@ -108,7 +127,9 @@ export async function getLocalGroupAttributeSummary(
   groupId: string,
 ): Promise<SnobGroupAttributeSummary[]> {
   try {
-    const { getLocalGroupAttributeSummaryDexie } = await import("./dexie-repositories");
+    const { getLocalGroupAttributeSummaryDexie } = await import(
+      "./dexie-repositories"
+    );
     return await getLocalGroupAttributeSummaryDexie(groupId);
   } catch {
     return [];

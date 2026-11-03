@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Card, CircularProgress, Divider, Typography, styled } from "@mui/material";
+import {
+  Box,
+  Card,
+  CircularProgress,
+  Divider,
+  Typography,
+  styled,
+} from "@mui/material";
 import EditProfileForm from "@/components/Profile/EditProfileForm";
 import ProfileAvatar from "@/components/Profile/ProfileAvatar";
 import { OFFLINE_ENABLED } from "@/config/offline";
@@ -90,7 +97,13 @@ const ProfilePageClient = ({ serverSnob }: { serverSnob: Snob | null }) => {
       <Container>
         <Title variant="h5">Profile</Title>
         <Divider sx={{ mb: 2 }} />
-        <Box padding={2} display="flex" flexDirection="column" alignItems="center" gap={1}>
+        <Box
+          padding={2}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          gap={1}
+        >
           <ProfileAvatar snob={snob} size="large" />
           <Typography variant="h6">
             {[snob.firstName, snob.lastName].filter(Boolean).join(" ") || "—"}

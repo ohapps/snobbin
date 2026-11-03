@@ -92,7 +92,10 @@ registerRoute(
 
 // The connectivity probe must never be served from cache, or a stale 200 would
 // make the app think the API is up while it is down.
-registerRoute(({ url }) => /\/api\/health$/i.test(url.pathname), new NetworkOnly());
+registerRoute(
+  ({ url }) => /\/api\/health$/i.test(url.pathname),
+  new NetworkOnly(),
+);
 
 // Sync endpoints must always hit the network; a cached page would make the
 // local mirror silently stale.
@@ -126,7 +129,10 @@ registerRoute(
   new CacheFirst({
     cacheName: "google-fonts-webfonts",
     plugins: [
-      new ExpirationPlugin({ maxEntries: 4, maxAgeSeconds: 365 * 24 * 60 * 60 }),
+      new ExpirationPlugin({
+        maxEntries: 4,
+        maxAgeSeconds: 365 * 24 * 60 * 60,
+      }),
     ],
   }),
 );
@@ -166,7 +172,10 @@ registerRoute(
   new StaleWhileRevalidate({
     cacheName: "next-image",
     plugins: [
-      new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60 }),
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      }),
     ],
   }),
 );
@@ -262,8 +271,6 @@ registerRoute(
   new NetworkFirst({
     cacheName: "cross-origin",
     networkTimeoutSeconds: 10,
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 60 * 60 }),
-    ],
+    plugins: [new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 60 * 60 })],
   }),
 );

@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Box,
-  IconButton,
-  Menu,
-  Typography,
-  styled,
-} from "@mui/material";
+import { Box, IconButton, Menu, Typography, styled } from "@mui/material";
 import CloudOffIcon from "@mui/icons-material/CloudOff";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { OFFLINE_ENABLED } from "@/config/offline";

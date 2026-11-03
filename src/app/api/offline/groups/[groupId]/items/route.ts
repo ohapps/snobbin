@@ -38,13 +38,18 @@ export async function GET(
   if (!auth.ok) return auth.response;
 
   const url = new URL(request.url);
-  const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10) || 1);
+  const page = Math.max(
+    1,
+    parseInt(url.searchParams.get("page") ?? "1", 10) || 1,
+  );
   const pageSize = Math.min(
     MAX_PAGE_SIZE,
     Math.max(
       1,
-      parseInt(url.searchParams.get("pageSize") ?? `${DEFAULT_PAGE_SIZE}`, 10) ||
-        DEFAULT_PAGE_SIZE,
+      parseInt(
+        url.searchParams.get("pageSize") ?? `${DEFAULT_PAGE_SIZE}`,
+        10,
+      ) || DEFAULT_PAGE_SIZE,
     ),
   );
 

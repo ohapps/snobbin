@@ -25,7 +25,10 @@ import {
   getAllGroupSyncStates,
   getLocalGroups,
 } from "@/data/local/repositories";
-import { getAllGroupSyncStatesDexie, getLocalGroupsDexie } from "@/data/local/dexie-repositories";
+import {
+  getAllGroupSyncStatesDexie,
+  getLocalGroupsDexie,
+} from "@/data/local/dexie-repositories";
 import { formatBytes, formatRelativeTime } from "@/utils/format-offline";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
@@ -116,7 +119,9 @@ const OfflineDataSettings = () => {
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : String(err);
           setLoadError(
-            msg.includes("crossOriginIsolated") || msg.includes("OPFS") || msg.includes("VFS")
+            msg.includes("crossOriginIsolated") ||
+              msg.includes("OPFS") ||
+              msg.includes("VFS")
               ? "Offline storage is not available in this browser/environment (missing secure context or storage permissions)."
               : msg,
           );
@@ -215,7 +220,10 @@ const OfflineDataSettings = () => {
         </Box>
       </Section>
 
-      <Dialog open={showClearConfirm} onClose={() => setShowClearConfirm(false)}>
+      <Dialog
+        open={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+      >
         <DialogTitle>Clear offline data?</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -224,7 +232,10 @@ const OfflineDataSettings = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowClearConfirm(false)} disabled={clearing}>
+          <Button
+            onClick={() => setShowClearConfirm(false)}
+            disabled={clearing}
+          >
             Cancel
           </Button>
           <Button color="warning" onClick={handleClear} disabled={clearing}>

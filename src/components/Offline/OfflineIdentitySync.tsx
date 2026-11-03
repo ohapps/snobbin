@@ -4,10 +4,7 @@ import { useEffect } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { offlineDbNameFor } from "@/config/offline";
 import { clearOfflineDataFor } from "@/data/local/clear";
-import {
-  getRememberedSub,
-  setRememberedSub,
-} from "@/data/local/identity";
+import { getRememberedSub, setRememberedSub } from "@/data/local/identity";
 import { resetDexieDb } from "@/data/local/dexie-db";
 
 /**

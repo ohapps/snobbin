@@ -12,7 +12,13 @@
  *  - `averageRanking` is stored as `real` to allow sorting.
  */
 
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  real,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 export const groupsTable = sqliteTable("groups", {
   id: text("id").primaryKey(),

@@ -5,10 +5,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import GroupDetails from "@/components/Group/GroupDetails";
 import ItemDrawer from "@/components/RankingItem/ItemDrawer";
 import { SnobGroupSearchParams } from "@/types/snobGroup";
-import {
-  useGroupPageData,
-  type GroupPageData,
-} from "@/hooks/useGroupPageData";
+import { useGroupPageData, type GroupPageData } from "@/hooks/useGroupPageData";
 import { useAutoSync } from "@/hooks/useAutoSync";
 import { useConnectivity } from "@/hooks/useConnectivity";
 
