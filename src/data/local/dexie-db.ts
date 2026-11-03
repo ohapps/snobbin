@@ -42,20 +42,48 @@ let currentDb: SnobbinOfflineDB | null = null;
 let currentDbName: string | null = null;
 
 export function getDexieDb(name: string): SnobbinOfflineDB {
-  if (currentDb && currentDbName === name) {
+  try {
+    if (currentDb && currentDbName === name) {
+      // Check if db is closed
+      const dbAny = currentDb as unknown as { isOpen?: () => boolean };
+      if (dbAny.isOpen?.() === false) {
+        currentDb = null;
+        currentDbName = null;
+      } else {
+        return currentDb;
+      }
+    }
+    if (currentDb) {
+      try {
+        currentDb.close();
+      } catch {
+        // ignore
+      }
+    }
+    currentDb = new SnobbinOfflineDB(name);
+    currentDbName = name;
+    return currentDb;
+  } catch {
+    currentDb = null;
+    currentDbName = null;
+    currentDb = new SnobbinOfflineDB(name);
+    currentDbName = name;
     return currentDb;
   }
-  if (currentDb) {
-    currentDb.close();
-  }
-  currentDb = new SnobbinOfflineDB(name);
-  currentDbName = name;
-  return currentDb;
 }
 
 export function resetDexieDb() {
-  if (currentDb) {
-    currentDb.close();
+  try {
+    if (currentDb) {
+      try {
+        currentDb.close();
+      } catch {
+        // ignore
+      }
+      currentDb = null;
+      currentDbName = null;
+    }
+  } catch {
     currentDb = null;
     currentDbName = null;
   }

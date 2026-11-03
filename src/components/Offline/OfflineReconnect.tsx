@@ -46,12 +46,11 @@ const OfflineReconnect = () => {
     lastReconcileAt.current = now;
 
     // Only mirror into the per-user database once the identity is known.
-    if (sub) {
-      refreshBootstrap().catch(() => {
-        // Non-fatal: reading stays available and it retries on the next
-        // navigation/reconnect.
-      });
-    }
+    console.log('[OfflineReconnect] reconnected, sub:', sub);
+    refreshBootstrap().catch(() => {
+      // Non-fatal: reading stays available and it retries on the next
+      // navigation/reconnect.
+    });
 
     router.refresh();
   }, [online, ready, sub, router]);
