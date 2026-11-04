@@ -62,13 +62,16 @@ export async function getAllGroupSyncStates(): Promise<
         const anonDb = getDexieDb("snobbin-offline-anonymous.db");
         const rows = await anonDb.sync_meta.toArray();
         return rows
-          .map((row) => ({
-            groupId: (row as any).groupId,
-            complete: (row as any).complete,
-            highestPageSynced: (row as any).highestPageSynced,
-            totalItems: (row as any).totalItems ?? null,
-            lastSyncedAt: (row as any).lastSyncedAt ?? null,
-          }))
+          .map((row) => {
+            const r = row as { groupId: string; complete: boolean; highestPageSynced: number; totalItems?: number | null; lastSyncedAt?: string | null };
+            return {
+              groupId: r.groupId,
+              complete: r.complete,
+              highestPageSynced: r.highestPageSynced,
+              totalItems: r.totalItems ?? null,
+              lastSyncedAt: r.lastSyncedAt ?? null,
+            };
+          })
           .sort((a, b) => {
             const aTime = a.lastSyncedAt ? Date.parse(a.lastSyncedAt) : 0;
             const bTime = b.lastSyncedAt ? Date.parse(b.lastSyncedAt) : 0;
