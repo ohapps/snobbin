@@ -363,7 +363,9 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
       const anonDb = getDexieDb("snobbin-offline-anonymous.db");
       const ag = await anonDb.groups.toArray();
       const res2: SnobGroup[] = [];
-      for (const g of ag.filter((x) => !(x as { deleted?: number | boolean }).deleted)) {
+      for (const g of ag.filter(
+        (x) => !(x as { deleted?: number | boolean }).deleted,
+      )) {
         res2.push({
           id: g.id,
           name: g.name,
@@ -383,7 +385,9 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
     try {
       const ag = await db.groups.toArray();
       const res2: SnobGroup[] = [];
-      for (const g of ag.filter((x) => !(x as { deleted?: number | boolean }).deleted)) {
+      for (const g of ag.filter(
+        (x) => !(x as { deleted?: number | boolean }).deleted,
+      )) {
         res2.push({
           id: g.id,
           name: g.name,

@@ -44,6 +44,59 @@ const GroupsPageClient = ({
       try {
         try {
           const local = await getLocalGroupsDexie();
+          if (!cancelled && local && local.length > 0) {
+            setGroups(local);
+            setSource("local");
+            setError(null);
+            return;
+          }
+          if (!cancelled && local && local.length === 0) {
+            // try harder
+            try {
+              const { getDexieDb } = await import("@/data/local/dexie-db");
+              const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+              const ag = await anonDb.groups.toArray();
+              if (ag.length > 0) {
+                const mapped = ag
+                  .filter((g) => !(g as { deleted?: number | boolean }).deleted)
+                  .map((g) => {
+                    const gg = g as {
+                      id: string;
+                      name: string;
+                      description: string;
+                      minRanking: number;
+                      maxRanking: number;
+                      increments: number;
+                      rankIcon: string;
+                      rankingsRequired: number;
+                      pictureUrl?: string;
+                    };
+                    return {
+                      id: gg.id,
+                      name: gg.name,
+                      description: gg.description,
+                      minRanking: gg.minRanking,
+                      maxRanking: gg.maxRanking,
+                      increments: gg.increments,
+                      rankIcon: gg.rankIcon,
+                      rankingsRequired: gg.rankingsRequired,
+                      pictureUrl: gg.pictureUrl,
+                    };
+                  });
+                setGroups(mapped as SnobGroup[]);
+                setSource("local");
+                setError(null);
+                return;
+              }
+            } catch {
+              // ignore
+            }
+          }
+        } catch {
+          // Try SQLite fallback
+        }
+        try {
+          const local = await getLocalGroups();
           if (!cancelled) {
             setGroups(local);
             setSource("local");
@@ -51,13 +104,7 @@ const GroupsPageClient = ({
             return;
           }
         } catch {
-          // Try SQLite fallback
-        }
-        const local = await getLocalGroups();
-        if (!cancelled) {
-          setGroups(local);
-          setSource("local");
-          setError(null);
+          // ignore
         }
       } catch (err) {
         if (!cancelled) {
