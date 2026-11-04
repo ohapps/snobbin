@@ -103,11 +103,12 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
     try {
       const anonDb = getDexieDb("snobbin-offline-anonymous.db");
       const snobs = await anonDb.snobs.toArray();
+      console.warn('[dexie-repos] anon snobs:', snobs.length);
       if (snobs.length > 0) {
         snobId = snobs[0].id;
       }
-    } catch {
-      // ignore
+    } catch (e) {
+      console.warn('[dexie-repos] anon err', e);
     }
   }
   if (!snobId) return [];
@@ -116,6 +117,7 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
     db.groups.toArray(),
     db.group_members.where("snobId").equals(snobId).toArray(),
   ]);
+  console.warn('[dexie-repos] groups:', groups.length, 'members:', memberRows.length);
   if (groups.length === 0 || memberRows.length === 0) {
     try {
       const anonDb = getDexieDb("snobbin-offline-anonymous.db");
