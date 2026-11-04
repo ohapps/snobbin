@@ -95,8 +95,24 @@ function toSnob(row: {
 
 export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
   const dbName = getOfflineDbName();
-  const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
+  let db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
   console.warn('[dexie-repos] getLocalGroupsDexie db:', dbName);
+  try {
+    const g = await db.groups.count();
+    console.warn('[dexie-repos] current db groups count:', g);
+    if (g === 0) {
+      try {
+        const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+        const ag = await anonDb.groups.count();
+        console.warn('[dexie-repos] anon count:', ag);
+        if (ag > 0) { db = anonDb; console.warn('[dexie-repos] switched to anon db'); }
+      } catch (e) {
+        console.warn('[dexie-repos] anon count err', e);
+      }
+    }
+  } catch (e) {
+    console.warn('[dexie-repos] count err', e);
+  }
   let snobId = getRememberedSnobId();
   console.warn('[dexie-repos] snobId:', snobId);
   if (!snobId) {
