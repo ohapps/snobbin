@@ -63,7 +63,13 @@ export async function getAllGroupSyncStates(): Promise<
         const rows = await anonDb.sync_meta.toArray();
         return rows
           .map((row) => {
-            const r = row as { groupId: string; complete: boolean; highestPageSynced: number; totalItems?: number | null; lastSyncedAt?: string | null };
+            const r = row as {
+              groupId: string;
+              complete: boolean;
+              highestPageSynced: number;
+              totalItems?: number | null;
+              lastSyncedAt?: string | null;
+            };
             return {
               groupId: r.groupId,
               complete: r.complete,

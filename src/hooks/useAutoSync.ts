@@ -76,11 +76,11 @@ function ensureBootstrap(force = false): Promise<void> {
 
   const run = (async () => {
     try {
-      console.warn('[autoSync] starting bootstrap');
+      console.warn("[autoSync] starting bootstrap");
       const res = await syncBootstrapDexie();
-      console.warn('[autoSync] bootstrap done', res);
+      console.warn("[autoSync] bootstrap done", res);
     } catch (e) {
-      console.warn('[autoSync] bootstrap err', e);
+      console.warn("[autoSync] bootstrap err", e);
     }
     bootstrapSyncedAt = Date.now();
   })();
@@ -144,12 +144,12 @@ async function mirrorGroup(
   // A complete-but-stale group must restart from page 1: resuming would start
   // past the last page and refresh nothing. An incomplete group resumes.
   try {
-    console.warn('[autoSync] mirroring group', groupId);
+    console.warn("[autoSync] mirroring group", groupId);
     await syncGroupDexie(groupId);
-    console.warn('[autoSync] mirrored group', groupId);
+    console.warn("[autoSync] mirrored group", groupId);
     return;
   } catch (e) {
-    console.warn('[autoSync] mirror err', groupId, e);
+    console.warn("[autoSync] mirror err", groupId, e);
   }
 }
 

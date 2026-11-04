@@ -82,7 +82,12 @@ const OfflineDataSettings = () => {
             getAllGroupSyncStatesDexie(),
             getLocalGroupsDexie(),
           ]);
-          console.warn('[OfflineDataSettings] states:', states, 'groups:', groups);
+          console.warn(
+            "[OfflineDataSettings] states:",
+            states,
+            "groups:",
+            groups,
+          );
           const names = new Map(groups.map((group) => [group.id, group.name]));
           if (!cancelled) {
             setSyncStates(

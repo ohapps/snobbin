@@ -96,35 +96,38 @@ function toSnob(row: {
 export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
   const dbName = getOfflineDbName();
   let db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
-  console.warn('[dexie-repos] getLocalGroupsDexie db:', dbName);
+  console.warn("[dexie-repos] getLocalGroupsDexie db:", dbName);
   try {
     const g = await db.groups.count();
-    console.warn('[dexie-repos] current db groups count:', g);
+    console.warn("[dexie-repos] current db groups count:", g);
     if (g === 0) {
       try {
         const anonDb = getDexieDb("snobbin-offline-anonymous.db");
         const ag = await anonDb.groups.count();
-        console.warn('[dexie-repos] anon count:', ag);
-        if (ag > 0) { db = anonDb; console.warn('[dexie-repos] switched to anon db'); }
+        console.warn("[dexie-repos] anon count:", ag);
+        if (ag > 0) {
+          db = anonDb;
+          console.warn("[dexie-repos] switched to anon db");
+        }
       } catch (e) {
-        console.warn('[dexie-repos] anon count err', e);
+        console.warn("[dexie-repos] anon count err", e);
       }
     }
   } catch (e) {
-    console.warn('[dexie-repos] count err', e);
+    console.warn("[dexie-repos] count err", e);
   }
   let snobId = getRememberedSnobId();
-  console.warn('[dexie-repos] snobId:', snobId);
+  console.warn("[dexie-repos] snobId:", snobId);
   if (!snobId) {
     try {
       const anonDb = getDexieDb("snobbin-offline-anonymous.db");
       const snobs = await anonDb.snobs.toArray();
-      console.warn('[dexie-repos] anon snobs:', snobs.length);
+      console.warn("[dexie-repos] anon snobs:", snobs.length);
       if (snobs.length > 0) {
         snobId = snobs[0].id;
       }
     } catch (e) {
-      console.warn('[dexie-repos] anon err', e);
+      console.warn("[dexie-repos] anon err", e);
     }
   }
   if (!snobId) return [];
@@ -133,21 +136,80 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
     db.groups.toArray(),
     db.group_members.where("snobId").equals(snobId).toArray(),
   ]);
-  console.warn('[dexie-repos] groups:', groups.length, 'members:', memberRows.length);
+  console.warn(
+    "[dexie-repos] groups:",
+    groups.length,
+    "members:",
+    memberRows.length,
+  );
   if (groups.length === 0 || memberRows.length === 0) {
     try {
       const anonDb = getDexieDb("snobbin-offline-anonymous.db");
-      groups = await anonDb.groups.toArray();
-      memberRows = await anonDb.group_members
-        .where("snobId")
-        .equals(snobId)
-        .toArray();
+      const [ag, am] = await Promise.all([
+        anonDb.groups.toArray(),
+        snobId
+          ? anonDb.group_members.where("snobId").equals(snobId).toArray()
+          : anonDb.group_members.toArray(),
+      ]);
+      console.warn(
+        "[dexie-repos] anon fallback groups:",
+        ag.length,
+        "members:",
+        am.length,
+      );
+      if (ag.length > 0) groups = ag;
+      if (am.length > 0) memberRows = am;
       if (groups.length > 0 || memberRows.length > 0) {
         // use anon db data
         const activeGroupIds = new Set(
           memberRows.filter((m) => m.role !== "DISABLED").map((m) => m.groupId),
         );
         const result: SnobGroup[] = [];
+        if (activeGroupIds.size === 0 && groups.length > 0) {
+          // no memberships - return all non-deleted groups
+          for (const g of groups.filter((g) => !g.deleted)) {
+            const members = await anonDb.group_members
+              .where("groupId")
+              .equals(g.id)
+              .toArray();
+            const snobIds = members.map((m) => m.snobId);
+            const snobs =
+              snobIds.length > 0
+                ? await anonDb.snobs.where("id").anyOf(snobIds).toArray()
+                : [];
+            const snobMap = new Map(snobs.map((s) => [s.id, toSnob(s)]));
+            const groupMembers: SnobGroupMember[] = members
+              .map((m) => {
+                const snob = snobMap.get(m.snobId);
+                if (!snob) return null;
+                return {
+                  id: m.id,
+                  snobId: m.snobId,
+                  groupId: m.groupId,
+                  role: m.role as SnobGroupMember["role"],
+                  snob,
+                };
+              })
+              .filter(Boolean) as SnobGroupMember[];
+            result.push({
+              id: g.id,
+              name: g.name,
+              description: g.description,
+              minRanking: g.minRanking,
+              maxRanking: g.maxRanking,
+              increments: g.increments,
+              rankIcon: g.rankIcon,
+              rankingsRequired: g.rankingsRequired,
+              pictureUrl: g.pictureUrl,
+              members: groupMembers,
+            } as SnobGroup);
+          }
+          console.warn(
+            "[dexie-repos] returning fallback all groups:",
+            result.length,
+          );
+          return result;
+        }
         for (const g of groups.filter(
           (g) => !g.deleted && activeGroupIds.has(g.id),
         )) {
