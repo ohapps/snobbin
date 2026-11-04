@@ -57,7 +57,9 @@ export async function syncBootstrapDexie(): Promise<{
           await anonDb.sync_meta.put({ groupId: g.id, complete: false, highestPageSynced: 0, totalItems: null, lastSyncedAt: null, state: null } as LocalSyncMeta);
         }
       }
-      try { setRememberedSnobId(data2.snob.id); } catch {}
+      try { setRememberedSnobId(data2.snob.id); } catch {
+        // ignore
+      }
       console.warn('[dexie-sync] bootstrap anon done');
       return { ok: true };
     } catch (e) {
