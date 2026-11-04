@@ -3,8 +3,11 @@
  */
 
 import { getDexieDb } from "./dexie-db";
-import { getOfflineDbName } from "./identity";
-import { getRememberedSnobId } from "./identity";
+import {
+  getOfflineDbName,
+  getRememberedSnobId,
+  setRememberedSnobId,
+} from "./identity";
 import type {
   SnobGroup,
   SnobGroupAttributeSummary,
@@ -125,12 +128,77 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
       console.warn("[dexie-repos] anon snobs:", snobs.length);
       if (snobs.length > 0) {
         snobId = snobs[0].id;
+        try {
+          setRememberedSnobId(snobId);
+        } catch {
+          // ignore
+        }
       }
     } catch (e) {
       console.warn("[dexie-repos] anon err", e);
     }
   }
-  if (!snobId) return [];
+  if (!snobId) {
+    // Last resort: if groups exist anywhere, return them
+    try {
+      const ag = await db.groups.toArray();
+      if (ag.length > 0) {
+        const result: SnobGroup[] = [];
+        for (const g of ag.filter(
+          (x) => !(x as { deleted?: number | boolean }).deleted,
+        )) {
+          result.push({
+            id: g.id,
+            name: g.name,
+            description: g.description,
+            minRanking: g.minRanking,
+            maxRanking: g.maxRanking,
+            increments: g.increments,
+            rankIcon: g.rankIcon,
+            rankingsRequired: g.rankingsRequired,
+            pictureUrl: g.pictureUrl,
+          } as SnobGroup);
+        }
+        if (result.length > 0) {
+          console.warn(
+            "[dexie-repos] returning groups with no snobId:",
+            result.length,
+          );
+          return result;
+        }
+      }
+      const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+      const ag2 = await anonDb.groups.toArray();
+      if (ag2.length > 0) {
+        const result: SnobGroup[] = [];
+        for (const g of ag2.filter(
+          (x) => !(x as { deleted?: number | boolean }).deleted,
+        )) {
+          result.push({
+            id: g.id,
+            name: g.name,
+            description: g.description,
+            minRanking: g.minRanking,
+            maxRanking: g.maxRanking,
+            increments: g.increments,
+            rankIcon: g.rankIcon,
+            rankingsRequired: g.rankingsRequired,
+            pictureUrl: g.pictureUrl,
+          } as SnobGroup);
+        }
+        if (result.length > 0) {
+          console.warn(
+            "[dexie-repos] returning anon groups with no snobId:",
+            result.length,
+          );
+          return result;
+        }
+      }
+    } catch (e) {
+      console.warn("[dexie-repos] last resort err", e);
+    }
+    return [];
+  }
 
   let [groups, memberRows] = await Promise.all([
     db.groups.toArray(),
