@@ -89,6 +89,18 @@ const OfflineDataSettings = () => {
             groups,
           );
           const names = new Map(groups.map((group) => [group.id, group.name]));
+          if (names.size === 0) {
+            try {
+              const { getDexieDb } = await import("@/data/local/dexie-db");
+              const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+              const ag = await anonDb.groups.toArray();
+              for (const g of ag) {
+                names.set(g.id, g.name);
+              }
+            } catch {
+              // ignore
+            }
+          }
           if (!cancelled) {
             setSyncStates(
               states.map((state) => ({
@@ -99,6 +111,38 @@ const OfflineDataSettings = () => {
                 totalItems: state.totalItems,
               })),
             );
+          }
+          if ((states.length === 0 || names.size === 0) && !cancelled) {
+            try {
+              const { getDexieDb } = await import("@/data/local/dexie-db");
+              const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+              const rows = await anonDb.sync_meta.toArray();
+              const ag = await anonDb.groups.toArray();
+              const anames = new Map(
+                ag.map((g) => [(g as { id: string }).id, (g as { name: string }).name]),
+              );
+              if (rows.length > 0) {
+                setSyncStates(
+                  rows.map((row) => {
+                    const r = row as {
+                      groupId: string;
+                      lastSyncedAt: string | null;
+                      complete: boolean;
+                      totalItems: number | null;
+                    };
+                    return {
+                      groupId: r.groupId,
+                      name: anames.get(r.groupId) ?? "Unknown group",
+                      lastSyncedAt: r.lastSyncedAt,
+                      complete: r.complete,
+                      totalItems: r.totalItems,
+                    };
+                  }),
+                );
+              }
+            } catch {
+              // ignore
+            }
           }
           return;
         } catch {
