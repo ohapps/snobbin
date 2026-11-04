@@ -5,6 +5,7 @@ import { PwaProvider } from "./PwaInitializer";
 import ThemeInitializer from "./ThemeInitializer";
 import OfflineIdentitySync from "@/components/Offline/OfflineIdentitySync";
 import OfflineReconnect from "@/components/Offline/OfflineReconnect";
+import OfflineBootstrapInitializer from "./OfflineBootstrapInitializer";
 
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -15,6 +16,7 @@ const AppInitializer = ({ children }: { children: React.ReactNode }) => {
             <PwaProvider>
               <OfflineIdentitySync />
               <OfflineReconnect />
+              <OfflineBootstrapInitializer />
               {children}
             </PwaProvider>
           </AlertInitializer>
