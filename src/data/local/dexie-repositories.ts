@@ -358,6 +358,49 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
       members: groupMembers,
     } as SnobGroup);
   }
+  if (result.length === 0) {
+    try {
+      const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+      const ag = await anonDb.groups.toArray();
+      const res2: SnobGroup[] = [];
+      for (const g of ag.filter((x) => !(x as { deleted?: number | boolean }).deleted)) {
+        res2.push({
+          id: g.id,
+          name: g.name,
+          description: g.description,
+          minRanking: g.minRanking,
+          maxRanking: g.maxRanking,
+          increments: g.increments,
+          rankIcon: g.rankIcon,
+          rankingsRequired: g.rankingsRequired,
+          pictureUrl: g.pictureUrl ?? undefined,
+        } as SnobGroup);
+      }
+      if (res2.length > 0) return res2;
+    } catch {
+      // ignore
+    }
+    try {
+      const ag = await db.groups.toArray();
+      const res2: SnobGroup[] = [];
+      for (const g of ag.filter((x) => !(x as { deleted?: number | boolean }).deleted)) {
+        res2.push({
+          id: g.id,
+          name: g.name,
+          description: g.description,
+          minRanking: g.minRanking,
+          maxRanking: g.maxRanking,
+          increments: g.increments,
+          rankIcon: g.rankIcon,
+          rankingsRequired: g.rankingsRequired,
+          pictureUrl: g.pictureUrl ?? undefined,
+        } as SnobGroup);
+      }
+      if (res2.length > 0) return res2;
+    } catch {
+      // ignore
+    }
+  }
   return result;
 }
 
