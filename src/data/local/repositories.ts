@@ -55,7 +55,28 @@ export async function getAllGroupSyncStates(): Promise<
   >
 > {
   try {
-    return await getAllGroupSyncStatesDexie();
+    const states = await getAllGroupSyncStatesDexie();
+    if (states.length === 0) {
+      try {
+        const { getDexieDb } = await import("./dexie-db");
+        const anonDb = getDexieDb("snobbin-offline-anonymous.db");
+        const rows = await anonDb.sync_meta.toArray();
+        return rows
+          .map((row: any) => ({
+            groupId: row.groupId,
+            complete: row.complete,
+            highestPageSynced: row.highestPageSynced,
+            totalItems: row.totalItems ?? null,
+            lastSyncedAt: row.lastSyncedAt ?? null,
+          }))
+          .sort((a: any, b: any) => {
+            const aTime = a.lastSyncedAt ? Date.parse(a.lastSyncedAt) : 0;
+            const bTime = b.lastSyncedAt ? Date.parse(b.lastSyncedAt) : 0;
+            return bTime - aTime;
+          });
+      } catch {}
+    }
+    return states;
   } catch {
     return [];
   }
