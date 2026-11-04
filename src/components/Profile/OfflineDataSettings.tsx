@@ -119,7 +119,10 @@ const OfflineDataSettings = () => {
               const rows = await anonDb.sync_meta.toArray();
               const ag = await anonDb.groups.toArray();
               const anames = new Map(
-                ag.map((g) => [(g as { id: string }).id, (g as { name: string }).name]),
+                ag.map((g) => [
+                  (g as { id: string }).id,
+                  (g as { name: string }).name,
+                ]),
               );
               if (rows.length > 0) {
                 setSyncStates(
