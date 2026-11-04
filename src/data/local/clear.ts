@@ -9,7 +9,7 @@
  */
 
 // Using Dexie only now
-import { resetDexieDb } from "./dexie-db";
+import { dexieDbNameFor, resetDexieDb } from "./dexie-db";
 import { getOfflineDbName } from "./identity";
 
 /** Dependents first, so the wipe is safe even if FKs are ever enabled. */
@@ -25,7 +25,7 @@ export async function clearOfflineData(): Promise<void> {
   }
   if (typeof indexedDB !== "undefined") {
     try {
-      indexedDB.deleteDatabase(getOfflineDbName().replace(/\.sqlite3$/, ".db"));
+      indexedDB.deleteDatabase(dexieDbNameFor(getOfflineDbName()));
     } catch {
       // ignore
     }
@@ -50,7 +50,7 @@ export async function clearOfflineDataFor(dbName: string): Promise<void> {
   }
   if (typeof indexedDB !== "undefined") {
     try {
-      indexedDB.deleteDatabase(dbName.replace(/\.sqlite3$/, ".db"));
+      indexedDB.deleteDatabase(dexieDbNameFor(dbName));
     } catch {
       // ignore
     }

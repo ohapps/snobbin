@@ -1,4 +1,5 @@
 import Dexie, { Table } from "dexie";
+import { getOfflineDbName } from "./identity";
 import type {
   LocalGroup,
   LocalSnob,
@@ -38,53 +39,43 @@ export class SnobbinOfflineDB extends Dexie {
   }
 }
 
-let currentDb: SnobbinOfflineDB | null = null;
-let currentDbName: string | null = null;
+/**
+ * One Dexie instance per database name.
+ *
+ * Instances are never closed just because a *different* name was requested:
+ * in Dexie 4, `close()` defaults to `disableAutoOpen: true`, so any code still
+ * holding the old instance would fail with `DatabaseClosedError` from then on.
+ * Only `resetDexieDb()` (identity change / clear) closes connections.
+ */
+const instances = new Map<string, SnobbinOfflineDB>();
 
 export function getDexieDb(name: string): SnobbinOfflineDB {
-  try {
-    if (currentDb && currentDbName === name) {
-      // Check if db is closed
-      const dbAny = currentDb as unknown as { isOpen?: () => boolean };
-      if (dbAny.isOpen?.() === false) {
-        currentDb = null;
-        currentDbName = null;
-      } else {
-        return currentDb;
-      }
-    }
-    if (currentDb) {
-      try {
-        currentDb.close();
-      } catch {
-        // ignore
-      }
-    }
-    currentDb = new SnobbinOfflineDB(name);
-    currentDbName = name;
-    return currentDb;
-  } catch {
-    currentDb = null;
-    currentDbName = null;
-    currentDb = new SnobbinOfflineDB(name);
-    currentDbName = name;
-    return currentDb;
+  let db = instances.get(name);
+  if (!db) {
+    db = new SnobbinOfflineDB(name);
+    instances.set(name, db);
   }
+  return db;
 }
 
+/** IndexedDB name for a mirror (the legacy `.sqlite3` suffix becomes `.db`). */
+export function dexieDbNameFor(offlineDbName: string): string {
+  return offlineDbName.replace(/\.sqlite3$/, ".db");
+}
+
+/** The mirror for the currently remembered identity. */
+export function currentDexieDb(): SnobbinOfflineDB {
+  return getDexieDb(dexieDbNameFor(getOfflineDbName()));
+}
+
+/** Closes every open mirror so the next query (or a deleteDatabase) starts clean. */
 export function resetDexieDb() {
-  try {
-    if (currentDb) {
-      try {
-        currentDb.close();
-      } catch {
-        // ignore
-      }
-      currentDb = null;
-      currentDbName = null;
+  instances.forEach((db) => {
+    try {
+      db.close();
+    } catch {
+      // ignore
     }
-  } catch {
-    currentDb = null;
-    currentDbName = null;
-  }
+  });
+  instances.clear();
 }

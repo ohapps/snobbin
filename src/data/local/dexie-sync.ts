@@ -1,7 +1,6 @@
-import { getDexieDb } from "./dexie-db";
+import { currentDexieDb } from "./dexie-db";
 import {
-  getOfflineDbName,
-  getRememberedSnobId,
+  getRememberedSub,
   setRememberedSnobId,
 } from "./identity";
 import type {
@@ -25,106 +24,16 @@ export async function syncBootstrapDexie(): Promise<{
   ok: boolean;
   reason?: string;
 }> {
-  const dbName = getOfflineDbName();
-  const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
-  const snobId = getRememberedSnobId();
-  console.warn("[dexie-sync] bootstrap start, snobId:", snobId, "db:", dbName);
-  if (!snobId) {
-    try {
-      const anonDb = getDexieDb("snobbin-offline-anonymous.db");
-      const res2 = await fetch("/api/offline/bootstrap");
-      console.warn("[dexie-sync] bootstrap resp anon:", res2.status);
-      if (!res2.ok) return { ok: false, reason: `http-${res2.status}` };
-      const data2: BootstrapResponse = await res2.json();
-      console.warn(
-        "[dexie-sync] bootstrap data groups anon:",
-        data2.groups?.length,
-      );
-      await db.transaction(
-        "rw",
-        [anonDb.snobs, anonDb.groups, anonDb.group_members],
-        async () => {
-          await anonDb.snobs.put({
-            id: data2.snob.id,
-            email: data2.snob.email,
-            firstName: data2.snob.first_name,
-            lastName: data2.snob.last_name,
-            pictureUrl: data2.snob.picture_url,
-            lastGroupId: data2.snob.last_group_id,
-            isPremium: data2.snob.is_premium === 1,
-          } as LocalSnob);
-          for (const s of data2.snobs) {
-            await anonDb.snobs.put({
-              id: s.id,
-              email: s.email,
-              firstName: s.first_name,
-              lastName: s.last_name,
-              pictureUrl: s.picture_url,
-              lastGroupId: s.last_group_id,
-              isPremium: s.is_premium === 1,
-            } as LocalSnob);
-          }
-          console.warn(
-            "[dexie-sync] writing groups anon:",
-            data2.groups?.length,
-          );
-          for (const g of data2.groups) {
-            console.warn("[dexie-sync] group anon:", g.id, g.name);
-            await anonDb.groups.put({
-              id: g.id,
-              name: g.name,
-              description: g.description,
-              minRanking: g.min_ranking,
-              maxRanking: g.max_ranking,
-              increments: g.increments,
-              rankIcon: g.rank_icon,
-              rankingsRequired: g.rankings_required,
-              deleted: g.deleted === 1,
-              pictureUrl: g.picture_url,
-            } as LocalGroup);
-          }
-          for (const m of data2.memberships) {
-            await anonDb.group_members.put({
-              id: m.id,
-              groupId: m.group_id,
-              snobId: m.snob_id,
-              role: m.role,
-            } as LocalGroupMember);
-          }
-        },
-      );
-      for (const g of data2.groups) {
-        const existing = await anonDb.sync_meta.get(g.id);
-        if (!existing) {
-          await anonDb.sync_meta.put({
-            groupId: g.id,
-            complete: false,
-            highestPageSynced: 0,
-            totalItems: null,
-            lastSyncedAt: null,
-            state: null,
-          } as LocalSyncMeta);
-        }
-      }
-      try {
-        setRememberedSnobId(data2.snob.id);
-      } catch {
-        // ignore
-      }
-      console.warn("[dexie-sync] bootstrap anon done");
-      return { ok: true };
-    } catch (e) {
-      console.warn("[dexie-sync] anon bootstrap err", e);
-      return { ok: false, reason: "no-identity" };
-    }
-  }
+  const db = currentDexieDb();
+  // The mirror is namespaced per Auth0 `sub`. Until OfflineIdentitySync has
+  // adopted the identity we must not write anything (it would land in the
+  // anonymous database and never be read again).
+  if (!getRememberedSub()) return { ok: false, reason: "no-identity" };
 
   try {
     const res = await fetch("/api/offline/bootstrap");
-    console.warn("[dexie-sync] bootstrap resp:", res.status);
     if (!res.ok) return { ok: false, reason: `http-${res.status}` };
     const data: BootstrapResponse = await res.json();
-    console.warn("[dexie-sync] bootstrap data groups:", data.groups?.length);
 
     await db.transaction(
       "rw",
@@ -174,11 +83,7 @@ export async function syncBootstrapDexie(): Promise<{
         }
       },
     );
-    try {
-      setRememberedSnobId(data.snob.id);
-    } catch {
-      // ignore
-    }
+    setRememberedSnobId(data.snob.id);
 
     // Sync meta for each group
     for (const g of data.groups) {
@@ -202,8 +107,7 @@ export async function syncBootstrapDexie(): Promise<{
 }
 
 export async function syncGroupDexie(groupId: string): Promise<void> {
-  const dbName = getOfflineDbName();
-  const db = getDexieDb(dbName.replace(/\.sqlite3$/, ".db"));
+  const db = currentDexieDb();
 
   const metaRes = await fetch(
     `/api/offline/groups/${encodeURIComponent(groupId)}/meta`,

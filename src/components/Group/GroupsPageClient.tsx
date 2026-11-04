@@ -5,7 +5,6 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import GroupList from "@/components/Group/GroupList";
 import GroupToolbar from "@/components/Group/GroupToolbar";
 import { OFFLINE_ENABLED } from "@/config/offline";
-import { getLocalGroups } from "@/data/local/repositories";
 import { getLocalGroupsDexie } from "@/data/local/dexie-repositories";
 import type { SnobGroup } from "@/types/snobGroup";
 import { useConnectivity } from "@/hooks/useConnectivity";
@@ -42,69 +41,11 @@ const GroupsPageClient = ({
 
     const load = async () => {
       try {
-        try {
-          const local = await getLocalGroupsDexie();
-          if (!cancelled && local && local.length > 0) {
-            setGroups(local);
-            setSource("local");
-            setError(null);
-            return;
-          }
-          if (!cancelled && local && local.length === 0) {
-            // try harder
-            try {
-              const { getDexieDb } = await import("@/data/local/dexie-db");
-              const anonDb = getDexieDb("snobbin-offline-anonymous.db");
-              const ag = await anonDb.groups.toArray();
-              if (ag.length > 0) {
-                const mapped = ag
-                  .filter((g) => !(g as { deleted?: number | boolean }).deleted)
-                  .map((g) => {
-                    const gg = g as {
-                      id: string;
-                      name: string;
-                      description: string;
-                      minRanking: number;
-                      maxRanking: number;
-                      increments: number;
-                      rankIcon: string;
-                      rankingsRequired: number;
-                      pictureUrl?: string;
-                    };
-                    return {
-                      id: gg.id,
-                      name: gg.name,
-                      description: gg.description,
-                      minRanking: gg.minRanking,
-                      maxRanking: gg.maxRanking,
-                      increments: gg.increments,
-                      rankIcon: gg.rankIcon,
-                      rankingsRequired: gg.rankingsRequired,
-                      pictureUrl: gg.pictureUrl,
-                    };
-                  });
-                setGroups(mapped as SnobGroup[]);
-                setSource("local");
-                setError(null);
-                return;
-              }
-            } catch {
-              // ignore
-            }
-          }
-        } catch {
-          // Try SQLite fallback
-        }
-        try {
-          const local = await getLocalGroups();
-          if (!cancelled) {
-            setGroups(local);
-            setSource("local");
-            setError(null);
-            return;
-          }
-        } catch {
-          // ignore
+        const local = await getLocalGroupsDexie();
+        if (!cancelled) {
+          setGroups(local);
+          setSource("local");
+          setError(null);
         }
       } catch (err) {
         if (!cancelled) {

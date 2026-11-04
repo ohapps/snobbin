@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { syncBootstrapDexie, syncGroupDexie } from "@/data/local/dexie-sync";
 import { getGroupSyncState } from "@/data/local/repositories";
-import { getAllGroupSyncStatesDexie } from "@/data/local/dexie-repositories";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
@@ -75,14 +74,9 @@ function ensureBootstrap(force = false): Promise<void> {
   }
 
   const run = (async () => {
-    try {
-      console.warn("[autoSync] starting bootstrap");
-      const res = await syncBootstrapDexie();
-      console.warn("[autoSync] bootstrap done", res);
-    } catch (e) {
-      console.warn("[autoSync] bootstrap err", e);
-    }
-    bootstrapSyncedAt = Date.now();
+    const res = await syncBootstrapDexie();
+    // Only a successful bootstrap counts as fresh; otherwise retry next time.
+    bootstrapSyncedAt = res.ok ? Date.now() : 0;
   })();
   bootstrapPromise = run;
   // Clear the in-flight marker once settled: on success the TTL takes over, and
@@ -118,17 +112,7 @@ async function mirrorGroup(
   signal: AbortSignal,
 ): Promise<void> {
   void signal;
-  let state: Awaited<ReturnType<typeof getGroupSyncState>> = null;
-  try {
-    state = await getGroupSyncState(groupId);
-  } catch {
-    try {
-      const states = await getAllGroupSyncStatesDexie();
-      state = states.find((s) => s.groupId === groupId) ?? null;
-    } catch {
-      state = null;
-    }
-  }
+  const state = await getGroupSyncState(groupId);
 
   // Skip only if the mirror is complete *and* recent. A stale mirror is
   // re-mirrored so offline data does not drift indefinitely.
@@ -143,14 +127,7 @@ async function mirrorGroup(
 
   // A complete-but-stale group must restart from page 1: resuming would start
   // past the last page and refresh nothing. An incomplete group resumes.
-  try {
-    console.warn("[autoSync] mirroring group", groupId);
-    await syncGroupDexie(groupId);
-    console.warn("[autoSync] mirrored group", groupId);
-    return;
-  } catch (e) {
-    console.warn("[autoSync] mirror err", groupId, e);
-  }
+  await syncGroupDexie(groupId);
 }
 
 export function useAutoSync(

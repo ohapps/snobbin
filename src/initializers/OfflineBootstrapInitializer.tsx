@@ -2,24 +2,25 @@
 
 import { useEffect } from "react";
 import { refreshBootstrap } from "@/hooks/useAutoSync";
-import { syncBootstrapDexie } from "@/data/local/dexie-sync";
+import { useConnectivity } from "@/hooks/useConnectivity";
+import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
+/**
+ * Fills identity + groups into the mirror as soon as the signed-in user is
+ * known and we're online. Waits for `sub` so the data lands in that user's
+ * database rather than the anonymous one.
+ */
 const OfflineBootstrapInitializer = () => {
+  const sub = useOfflineIdentity();
+  const { online, ready } = useConnectivity();
+
   useEffect(() => {
-    const run = async () => {
-      try {
-        console.warn("[OfflineBootstrapInitializer] forcing bootstrap");
-        await syncBootstrapDexie();
-        await refreshBootstrap();
-      } catch (e) {
-        console.warn("[OfflineBootstrapInitializer] err", e);
-      }
-    };
-    run();
-    // also run again after a delay
-    const t = setTimeout(run, 2000);
-    return () => clearTimeout(t);
-  }, []);
+    if (!sub || !ready || !online) return;
+    refreshBootstrap().catch((e) => {
+      console.warn("[OfflineBootstrapInitializer] err", e);
+    });
+  }, [sub, online, ready]);
+
   return null;
 };
 
