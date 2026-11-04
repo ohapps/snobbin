@@ -1,8 +1,5 @@
 import { currentDexieDb } from "./dexie-db";
-import {
-  getRememberedSub,
-  setRememberedSnobId,
-} from "./identity";
+import { getRememberedSub, setRememberedSnobId } from "./identity";
 import type {
   BootstrapResponse,
   GroupItemsPageResponse,
