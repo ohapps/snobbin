@@ -111,8 +111,10 @@ registerRoute(
     cacheName: "cloudinary-images",
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
+      // Thumbnails are pre-cached for every mirrored item (see
+      // src/data/local/warm-images.ts), so this must exceed the item count.
       new ExpirationPlugin({
-        maxEntries: 3000,
+        maxEntries: 10000,
         maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
       }),
     ],

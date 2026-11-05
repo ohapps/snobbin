@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { syncBootstrapDexie, syncGroupDexie } from "@/data/local/dexie-sync";
 import { getGroupSyncState } from "@/data/local/repositories";
+import { warmGroupImages } from "@/data/local/warm-images";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
@@ -30,6 +31,8 @@ import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
 /** In-flight/resolved syncs, keyed by group id, so runs are deduped per tab. */
 const activeSyncs = new Map<string, Promise<void>>();
+/** Groups whose thumbnails were pre-cached in this tab. */
+const warmedGroups = new Set<string>();
 let bootstrapPromise: Promise<void> | null = null;
 let bootstrapSyncedAt = 0;
 let persistRequested = false;
@@ -111,7 +114,6 @@ async function mirrorGroup(
   groupId: string,
   signal: AbortSignal,
 ): Promise<void> {
-  void signal;
   const state = await getGroupSyncState(groupId);
 
   // Skip only if the mirror is complete *and* recent. A stale mirror is
@@ -120,14 +122,22 @@ async function mirrorGroup(
     state?.complete === true &&
     state.lastSyncedAt !== null &&
     Date.now() - Date.parse(state.lastSyncedAt) < SYNC_TTL_MS;
-  if (fresh) return;
 
-  requestPersistentStorage();
-  await ensureBootstrap();
+  if (!fresh) {
+    requestPersistentStorage();
+    await ensureBootstrap();
 
-  // A complete-but-stale group must restart from page 1: resuming would start
-  // past the last page and refresh nothing. An incomplete group resumes.
-  await syncGroupDexie(groupId);
+    // A complete-but-stale group must restart from page 1: resuming would
+    // start past the last page and refresh nothing. An incomplete group resumes.
+    await syncGroupDexie(groupId);
+  }
+
+  // Thumbnails are cached separately from the data mirror. Run once per tab
+  // per group (cached images are skipped by the worker), and again after a
+  // re-sync so new items are picked up. An aborted run retries next visit.
+  if (signal.aborted || (fresh && warmedGroups.has(groupId))) return;
+  await warmGroupImages(groupId, signal);
+  if (!signal.aborted) warmedGroups.add(groupId);
 }
 
 export function useAutoSync(
@@ -177,6 +187,7 @@ export function useAutoSync(
 /** Test/reset helper: clears dedupe state between runs. */
 export function __resetAutoSyncState(): void {
   activeSyncs.clear();
+  warmedGroups.clear();
   bootstrapPromise = null;
   bootstrapSyncedAt = 0;
 }
