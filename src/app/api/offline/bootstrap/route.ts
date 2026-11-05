@@ -59,18 +59,29 @@ export async function GET() {
     });
   }
 
-  const groupIds = userMemberships.map((m) => m.groupId);
+  // Soft-deleted groups are excluded so the client never mirrors (or creates
+  // sync state for) a group it can no longer show.
+  const groups = await db
+    .select()
+    .from(snobGroupsTable)
+    .where(
+      and(
+        inArray(
+          snobGroupsTable.id,
+          userMemberships.map((m) => m.groupId),
+        ),
+        eq(snobGroupsTable.deleted, false),
+      ),
+    );
+  const groupIds = groups.map((g) => g.id);
 
-  const [groups, memberships] = await Promise.all([
-    db
-      .select()
-      .from(snobGroupsTable)
-      .where(inArray(snobGroupsTable.id, groupIds)),
-    db
-      .select()
-      .from(snobGroupMembersTable)
-      .where(inArray(snobGroupMembersTable.groupId, groupIds)),
-  ]);
+  const memberships =
+    groupIds.length > 0
+      ? await db
+          .select()
+          .from(snobGroupMembersTable)
+          .where(inArray(snobGroupMembersTable.groupId, groupIds))
+      : [];
 
   const snobIds = Array.from(new Set(memberships.map((m) => m.snobId)));
   const snobs =

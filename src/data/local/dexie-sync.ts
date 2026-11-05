@@ -96,11 +96,53 @@ export async function syncBootstrapDexie(): Promise<{
         } as LocalSyncMeta);
       }
     }
+
+    // Prune groups the server no longer returns (deleted, left, disabled) so
+    // their sync state and mirrored data don't linger as orphans.
+    const liveGroupIds = new Set(data.groups.map((g) => g.id));
+    const staleGroupIds = (await db.sync_meta.toCollection().primaryKeys())
+      .map(String)
+      .filter((id) => !liveGroupIds.has(id));
+    if (staleGroupIds.length > 0) {
+      await pruneGroupsDexie(staleGroupIds);
+    }
     return { ok: true };
   } catch (e) {
     console.error(e);
     return { ok: false, reason: "error" };
   }
+}
+
+/** Removes a set of groups and everything mirrored under them. */
+async function pruneGroupsDexie(groupIds: string[]): Promise<void> {
+  const db = currentDexieDb();
+  await db.transaction(
+    "rw",
+    [
+      db.groups,
+      db.group_members,
+      db.group_attributes,
+      db.items,
+      db.item_attributes,
+      db.rankings,
+      db.sync_meta,
+    ],
+    async () => {
+      const itemIds = (await db.items
+        .where("groupId")
+        .anyOf(groupIds)
+        .primaryKeys()) as string[];
+      if (itemIds.length > 0) {
+        await db.item_attributes.where("itemId").anyOf(itemIds).delete();
+        await db.rankings.where("itemId").anyOf(itemIds).delete();
+        await db.items.bulkDelete(itemIds);
+      }
+      await db.group_attributes.where("groupId").anyOf(groupIds).delete();
+      await db.group_members.where("groupId").anyOf(groupIds).delete();
+      await db.groups.bulkDelete(groupIds);
+      await db.sync_meta.bulkDelete(groupIds);
+    },
+  );
 }
 
 export async function syncGroupDexie(groupId: string): Promise<void> {

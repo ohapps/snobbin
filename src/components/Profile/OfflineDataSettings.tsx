@@ -80,14 +80,18 @@ const OfflineDataSettings = () => {
         const names = new Map(groups.map((group) => [group.id, group.name]));
         if (!cancelled) {
           setLoadError(null);
+          // Only list groups the user can actually see; orphaned sync rows
+          // (deleted/left groups) are pruned on the next bootstrap.
           setSyncStates(
-            states.map((state) => ({
-              groupId: state.groupId,
-              name: names.get(state.groupId) ?? "Unknown group",
-              lastSyncedAt: state.lastSyncedAt,
-              complete: state.complete,
-              totalItems: state.totalItems,
-            })),
+            states
+              .filter((state) => names.has(state.groupId))
+              .map((state) => ({
+                groupId: state.groupId,
+                name: names.get(state.groupId)!,
+                lastSyncedAt: state.lastSyncedAt,
+                complete: state.complete,
+                totalItems: state.totalItems,
+              })),
           );
         }
       } catch (err) {
