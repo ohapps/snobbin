@@ -157,13 +157,15 @@ export async function getLocalItems({
     const { getLocalItemsDexie } = await import("./dexie-repositories");
     let rankedStatus: "all" | "ranked" | "unranked" = "all";
     if (status === "ranked") rankedStatus = "ranked";
-    else if (status === "unranked") rankedStatus = "unranked";
+    // The UI sends "pending"; the server treats any non-"ranked" status as unranked.
+    else if (status === "pending" || status === "unranked")
+      rankedStatus = "unranked";
     const res = await getLocalItemsDexie(groupId, {
       page,
       sortBy: sortBy as RankingItemSoryBy,
       rankedStatus,
       keyword,
-      attributeFilters: attributeFilters as unknown as Record<string, string[]>,
+      attributeFilters,
     });
     return {
       items: res.data,

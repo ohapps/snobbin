@@ -6,15 +6,13 @@ import { currentDexieDb } from "./dexie-db";
 import { getRememberedSnobId } from "./identity";
 import type {
   SnobGroup,
+  SnobGroupAttribute,
   SnobGroupAttributeSummary,
   SnobGroupInvite,
   SnobGroupMember,
 } from "@/types/snobGroup";
-import type {
-  RankingItem,
-  RankingItemSoryBy,
-  RecentRankingItem,
-} from "@/types/rankings";
+import type { RankingItem, RecentRankingItem } from "@/types/rankings";
+import { RankingItemSoryBy } from "@/types/rankings";
 import type { Snob } from "@/types/snob";
 import type { GroupSyncState } from "./repositories";
 
@@ -118,6 +116,21 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
         snob,
       } as SnobGroupMember);
     }
+    const [attributeRows, inviteRows] = await Promise.all([
+      db.group_attributes.where("groupId").equals(g.id).toArray(),
+      db.group_invites.where("groupId").equals(g.id).toArray(),
+    ]);
+    const attributes: SnobGroupAttribute[] = attributeRows
+      .map((a) => ({ id: a.id, name: a.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const invites: SnobGroupInvite[] = inviteRows.map((inv) => ({
+      id: inv.id,
+      email: inv.email,
+      status: inv.status as SnobGroupInvite["status"],
+      groupId: inv.groupId,
+      groupName: g.name,
+    }));
+
     result.push({
       id: g.id,
       name: g.name,
@@ -129,6 +142,8 @@ export async function getLocalGroupsDexie(): Promise<SnobGroup[]> {
       rankingsRequired: g.rankingsRequired,
       pictureUrl: g.pictureUrl ?? undefined,
       members: groupMembers,
+      attributes,
+      invites,
     } as SnobGroup);
   }
   return result;
@@ -212,7 +227,8 @@ export async function getLocalItemsDexie(
     sortBy?: RankingItemSoryBy;
     rankedStatus?: "all" | "ranked" | "unranked";
     keyword?: string;
-    attributeFilters?: Record<string, string[]>;
+    /** attributeId -> exact value ("all" or empty means no filter). */
+    attributeFilters?: Record<string, string>;
   } = {},
 ): Promise<{
   data: RankingItem[];
@@ -232,11 +248,63 @@ export async function getLocalItemsDexie(
     items = items.filter((i) => !i.ranked);
   }
 
-  if (keyword) {
-    items = items.filter((i) =>
-      (i.description || "").toLowerCase().includes(keyword),
-    );
+  const activeAttributeFilters = Object.entries(
+    options.attributeFilters ?? {},
+  ).filter(([, value]) => value && value !== "all");
+
+  // Item attributes are only needed for keyword and attribute filtering.
+  if (keyword || activeAttributeFilters.length > 0) {
+    const itemIds = items.map((i) => i.id);
+    const attrRows =
+      itemIds.length > 0
+        ? await db.item_attributes.where("itemId").anyOf(itemIds).toArray()
+        : [];
+    const attrsByItem = new Map<string, typeof attrRows>();
+    for (const row of attrRows) {
+      const list = attrsByItem.get(row.itemId);
+      if (list) list.push(row);
+      else attrsByItem.set(row.itemId, [row]);
+    }
+
+    // Mirrors the server: keyword matches the description OR any attribute value.
+    if (keyword) {
+      items = items.filter(
+        (i) =>
+          (i.description || "").toLowerCase().includes(keyword) ||
+          (attrsByItem.get(i.id) ?? []).some((a) =>
+            (a.attributeValue || "").toLowerCase().includes(keyword),
+          ),
+      );
+    }
+
+    // Each active filter requires an exact attribute value match.
+    for (const [attributeId, value] of activeAttributeFilters) {
+      items = items.filter((i) =>
+        (attrsByItem.get(i.id) ?? []).some(
+          (a) => a.attributeId === attributeId && a.attributeValue === value,
+        ),
+      );
+    }
   }
+
+  // Mirrors the server's `getSortBy`, with id as the tiebreaker.
+  const byId = (a: { id: string }, b: { id: string }) =>
+    a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  const time = (d: string | null | undefined) => (d ? Date.parse(d) : 0);
+  items.sort((a, b) => {
+    let cmp: number;
+    switch (options.sortBy) {
+      case RankingItemSoryBy.DESCRIPTION:
+        cmp = (a.description || "").localeCompare(b.description || "");
+        break;
+      case RankingItemSoryBy.RANKING:
+        cmp = (b.averageRanking ?? -Infinity) - (a.averageRanking ?? -Infinity);
+        break;
+      default:
+        cmp = time(b.createdDate) - time(a.createdDate);
+    }
+    return cmp || byId(a, b);
+  });
 
   const total = items.length;
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -252,11 +320,6 @@ export async function getLocalItemsDexie(
       .where("itemId")
       .equals(item.id)
       .toArray();
-    const attributeMap = new Map<string, string>();
-    for (const ia of itemAttrs) {
-      const attr = await db.group_attributes.get(ia.attributeId);
-      if (attr) attributeMap.set(attr.name, ia.attributeValue);
-    }
     const members = await db.group_members
       .where("groupId")
       .equals(groupId)
@@ -280,13 +343,12 @@ export async function getLocalItemsDexie(
         };
       })
       .filter((r): r is NonNullable<typeof r> => r !== null);
-    const attributesArr = Array.from(attributeMap.entries()).map(
-      ([name, value]) => ({
-        id: name,
-        attributeId: name,
-        attributeValue: value,
-      }),
-    );
+    // Same shape as the server: keyed by attribute *id*, which ItemCard looks up.
+    const attributesArr = itemAttrs.map((ia) => ({
+      id: ia.id,
+      attributeId: ia.attributeId,
+      attributeValue: ia.attributeValue,
+    }));
     results.push({
       id: item.id,
       groupId: item.groupId,
