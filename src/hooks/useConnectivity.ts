@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
  * Connectivity state for the offline read experience.
  *
  * "Offline" is deliberately more than `navigator.onLine === false` (see
- * docs/OFFLINE_PLAN.md §3): the API can be down while the network is up. The
+ * docs/OFFLINE_PLAN.md › Connectivity): the API can be down while the network is up. The
  * app treats itself as offline when the browser reports offline OR a lightweight
  * health probe fails. The probe is cheap and debounced.
  */

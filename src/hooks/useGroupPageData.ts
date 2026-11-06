@@ -37,7 +37,7 @@ export interface UseGroupPageDataResult {
 /**
  * Resolves the data for a group page, preferring server-provided data (from the
  * RSC render) and falling back to the local mirror when the server is
- * unreachable. See docs/OFFLINE_PLAN.md §2.5.
+ * unreachable. See docs/OFFLINE_PLAN.md › Offline read paths.
  *
  * `serverData` is what the RSC page already fetched; when present and the app is
  * online we use it verbatim. When offline, we read from the mirror.

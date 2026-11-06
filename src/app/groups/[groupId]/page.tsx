@@ -10,7 +10,7 @@ import type { GroupPageData } from "@/hooks/useGroupPageData";
 /**
  * Group page. Fetches server data for the online fast path and hands it to the
  * client shell, which falls back to the local SQLite mirror when the server is
- * unreachable (see docs/OFFLINE_PLAN.md §2.5).
+ * unreachable (see docs/OFFLINE_PLAN.md › Offline read paths).
  *
  * When offline features are enabled, a server-side failure (DB down, session
  * check failing) must not throw — we pass `null` and let the client render from

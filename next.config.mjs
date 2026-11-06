@@ -35,7 +35,7 @@ const withPWA = withPWAInit({
   // outage behind a reverse proxy (502/503) would replace the cached app with an
   // error page. `sw.js` implements a navigation handler that treats 5xx as a
   // failure and serves the cached document. It also keeps the runtime caching
-  // rules that used to live here. See docs/OFFLINE_PLAN.md §4.
+  // rules that used to live here. See docs/OFFLINE_PLAN.md › Service worker.
   swSrc: "sw.js",
 });
 

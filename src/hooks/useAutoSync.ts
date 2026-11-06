@@ -12,7 +12,7 @@ import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
  *
  * When a group page is viewed online we quietly mirror the whole group into the
  * local SQLite database so it is readable offline later, with no explicit user
- * action. See docs/OFFLINE_PLAN.md §4 Phase 2 ("progressive fill").
+ * action. See docs/OFFLINE_PLAN.md › Sync.
  *
  * Properties that matter here:
  *  - **Non-blocking.** Never awaited by the render path; the online page render

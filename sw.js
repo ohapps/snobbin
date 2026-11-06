@@ -10,7 +10,7 @@
  * an error page even though a perfectly good copy is cached.
  *
  * The navigation handler below treats 5xx (and aborted/slow requests) as a
- * failure and serves the cached document instead. See docs/OFFLINE_PLAN.md §4.
+ * failure and serves the cached document instead. See docs/OFFLINE_PLAN.md › Service worker.
  */
 
 import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";

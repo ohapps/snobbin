@@ -1,5 +1,6 @@
 import { Snob } from "@/types/snob";
 import Avatar from "@mui/material/Avatar";
+import { cloudinaryCrossOrigin } from "@/utils/image-cors";
 
 export default function ProfileAvatar({
   snob,
@@ -20,10 +21,13 @@ export default function ProfileAvatar({
       ? `${snob.firstName.charAt(0).toUpperCase()}${snob.lastName.charAt(0).toUpperCase()}`
       : snob.email.charAt(0).toUpperCase();
 
+  const src = imaageOverrideUrl ?? snob.pictureUrl ?? "";
+
   return (
     <Avatar
       alt="profile picture"
-      src={imaageOverrideUrl ?? snob.pictureUrl ?? ""}
+      src={src}
+      imgProps={{ crossOrigin: cloudinaryCrossOrigin(src) }}
       sx={style}
     >
       {fallbackText}

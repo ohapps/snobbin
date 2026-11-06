@@ -3,7 +3,7 @@
  *
  * These mirror the existing `/api/mobile/*` snake_case responses
  * (`src/server/utils/mobile/mobile-formatters.ts`) so the browser can reuse the
- * same data contract. See `docs/OFFLINE_PLAN.md` §5.
+ * same data contract. See `docs/OFFLINE_PLAN.md` › Sync API.
  */
 
 export interface ApiGroup {

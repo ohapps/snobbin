@@ -13,7 +13,7 @@ const LoginCheck = async ({ children }: { children: React.ReactNode }) => {
     // Offline support: the session check itself failed (cache backend or API
     // unreachable) rather than reporting "no session". We must not force a
     // re-login in that case — let the shell render and let the client resolve
-    // the user from the cached local mirror. See docs/OFFLINE_PLAN.md §2.5.
+    // the user from the cached local mirror. See docs/OFFLINE_PLAN.md › Identity and session.
     if (OFFLINE_ENABLED) return <>{children}</>;
     throw error;
   }
