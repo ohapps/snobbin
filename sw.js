@@ -105,12 +105,31 @@ registerRoute(
 );
 
 // Cloudinary images (CldImage) — cache-first so thumbnails render offline.
+//
+// - `ignoreVary`: Cloudinary sends `Vary: Accept` (f_auto negotiates the
+//   format), so an entry cached by a JS `fetch` would never match a later
+//   `<img>` request with a different Accept header. The URL fully identifies
+//   the image, so any cached format is fine to serve.
+// - Only 200s are cached: images load with `crossOrigin`, and an opaque
+//   (status 0) response cannot satisfy a CORS image request.
+// - The cache was renamed (v2) to drop opaque entries cached before that
+//   change; the old cache is deleted on activate below.
+const CLOUDINARY_CACHE = "cloudinary-images-v2";
+const OBSOLETE_CACHES = ["cloudinary-images"];
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    Promise.all(OBSOLETE_CACHES.map((name) => caches.delete(name))),
+  );
+});
+
 registerRoute(
   ({ url }) => url.hostname === "res.cloudinary.com",
   new CacheFirst({
-    cacheName: "cloudinary-images",
+    cacheName: CLOUDINARY_CACHE,
+    matchOptions: { ignoreVary: true },
     plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new CacheableResponsePlugin({ statuses: [200] }),
       // Thumbnails are pre-cached for every mirrored item (see
       // src/data/local/warm-images.ts), so this must exceed the item count.
       new ExpirationPlugin({

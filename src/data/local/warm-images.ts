@@ -18,6 +18,10 @@ import { placeholderImage } from "@/types/image";
 
 const CONCURRENCY = 6;
 
+/** Chrome's Accept header for <img> requests (a CORS-safelisted value). */
+const IMAGE_ACCEPT =
+  "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
+
 /** Matches the srcset candidate the browser picks for a 200px thumbnail. */
 function thumbnailWidth(): number {
   return typeof window !== "undefined" && window.devicePixelRatio > 1
@@ -59,7 +63,13 @@ export async function warmGroupImages(
       try {
         // CORS (not no-cors) so the cache holds a real-sized response instead
         // of an opaque one, which Chrome pads to ~7MB each against quota.
-        const res = await fetch(url, { mode: "cors", credentials: "omit" });
+        // Send the browser's image Accept header so Cloudinary's f_auto picks
+        // the same format an <img> would get (WebP/AVIF rather than PNG).
+        const res = await fetch(url, {
+          mode: "cors",
+          credentials: "omit",
+          headers: { Accept: IMAGE_ACCEPT },
+        });
         await res.body?.cancel();
       } catch {
         // Missing/deleted image or a network blip: skip it.

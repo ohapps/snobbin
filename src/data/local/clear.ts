@@ -15,7 +15,11 @@ import { getOfflineDbName } from "./identity";
 /** Dependents first, so the wipe is safe even if FKs are ever enabled. */
 
 /** Runtime caches that hold user-specific content (e.g. Cloudinary images). */
-const RUNTIME_CACHES = ["cloudinary-images", "next-image"] as const;
+const RUNTIME_CACHES = [
+  "cloudinary-images-v2",
+  "cloudinary-images", // pre-v2 name; may still exist before the new worker activates
+  "next-image",
+] as const;
 
 export async function clearOfflineData(): Promise<void> {
   try {
