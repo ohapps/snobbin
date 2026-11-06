@@ -36,6 +36,9 @@ const ImagePreview = ({ image }: { image: ItemImage }) => {
         crop="fill"
         src={image.publicId}
         alt="item image"
+        // CORS so the service worker caches a real-sized response (opaque
+        // no-cors responses are padded to ~7MB each against storage quota).
+        crossOrigin="anonymous"
         onClick={() => setModalOpen(true)}
         style={{
           border: `1px solid ${theme.palette.grey[400]}`,
@@ -56,6 +59,7 @@ const ImagePreview = ({ image }: { image: ItemImage }) => {
               crop="fill"
               src={image.publicId}
               alt="item image"
+              crossOrigin="anonymous"
               style={{
                 border: `1px solid ${theme.palette.grey[400]}`,
                 cursor: "pointer",

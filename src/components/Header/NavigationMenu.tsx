@@ -14,6 +14,7 @@ import ProfileIcon from "@mui/icons-material/Person";
 import GroupsIcon from "@mui/icons-material/People";
 import ActivityIcon from "@mui/icons-material/Assessment";
 import PwaInstallButton from "@/components/Header/PwaInstallButton";
+import { useOfflineLogout } from "@/hooks/useOfflineLogout";
 
 export const NavLink = styled(Link)(({ theme }) => ({
   textDecoration: "none",
@@ -33,6 +34,7 @@ export const Container = styled("div")(({ theme }) => ({
 const NavigationMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const onLogout = useOfflineLogout();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -79,7 +81,7 @@ const NavigationMenu = () => {
           <NavLink href={AppRoutes.PROFILE}>Profile</NavLink>
         </MenuItem>
         <PwaInstallButton />
-        <MenuItem href="/api/auth/logout">
+        <MenuItem href="/api/auth/logout" onClick={onLogout}>
           <ListItemIcon>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>

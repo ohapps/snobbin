@@ -35,6 +35,8 @@ const ItemList = ({
   hideGroupSummary,
   setHideGroupSummary,
   searchParams,
+  readOnly = false,
+  onUpdateQuery,
 }: {
   group: SnobGroup;
   paginatedResults: PaginatedResults;
@@ -42,11 +44,21 @@ const ItemList = ({
   hideGroupSummary: boolean;
   setHideGroupSummary: (hide: boolean) => void;
   searchParams: SnobGroupSearchParams;
+  readOnly?: boolean;
+  /**
+   * Offline override: when present, query changes are handled locally instead of
+   * via a router navigation (which needs the server). See GroupPageClient.
+   */
+  onUpdateQuery?: (newParams: Record<string, string>) => void;
 }) => {
   const updateQueryParams = useUpdateQueryParams();
   const [loading, startTransition] = useTransition();
 
   const updateQuery = (newParams: Record<string, string>) => {
+    if (onUpdateQuery) {
+      onUpdateQuery(newParams);
+      return;
+    }
     startTransition(() => {
       updateQueryParams(newParams);
     });
@@ -90,18 +102,23 @@ const ItemList = ({
           sx={{ justifyContent: { xs: "flex-start", md: "flex-end" } }}
           paddingBottom={2}
         >
-          <SearchBox updateQuery={updateQuery} />
-          <NewItemButton />
+          <SearchBox updateQuery={updateQuery} searchParams={searchParams} />
+          {!readOnly && <NewItemButton />}
         </Grid>
       </Grid>
       {loading ? (
         <LoadingPage fullHeight={false} />
       ) : (
-        <ItemListPage group={group} items={paginatedResults.items} />
+        <ItemListPage
+          group={group}
+          items={paginatedResults.items}
+          readOnly={readOnly}
+        />
       )}
       <PagingNavigation
         paginatedResults={paginatedResults}
         updateQuery={updateQuery}
+        searchParams={searchParams}
       />
     </Box>
   );

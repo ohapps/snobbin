@@ -1,5 +1,6 @@
 import { SnobGroup } from "@/types/snobGroup";
 import { getGroupInitials } from "@/utils/get-group-initials";
+import { cloudinaryCrossOrigin } from "@/utils/image-cors";
 import { styled, Avatar as MuiAvatar } from "@mui/material";
 
 const Avatar = styled(MuiAvatar)(({ theme }) => ({
@@ -23,10 +24,13 @@ const GroupAvatar = ({
       ? { width: 120, height: 120, fontSize: "48px" }
       : { width: 32, height: 32, fontSize: "12px" };
 
+  const src = imaageOverrideUrl ?? group.pictureUrl ?? "";
+
   return (
     <Avatar
       alt="group avatar"
-      src={imaageOverrideUrl ?? group.pictureUrl ?? ""}
+      src={src}
+      imgProps={{ crossOrigin: cloudinaryCrossOrigin(src) }}
       sx={style}
     >
       {getGroupInitials(group)}
