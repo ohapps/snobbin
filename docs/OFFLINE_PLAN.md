@@ -38,17 +38,17 @@ Reconnect
 
 Key modules:
 
-| Area                  | Files                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------- |
-| Connectivity          | `src/hooks/useConnectivity.ts`, `src/app/api/health/route.ts`                                  |
-| Identity / isolation  | `src/data/local/identity.ts`, `src/config/offline.ts`, `src/components/Offline/OfflineIdentitySync.tsx`, `src/hooks/useOfflineIdentity.ts`, `src/hooks/useOfflineLogout.ts` |
-| Local mirror          | `src/data/local/dexie-db.ts`, `src/data/local/schema.ts` (row types)                            |
-| Sync                  | `src/app/api/offline/**`, `src/data/local/dexie-sync.ts`, `src/data/local/api-types.ts`, `src/hooks/useAutoSync.ts` |
-| Local reads           | `src/data/local/repositories.ts` (public API), `src/data/local/dexie-repositories.ts`, `src/data/local/mappers.ts` |
-| Read paths / UI       | `src/hooks/useGroupPageData.ts`, `*PageClient.tsx`, `src/components/Offline/*`                  |
-| Service worker        | `sw.js` (root, InjectManifest), `next.config.mjs`, `src/initializers/PwaInitializer.tsx`        |
-| Images                | `src/data/local/warm-images.ts`, `src/components/Image/ImagePreview.tsx`, `src/utils/image-cors.ts` |
-| Settings / clear      | `src/components/Profile/OfflineDataSettings.tsx`, `src/data/local/clear.ts`                     |
+| Area                 | Files                                                                                                                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Connectivity         | `src/hooks/useConnectivity.ts`, `src/app/api/health/route.ts`                                                                                                               |
+| Identity / isolation | `src/data/local/identity.ts`, `src/config/offline.ts`, `src/components/Offline/OfflineIdentitySync.tsx`, `src/hooks/useOfflineIdentity.ts`, `src/hooks/useOfflineLogout.ts` |
+| Local mirror         | `src/data/local/dexie-db.ts`, `src/data/local/schema.ts` (row types)                                                                                                        |
+| Sync                 | `src/app/api/offline/**`, `src/data/local/dexie-sync.ts`, `src/data/local/api-types.ts`, `src/hooks/useAutoSync.ts`                                                         |
+| Local reads          | `src/data/local/repositories.ts` (public API), `src/data/local/dexie-repositories.ts`, `src/data/local/mappers.ts`                                                          |
+| Read paths / UI      | `src/hooks/useGroupPageData.ts`, `*PageClient.tsx`, `src/components/Offline/*`                                                                                              |
+| Service worker       | `sw.js` (root, InjectManifest), `next.config.mjs`, `src/initializers/PwaInitializer.tsx`                                                                                    |
+| Images               | `src/data/local/warm-images.ts`, `src/components/Image/ImagePreview.tsx`, `src/utils/image-cors.ts`                                                                         |
+| Settings / clear     | `src/components/Profile/OfflineDataSettings.tsx`, `src/data/local/clear.ts`                                                                                                 |
 
 `OFFLINE_ENABLED` (`src/config/offline.ts`) is a constant `true`. It still guards the
 "swallow server errors and fall back to the mirror" branches, so flipping it restores
@@ -92,16 +92,16 @@ outage.
 
 `SnobbinOfflineDB` (`dexie-db.ts`) tables and indexes:
 
-| Table              | Indexes                                              |
-| ------------------ | ---------------------------------------------------- |
-| `groups`           | `id, name`                                           |
-| `snobs`            | `id, email`                                          |
-| `group_members`    | `id, groupId, snobId`                                |
-| `group_invites`    | `id, groupId, email`                                 |
-| `group_attributes` | `id, groupId, name`                                  |
-| `items`            | `id, groupId, ranked, averageRanking, description`   |
-| `item_attributes`  | `id, itemId, attributeId, attributeValue`            |
-| `rankings`         | `id, itemId, groupMemberId`                          |
+| Table              | Indexes                                                                   |
+| ------------------ | ------------------------------------------------------------------------- |
+| `groups`           | `id, name`                                                                |
+| `snobs`            | `id, email`                                                               |
+| `group_members`    | `id, groupId, snobId`                                                     |
+| `group_invites`    | `id, groupId, email`                                                      |
+| `group_attributes` | `id, groupId, name`                                                       |
+| `items`            | `id, groupId, ranked, averageRanking, description`                        |
+| `item_attributes`  | `id, itemId, attributeId, attributeValue`                                 |
+| `rankings`         | `id, itemId, groupMemberId`                                               |
 | `sync_meta`        | `groupId` — `complete`, `highestPageSynced`, `totalItems`, `lastSyncedAt` |
 
 Row types come from `schema.ts`, which is a leftover Drizzle `sqliteTable` schema from
@@ -124,10 +124,10 @@ All routes use the Auth0 session cookie, return snake_case shapes from
 `OFFLINE_ENABLED` — background fill runs in the normal app. The service worker serves
 `/api/offline/*` `NetworkOnly` so the mirror never syncs from a stale cache.
 
-| Route                                          | Returns                                                                 |
-| ---------------------------------------------- | ----------------------------------------------------------------------- |
-| `GET /api/offline/bootstrap`                   | The user, their non-deleted groups (non-`DISABLED` membership), all memberships and snobs for those groups |
-| `GET /api/offline/groups/:id/meta`             | Group, members, snobs, attributes, invites, `totalItems`                |
+| Route                                             | Returns                                                                                                       |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `GET /api/offline/bootstrap`                      | The user, their non-deleted groups (non-`DISABLED` membership), all memberships and snobs for those groups    |
+| `GET /api/offline/groups/:id/meta`                | Group, members, snobs, attributes, invites, `totalItems`                                                      |
 | `GET /api/offline/groups/:id/items?page&pageSize` | One page of items + their attributes + rankings, ordered `(created_date DESC, id ASC)` so pages never overlap |
 
 ### 5.2 Client sync (`dexie-sync.ts`)
@@ -162,13 +162,13 @@ failure it passes `null` and a client shell renders from the mirror via
 `src/data/local/repositories.ts`, which returns the same shapes as the server utils
 (`SnobGroup`, `PaginatedResults`, …).
 
-| Route              | Client shell / hook                          | Local reads                                          |
-| ------------------ | -------------------------------------------- | ---------------------------------------------------- |
-| `/`                | `OfflineHomeRedirect`                        | `getLocalLastGroupId`                                |
-| `/groups`          | `GroupsPageClient`                           | `getLocalGroups` (active membership, not deleted)    |
-| `/groups/:groupId` | `GroupPageClient` + `useGroupPageData`       | group, items, attribute summary                      |
-| `/activity`        | `ActivityPageClient`                         | pending invites, recent rankings                     |
-| `/profile`         | `ProfilePageClient` + `OfflineDataSettings`  | current user, sync states                            |
+| Route              | Client shell / hook                         | Local reads                                       |
+| ------------------ | ------------------------------------------- | ------------------------------------------------- |
+| `/`                | `OfflineHomeRedirect`                       | `getLocalLastGroupId`                             |
+| `/groups`          | `GroupsPageClient`                          | `getLocalGroups` (active membership, not deleted) |
+| `/groups/:groupId` | `GroupPageClient` + `useGroupPageData`      | group, items, attribute summary                   |
+| `/activity`        | `ActivityPageClient`                        | pending invites, recent rankings                  |
+| `/profile`         | `ProfilePageClient` + `OfflineDataSettings` | current user, sync states                         |
 
 **Query parity.** `getLocalItemsDexie` mirrors `getItems()`: sort (`MOST_RECENT`
 default → created date desc, `DESCRIPTION`, `RANKING`, id tiebreak), status (`ranked`
