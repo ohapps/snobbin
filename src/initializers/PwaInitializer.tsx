@@ -58,9 +58,10 @@ export const PwaProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Register the service worker.
   //
-  // `next-pwa` injects its own register script into the Pages Router `main.js`
-  // entry, which the App Router never loads — so the worker was bundled but
-  // never registered. Registering here is the App Router–correct equivalent.
+  // Serwist's auto-register is off (`register: false` in next.config.mjs) so
+  // registration stays explicit and production-only. (The previous library,
+  // next-pwa, injected its register script into the Pages Router `main.js`
+  // entry, which the App Router never loads, so the worker never registered.)
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return;
     if (!("serviceWorker" in navigator)) return;

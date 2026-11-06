@@ -1,45 +1,62 @@
 /* eslint-env serviceworker */
 /**
- * Service worker for the offline read-only experience.
+ * Service worker for the offline read-only experience, built by Serwist
+ * (`@serwist/next`, see next.config.mjs). See docs/OFFLINE_PLAN.md › Service worker.
  *
- * We use next-pwa's InjectManifest mode (rather than its generated worker)
- * because Workbox's stock `NetworkFirst` only falls back to the cache when the
- * network *throws*. When an app server is behind a reverse proxy (Coolify,
- * Vercel, nginx) a server outage usually surfaces as a **502/503 response**,
- * which `NetworkFirst` happily returns to the browser — replacing the app with
- * an error page even though a perfectly good copy is cached.
+ * We write our own navigation handler instead of a stock `NetworkFirst`
+ * because `NetworkFirst` only falls back to the cache when the network
+ * *throws*. Behind a reverse proxy (Coolify, Vercel, nginx) a server outage
+ * usually surfaces as a **502/503 response**, which `NetworkFirst` happily
+ * returns — replacing the app with an error page even though a good copy is
+ * cached. The handler below treats non-OK responses and slow requests as a
+ * failure and serves the cached document instead.
  *
- * The navigation handler below treats 5xx (and aborted/slow requests) as a
- * failure and serves the cached document instead. See docs/OFFLINE_PLAN.md › Service worker.
+ * Route order matters: the first matching entry in `runtimeCaching` wins.
  */
 
-import { cleanupOutdatedCaches, precacheAndRoute } from "workbox-precaching";
-import { registerRoute } from "workbox-routing";
-import { clientsClaim } from "workbox-core";
 import {
   CacheFirst,
+  CacheableResponsePlugin,
+  ExpirationPlugin,
   NetworkFirst,
   NetworkOnly,
+  Serwist,
   StaleWhileRevalidate,
-} from "workbox-strategies";
-import { ExpirationPlugin } from "workbox-expiration";
-import { CacheableResponsePlugin } from "workbox-cacheable-response";
-
-self.skipWaiting();
-clientsClaim();
-
-precacheAndRoute(self.__WB_MANIFEST);
-cleanupOutdatedCaches();
+} from "serwist";
 
 const DOCUMENTS_CACHE = "documents";
 const DOCUMENT_MAX_ENTRIES = 200;
 const DOCUMENT_TIMEOUT_MS = 3000;
 
+// Cloudinary images (CldImage, Cloudinary avatars). See OFFLINE_PLAN.md › Images.
+// - Only 200s are cached: images load with `crossOrigin`, and an opaque
+//   (status 0) response can't satisfy a CORS image request.
+// - `ignoreVary`: Cloudinary may send `Vary: Accept` (f_auto); the URL fully
+//   identifies the image, so any cached format is fine to serve.
+// - v2: drops opaque entries cached before images loaded with CORS; the old
+//   cache is deleted on activate below.
+const CLOUDINARY_CACHE = "cloudinary-images-v2";
+
+/** Caches from earlier workers that are no longer used. */
+const OBSOLETE_CACHES = [
+  "cloudinary-images", // pre-v2, held opaque responses
+  "start-url", // next-pwa's homepage cache
+];
+
+/** Cache API has no TTL/index; evict oldest entries by insertion order. */
+async function trimCache(cache, maxEntries) {
+  const keys = await cache.keys();
+  for (let i = 0; i < keys.length - maxEntries; i += 1) {
+    await cache.delete(keys[i]);
+  }
+}
+
 /**
  * Network-first for navigations, but:
- *  - falls back to the cached document on network errors, timeouts AND 5xx;
- *  - never caches a cross-origin response (e.g. the Auth0 login page reached
- *    through a redirect), which would otherwise poison the cache for a URL.
+ *  - falls back to the cached document on network errors, timeouts AND non-OK
+ *    responses;
+ *  - never caches a redirected or cross-origin response (e.g. the Auth0 login
+ *    page reached through a redirect), which would poison the cache for a URL.
  */
 async function networkFirstDocument({ request }) {
   const cache = await caches.open(DOCUMENTS_CACHE);
@@ -56,66 +73,191 @@ async function networkFirstDocument({ request }) {
     }
 
     // 4xx/5xx: prefer a cached copy over an error page.
-    const cached = await cache.match(request);
-    return cached ?? response;
+    return (await cache.match(request)) ?? response;
   } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    // Fall back to the generic app shell from precache so we don't show
-    // the browser's "offline" error page.
-    const precache = await caches.open("precache-v1");
-    const shell =
-      (await precache.match("/offline.html")) ||
-      (await precache.match("/index.html")) ||
+    // Offline or timed out. Any cached document beats the browser's offline
+    // page: the home page redirects on the client to the last group.
+    const fallback =
+      (await cache.match(request)) ??
+      (await cache.match("/")) ??
       (await caches.match("/"));
-    if (shell) return shell;
+    if (fallback) return fallback;
     throw new Error(`No cached document for ${request.url}`);
   } finally {
     clearTimeout(timeout);
   }
 }
 
-/** Cache API has no TTL/index; evict oldest entries by insertion order. */
-async function trimCache(cache, maxEntries) {
-  const keys = await cache.keys();
-  for (let i = 0; i < keys.length - maxEntries; i += 1) {
-    await cache.delete(keys[i]);
-  }
-}
+const serwist = new Serwist({
+  precacheEntries: self.__SW_MANIFEST,
+  precacheOptions: { cleanupOutdatedCaches: true },
+  skipWaiting: true,
+  clientsClaim: true,
+  runtimeCaching: [
+    {
+      matcher: ({ request, url }) =>
+        request.mode === "navigate" && url.origin === self.location.origin,
+      handler: networkFirstDocument,
+    },
 
-// Must be registered before the generic defaults: first match wins.
-registerRoute(
-  ({ request, url }) =>
-    request.mode === "navigate" && url.origin === self.location.origin,
-  networkFirstDocument,
-);
+    // The connectivity probe must never be served from cache, or a stale 200
+    // would make the app think the API is up while it is down.
+    {
+      matcher: ({ url }) => /\/api\/health$/i.test(url.pathname),
+      handler: new NetworkOnly(),
+    },
 
-// The connectivity probe must never be served from cache, or a stale 200 would
-// make the app think the API is up while it is down.
-registerRoute(
-  ({ url }) => /\/api\/health$/i.test(url.pathname),
-  new NetworkOnly(),
-);
+    // Sync endpoints must always hit the network; a cached response would make
+    // the local mirror silently stale.
+    {
+      matcher: ({ url }) => url.pathname.startsWith("/api/offline/"),
+      handler: new NetworkOnly(),
+    },
 
-// Sync endpoints must always hit the network; a cached page would make the
-// local mirror silently stale.
-registerRoute(
-  ({ url }) => url.pathname.startsWith("/api/offline/"),
-  new NetworkOnly(),
-);
+    {
+      matcher: ({ url }) => url.hostname === "res.cloudinary.com",
+      handler: new CacheFirst({
+        cacheName: CLOUDINARY_CACHE,
+        matchOptions: { ignoreVary: true },
+        plugins: [
+          new CacheableResponsePlugin({ statuses: [200] }),
+          // Thumbnails are pre-cached for every mirrored item (see
+          // src/data/local/warm-images.ts), so this must exceed the item count.
+          new ExpirationPlugin({
+            maxEntries: 10000,
+            maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+          }),
+        ],
+      }),
+    },
 
-// Cloudinary images (CldImage) — cache-first so thumbnails render offline.
-//
-// - `ignoreVary`: Cloudinary sends `Vary: Accept` (f_auto negotiates the
-//   format), so an entry cached by a JS `fetch` would never match a later
-//   `<img>` request with a different Accept header. The URL fully identifies
-//   the image, so any cached format is fine to serve.
-// - Only 200s are cached: images load with `crossOrigin`, and an opaque
-//   (status 0) response cannot satisfy a CORS image request.
-// - The cache was renamed (v2) to drop opaque entries cached before that
-//   change; the old cache is deleted on activate below.
-const CLOUDINARY_CACHE = "cloudinary-images-v2";
-const OBSOLETE_CACHES = ["cloudinary-images"];
+    /* -------------------------------------------------------------------
+     * General-purpose rules (carried over from next-pwa's defaults).
+     * ---------------------------------------------------------------- */
+    {
+      matcher: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
+      handler: new CacheFirst({
+        cacheName: "google-fonts-webfonts",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 4,
+            maxAgeSeconds: 365 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
+    {
+      matcher: /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: "google-fonts-stylesheets",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 4,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
+    {
+      matcher: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: "static-font-assets",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 4,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
+    {
+      matcher: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: "static-image-assets",
+        plugins: [
+          new ExpirationPlugin({ maxEntries: 64, maxAgeSeconds: 24 * 60 * 60 }),
+        ],
+      }),
+    },
+    {
+      matcher: /\/_next\/image\?url=.+$/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: "next-image",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 200,
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
+    {
+      matcher: /\.(?:js)$/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: "static-js-assets",
+        plugins: [
+          new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
+        ],
+      }),
+    },
+    {
+      matcher: /\.(?:css|less)$/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: "static-style-assets",
+        plugins: [
+          new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
+        ],
+      }),
+    },
+    {
+      matcher: /\.(?:json|xml|csv)$/i,
+      handler: new NetworkFirst({
+        cacheName: "static-data-assets",
+        plugins: [
+          new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
+        ],
+      }),
+    },
+    {
+      matcher: ({ url, request }) =>
+        request.method === "GET" &&
+        url.origin === self.location.origin &&
+        url.pathname.startsWith("/api/") &&
+        !url.pathname.startsWith("/api/auth/"),
+      handler: new NetworkFirst({
+        cacheName: "apis",
+        networkTimeoutSeconds: 10,
+        plugins: [
+          new ExpirationPlugin({ maxEntries: 16, maxAgeSeconds: 24 * 60 * 60 }),
+        ],
+      }),
+    },
+    // Same-origin, non-API requests — notably App Router RSC payloads for
+    // client-side navigation (`?_rsc=`).
+    {
+      matcher: ({ url }) =>
+        url.origin === self.location.origin &&
+        !url.pathname.startsWith("/api/"),
+      handler: new NetworkFirst({
+        cacheName: "others",
+        networkTimeoutSeconds: 10,
+        plugins: [
+          new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
+        ],
+      }),
+    },
+    {
+      matcher: ({ url }) => url.origin !== self.location.origin,
+      handler: new NetworkFirst({
+        cacheName: "cross-origin",
+        networkTimeoutSeconds: 10,
+        plugins: [
+          new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 60 * 60 }),
+        ],
+      }),
+    },
+  ],
+});
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
@@ -123,175 +265,4 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-registerRoute(
-  ({ url }) => url.hostname === "res.cloudinary.com",
-  new CacheFirst({
-    cacheName: CLOUDINARY_CACHE,
-    matchOptions: { ignoreVary: true },
-    plugins: [
-      new CacheableResponsePlugin({ statuses: [200] }),
-      // Thumbnails are pre-cached for every mirrored item (see
-      // src/data/local/warm-images.ts), so this must exceed the item count.
-      new ExpirationPlugin({
-        maxEntries: 10000,
-        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-      }),
-    ],
-  }),
-);
-
-/* -------------------------------------------------------------------------
- * next-pwa's default runtime caching, replicated for InjectManifest mode.
- * https://github.com/shadowwalker/next-pwa/blob/master/cache.js
- * ---------------------------------------------------------------------- */
-
-registerRoute(
-  /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
-  new CacheFirst({
-    cacheName: "google-fonts-webfonts",
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 4,
-        maxAgeSeconds: 365 * 24 * 60 * 60,
-      }),
-    ],
-  }),
-);
-
-registerRoute(
-  /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
-  new StaleWhileRevalidate({
-    cacheName: "google-fonts-stylesheets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 4, maxAgeSeconds: 7 * 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
-  new StaleWhileRevalidate({
-    cacheName: "static-font-assets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 4, maxAgeSeconds: 7 * 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
-  new StaleWhileRevalidate({
-    cacheName: "static-image-assets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 64, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\/_next\/image\?url=.+$/i,
-  new StaleWhileRevalidate({
-    cacheName: "next-image",
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 200,
-        maxAgeSeconds: 30 * 24 * 60 * 60,
-      }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\.(?:mp3|wav|ogg)$/i,
-  new CacheFirst({
-    cacheName: "static-audio-assets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\.(?:mp4)$/i,
-  new CacheFirst({
-    cacheName: "static-video-assets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\.(?:js)$/i,
-  new StaleWhileRevalidate({
-    cacheName: "static-js-assets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\.(?:css|less)$/i,
-  new StaleWhileRevalidate({
-    cacheName: "static-style-assets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\/_next\/data\/.+\/.+\.json$/i,
-  new StaleWhileRevalidate({
-    cacheName: "next-data",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  /\.(?:json|xml|csv)$/i,
-  new NetworkFirst({
-    cacheName: "static-data-assets",
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  ({ url }) =>
-    url.origin === self.origin &&
-    url.pathname.startsWith("/api/") &&
-    !url.pathname.startsWith("/api/auth/"),
-  new NetworkFirst({
-    cacheName: "apis",
-    networkTimeoutSeconds: 10,
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 16, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-  "GET",
-);
-
-registerRoute(
-  ({ url }) => url.origin === self.origin && !url.pathname.startsWith("/api/"),
-  new NetworkFirst({
-    cacheName: "others",
-    networkTimeoutSeconds: 10,
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }),
-    ],
-  }),
-);
-
-registerRoute(
-  ({ url }) => url.origin !== self.origin,
-  new NetworkFirst({
-    cacheName: "cross-origin",
-    networkTimeoutSeconds: 10,
-    plugins: [new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 60 * 60 })],
-  }),
-);
+serwist.addEventListeners();

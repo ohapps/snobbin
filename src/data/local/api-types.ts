@@ -96,7 +96,24 @@ export interface GroupMetaResponse {
   attributes: ApiAttribute[];
   invites: ApiInvite[];
   totalItems: number;
+  /** Server clock when the request started; seeds the `/changes` cursor. */
+  serverTime: string;
 }
+
+/** `GET /api/offline/groups/:groupId/changes?since=<ISO>` */
+export type GroupChangesResponse =
+  | { tooMany: true; cursor: string }
+  | {
+      tooMany: false;
+      /** Pass back as `since` on the next call. */
+      cursor: string;
+      /** Items updated after `since`, with all their attributes/rankings. */
+      items: ApiItem[];
+      itemAttributes: ApiItemAttribute[];
+      rankings: ApiRanking[];
+      /** Every current item id in the group (prunes hard deletes). */
+      itemIds: string[];
+    };
 
 /** `GET /api/offline/groups/:groupId/items?page=N` */
 export interface GroupItemsPageResponse {

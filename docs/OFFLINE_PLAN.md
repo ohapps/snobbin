@@ -13,6 +13,43 @@ is no write queue: all mutations are hidden while offline.
 
 ---
 
+## Design decision (Nov 2026)
+
+**Decision:** keep a hand-rolled, one-way **server → IndexedDB (Dexie) mirror** plus a
+custom service worker (Serwist), rather than adopting a sync engine or SQLite in the
+browser. Revisit only if offline **writes** become a requirement.
+
+**Why:**
+
+- **Read-only is the easy case.** No conflict resolution, write queue, or replay — the
+  main things sync engines solve.
+- **IndexedDB is the most portable store.** It works in every browser and installed
+  PWA (including Safari) with no worker, WASM asset, or COOP/COEP headers. The first
+  implementation used SQLite WASM (wa-sqlite over OPFS) and hit the usual problems:
+  OPFS differences across browsers, the fast VFSes needing COOP/COEP (which break
+  Auth0 and Cloudinary), and extra worker/WASM plumbing.
+- **The data is small.** ~1,600 items per group fits comfortably; an indexed lookup
+  plus in-memory filter/sort is fast enough, so a SQL engine buys little.
+- **The real risks weren't the storage library.** They were local queries drifting
+  from the server's `getItems()`, full re-syncs, and an unmaintained service-worker
+  plugin. Those were addressed directly: parity tests (§10), incremental sync (§5), and
+  the move from `next-pwa` to Serwist (§7).
+
+**Alternatives considered:**
+
+| Option                                           | Fit                                                                                                                            |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| ElectricSQL (shapes)                             | Read-only Postgres → client streaming; would replace the hand-written `/api/offline/*` routes. Closest fit if sync code grows. |
+| PowerSync                                        | Mature offline **writes** against Postgres, but brings SQLite back into the browser.                                           |
+| RxDB (on Dexie)                                  | Reactive queries + replication plugins; mainly worthwhile once writes are needed.                                              |
+| Replicache / Zero, TinyBase                      | Local-first / realtime collaboration; more than "has this been ranked?" needs.                                                 |
+| SQLite WASM (wa-sqlite, official build, SQLocal) | Tried first; replaced for the reasons above.                                                                                   |
+
+Any of these would be a rewrite of the data layer and would only remove the
+duplicated query logic if queries also moved into that library's query layer.
+
+---
+
 ## 1. Architecture at a glance
 
 ```
@@ -21,7 +58,8 @@ Online
         └─▶ useAutoSync (background, non-blocking)
               ├─ GET /api/offline/bootstrap            → groups, memberships, snobs
               ├─ GET /api/offline/groups/:id/meta      → group, members, attributes, invites
-              ├─ GET /api/offline/groups/:id/items?page → 20 items/page + attrs + rankings
+              ├─ GET /api/offline/groups/:id/items?page → full mirror, 20 items/page
+              ├─ GET /api/offline/groups/:id/changes    → incremental refresh afterwards
               │     └─▶ IndexedDB mirror (Dexie, one DB per Auth0 user)
               └─ warmGroupImages                       → thumbnails into Cache Storage
 
@@ -46,7 +84,8 @@ Key modules:
 | Sync                 | `src/app/api/offline/**`, `src/data/local/dexie-sync.ts`, `src/data/local/api-types.ts`, `src/hooks/useAutoSync.ts`                                                         |
 | Local reads          | `src/data/local/repositories.ts` (public API), `src/data/local/dexie-repositories.ts`, `src/data/local/mappers.ts`                                                          |
 | Read paths / UI      | `src/hooks/useGroupPageData.ts`, `*PageClient.tsx`, `src/components/Offline/*`                                                                                              |
-| Service worker       | `sw.js` (root, InjectManifest), `next.config.mjs`, `src/initializers/PwaInitializer.tsx`                                                                                    |
+| Service worker       | `sw.js` (root, Serwist), `next.config.mjs`, `src/initializers/PwaInitializer.tsx`                                                                                           |
+| Tests                | `src/data/local/__tests__/dexie-local.test.ts`, `src/data/local/__tests__/mappers.test.ts`                                                                                  |
 | Images               | `src/data/local/warm-images.ts`, `src/components/Image/ImagePreview.tsx`, `src/utils/image-cors.ts`                                                                         |
 | Settings / clear     | `src/components/Profile/OfflineDataSettings.tsx`, `src/data/local/clear.ts`                                                                                                 |
 
@@ -92,17 +131,17 @@ outage.
 
 `SnobbinOfflineDB` (`dexie-db.ts`) tables and indexes:
 
-| Table              | Indexes                                                                   |
-| ------------------ | ------------------------------------------------------------------------- |
-| `groups`           | `id, name`                                                                |
-| `snobs`            | `id, email`                                                               |
-| `group_members`    | `id, groupId, snobId`                                                     |
-| `group_invites`    | `id, groupId, email`                                                      |
-| `group_attributes` | `id, groupId, name`                                                       |
-| `items`            | `id, groupId, ranked, averageRanking, description`                        |
-| `item_attributes`  | `id, itemId, attributeId, attributeValue`                                 |
-| `rankings`         | `id, itemId, groupMemberId`                                               |
-| `sync_meta`        | `groupId` — `complete`, `highestPageSynced`, `totalItems`, `lastSyncedAt` |
+| Table              | Indexes                                                                                                        |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `groups`           | `id, name`                                                                                                     |
+| `snobs`            | `id, email`                                                                                                    |
+| `group_members`    | `id, groupId, snobId`                                                                                          |
+| `group_invites`    | `id, groupId, email`                                                                                           |
+| `group_attributes` | `id, groupId, name`                                                                                            |
+| `items`            | `id, groupId, ranked, averageRanking, description`                                                             |
+| `item_attributes`  | `id, itemId, attributeId, attributeValue`                                                                      |
+| `rankings`         | `id, itemId, groupMemberId`                                                                                    |
+| `sync_meta`        | `groupId` — `complete`, `highestPageSynced`, `totalItems`, `lastSyncedAt`, `state` (JSON: `{ changesCursor }`) |
 
 Row types come from `schema.ts`, which is a leftover Drizzle `sqliteTable` schema from
 the original SQLite design; it is used for types only.
@@ -124,11 +163,18 @@ All routes use the Auth0 session cookie, return snake_case shapes from
 `OFFLINE_ENABLED` — background fill runs in the normal app. The service worker serves
 `/api/offline/*` `NetworkOnly` so the mirror never syncs from a stale cache.
 
-| Route                                             | Returns                                                                                                       |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `GET /api/offline/bootstrap`                      | The user, their non-deleted groups (non-`DISABLED` membership), all memberships and snobs for those groups    |
-| `GET /api/offline/groups/:id/meta`                | Group, members, snobs, attributes, invites, `totalItems`                                                      |
-| `GET /api/offline/groups/:id/items?page&pageSize` | One page of items + their attributes + rankings, ordered `(created_date DESC, id ASC)` so pages never overlap |
+| Route                                             | Returns                                                                                                                                                                                |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/offline/bootstrap`                      | The user, their non-deleted groups (non-`DISABLED` membership), all memberships and snobs for those groups                                                                             |
+| `GET /api/offline/groups/:id/meta`                | Group, members, snobs, attributes, invites, `totalItems`, `serverTime` (seeds the change cursor)                                                                                       |
+| `GET /api/offline/groups/:id/items?page&pageSize` | One page of items + their attributes + rankings, ordered `(created_date DESC, id ASC)` so pages never overlap                                                                          |
+| `GET /api/offline/groups/:id/changes?since=<ISO>` | Items with `updated_date > since` + **all** their attributes and rankings; every current item id (to prune hard deletes); a new `cursor`. `{ tooMany: true }` above 500 changed items. |
+
+`/changes` relies on two server facts: saving a ranking recalculates the item's
+average and bumps its `updated_date` (`calculate-average-ranking.ts`), and items are
+hard-deleted (so deletions are detected from the id list, not timestamps). The cursor
+is taken from the server clock _before_ querying, so writes that land mid-request are
+picked up next time.
 
 ### 5.2 Client sync (`dexie-sync.ts`)
 
@@ -137,16 +183,26 @@ All routes use the Auth0 session cookie, return snake_case shapes from
   longer returns (deleted, left, or disabled): its `sync_meta`, group row, members,
   attributes, items, item attributes, and rankings. Invites are kept because pending
   invites can reference groups the user hasn't joined.
-- **`syncGroupDexie(groupId)`** — writes meta, then pages through items 20 at a time,
-  one transaction per page (upsert by id), updating `sync_meta` after each page.
+- **`syncGroupDexie(groupId)`** — always refreshes meta first, **replacing** the
+  group's members, attributes, and invites (so removals propagate) and dropping item
+  values for attributes the group no longer has. Then:
+  - **Incremental** — if the group is `complete` and has a `changesCursor`: one
+    `/changes` call (from 2 min before the cursor, to absorb clock skew; re-applying
+    is harmless). Changed items have their attributes and rankings replaced; local
+    items missing from `itemIds` are deleted.
+  - **Full** — otherwise (first sync, interrupted sync, no cursor, or `tooMany`):
+    pages through every item, one transaction per page, replacing each item's
+    attributes and rankings; on the last page deletes local items the server didn't
+    return and stores `meta.serverTime` as the cursor. An interrupted full sync stays
+    `complete: false` and restarts from page 1 next time.
 
 ### 5.3 When sync runs (`useAutoSync`)
 
 Called by the group page. Visiting a group online silently mirrors it:
 
 - **Bootstrap** runs first, at most once per 15 min (forced on reconnect).
-- **Group sync** is skipped if the group is `complete` and synced within 24 h;
-  otherwise it re-mirrors from page 1.
+- **Group sync** is skipped if the group is `complete` and synced within 5 min;
+  otherwise it runs (usually incremental, so cheap).
 - **Thumbnails** are pre-cached after a sync, and once per tab per group otherwise
   (see Images).
 - Runs are deduped per group, aborted on unmount, gated on a known identity (never
@@ -193,9 +249,22 @@ pending-invite accept/decline, profile editing, and the item/group drawers. The 
 
 ## 7. Service worker
 
-`next-pwa` in **InjectManifest** mode with a custom `sw.js` (root). Registration is
-explicit in `PwaInitializer` — `next-pwa`'s auto-register targets the Pages Router
-entry, which the App Router never loads — and **only in production builds**.
+Built by **Serwist** (`@serwist/next` + `serwist`, the maintained successor to
+`next-pwa`/Workbox) from a custom `sw.js` (root) into `public/sw.js`. Config in
+`next.config.mjs`:
+
+- `disable` outside production — `next dev` has no worker.
+- `register: false` — registration is explicit in `PwaInitializer`, production only.
+- `reloadOnOnline: false` — Serwist would otherwise hard-reload the page whenever the
+  browser comes back online; `OfflineReconnect` re-syncs and soft-refreshes instead.
+- `exclude: [/\.map$/, /^manifest.*\.js$/, /app-build-manifest\.json$/]` — a single
+  non-200 precache entry fails the whole install. `app-build-manifest.json` is
+  redirected by the auth guard (307); the first two are Serwist's defaults, repeated
+  because setting `exclude` replaces them.
+
+The worker precaches the build output (`precacheOptions.cleanupOutdatedCaches`, which
+also removes the old Workbox precache), uses `skipWaiting` + `clientsClaim`, and on
+activate deletes obsolete caches (`cloudinary-images`, next-pwa's `start-url`).
 
 Routes, in order (first match wins):
 
@@ -203,18 +272,15 @@ Routes, in order (first match wins):
    cached document on network error, timeout, **or any non-OK response** (a crashed
    backend behind a reverse proxy usually returns 502). Cross-origin and redirected
    responses (e.g. the Auth0 login page) are never cached. Cache: `documents`, 200
-   entries.
+   entries. With no cached copy of the URL it falls back to the cached `/`.
 2. `/api/health` and `/api/offline/*` — `NetworkOnly`.
 3. Cloudinary — see Images.
-4. next-pwa's default runtime rules (fonts, static assets, `_next/image`, JS/CSS,
-   `apis`, `others`, cross-origin).
+4. General rules carried over from next-pwa's defaults (fonts, static assets,
+   `_next/image`, JS/CSS, `apis`, `others` — which includes App Router RSC payloads —
+   and cross-origin).
 
 `/` renders a cacheable page and redirects on the client: a server-side 307 isn't
 cacheable, so "open the app offline" would fail.
-
-`next.config.mjs` sets `buildExcludes: [/\.map$/, /app-build-manifest\.json$/]`:
-those precache entries don't return 200 in production, and a single non-200 entry
-makes the whole Workbox install fail.
 
 ---
 
@@ -264,8 +330,18 @@ last sync time, and per-group mirror status (only groups that resolve locally).
   API down". Inspect Application → IndexedDB / Cache Storage.
 - The Claude desktop browser pane can't register service workers; use it only for
   client-side checks (e.g. stubbing `fetch` to reject).
-- Unit tests: `npm test` (Vitest). Coverage of the offline layer is currently limited
-  to `mappers.test.ts`.
+- **Unit tests:** `npm test` (Vitest). `dexie-local.test.ts` runs the real Dexie code
+  against an in-memory IndexedDB (`fake-indexeddb`):
+  - **Query parity with `getItems()`** — default/description/ranking sort with id
+    tiebreak, `ranked`/`pending` status, keyword over description and attribute
+    values, exact attribute filters, paging, item attributes keyed by id, and local
+    groups including attributes and invites. When server query semantics change,
+    update these cases with them.
+  - **Sync** — full mirror (pages, cursor, pruning deletes), incremental changes
+    (upserts, ranking replacement, deletes, overlap before the cursor), `tooMany`
+    fallback to a full mirror, and removal of a deleted group attribute's values.
+- After changing precache config, check every entry in `public/sw.js` returns 200 —
+  one failure leaves the worker `redundant`.
 
 Validated against a production build:
 
@@ -275,8 +351,11 @@ Validated against a production build:
 - **Browser pane, fetch stubbed to fail (Nov 2026, Dexie mirror):** the 1,624-item
   group page renders identically online and offline, including default order,
   `sortBy=DESCRIPTION&status=pending`, and attribute values.
-- **Not yet re-verified in Chrome Offline mode** since the Dexie switch: the
-  `cloudinary-images-v2` cache, thumbnail pre-caching, and avatar caching.
+- **Serwist build (Nov 2026):** production build succeeds; all 67 precache entries
+  return 200; `/api/offline/groups/:id/changes` returns 401 without a session.
+- **Not yet verified in Chrome Offline mode:** the Serwist worker installing and
+  serving offline, incremental sync against real data, the `cloudinary-images-v2`
+  cache, thumbnail pre-caching, and avatar caching.
 
 ---
 
@@ -291,10 +370,15 @@ Validated against a production build:
   profile pictures aren't cached.
 - **Partial mirrors.** A group visited briefly may be partially synced; the profile
   shows "Partial", but the group page doesn't indicate it.
-- **No incremental sync.** Stale groups re-mirror from page 1 (~6–7 s for 1,624 items).
+- **Full syncs aren't resumable.** First mirrors and interrupted syncs restart from
+  page 1 (~6–7 s for 1,624 items); only complete groups sync incrementally.
+- **`/changes` blind spots.** It relies on item `updated_date`. A write path that
+  changes an item's attributes or rankings without bumping it would be missed until
+  the next full mirror (deleting a group attribute is handled via meta).
+- **Duplicated query logic.** `getLocalItemsDexie` re-implements `getItems()`; the
+  parity tests guard it but must be kept in step with server changes.
 - **Not yet validated:** Vercel and Coolify (reverse proxy) deployments, installed
   PWA on iOS Safari / Android Chrome, persistence across browser restarts.
-- `next-pwa` is unmaintained; consider Serwist if service-worker work grows.
 
 ---
 
@@ -305,12 +389,13 @@ The feature is additive. To remove it:
 - Delete `src/data/local/`, `src/app/api/offline/`, `src/components/Offline/`, the
   offline hooks (`useAutoSync`, `useGroupPageData`, `useConnectivity`,
   `useOfflineIdentity`, `useOfflineLogout`), `OfflineDataSettings`, and
-  `src/utils/image-cors.ts`; remove `dexie` from `package.json`.
+  `src/utils/image-cors.ts`; remove `dexie` and `fake-indexeddb` from `package.json`.
 - Revert the try/catch fallbacks in the page RSCs and `AuthInitializer`, and the
   `readOnly` / `onUpdateQuery` props (they default to the online behaviour).
 - No Postgres schema changes were made.
 
 **Keep** the service-worker fixes even if offline reads are removed — they fix
 pre-existing bugs that left the deployed PWA without a working service worker: the
-precache `buildExcludes`, explicit registration in `PwaInitializer`, the navigation
-route, and 5xx handling in `sw.js`.
+precache `exclude` list, explicit registration in `PwaInitializer`, the navigation
+route, and 5xx handling in `sw.js`. The Serwist worker can stay as the app's PWA
+worker; drop the `/api/offline/*` and Cloudinary rules if they're no longer needed.

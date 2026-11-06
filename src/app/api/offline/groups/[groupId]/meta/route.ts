@@ -35,6 +35,11 @@ export async function GET(
   const auth = await requireSessionMember(groupId);
   if (!auth.ok) return auth.response;
 
+  // Captured before any query: a full mirror that starts with this request uses
+  // it as its first `/changes?since=` cursor, so nothing written during the
+  // page-by-page sync is missed.
+  const serverTime = new Date().toISOString();
+
   const [groupRows, members, attributes, invites, itemCountRows] =
     await Promise.all([
       db.select().from(snobGroupsTable).where(eq(snobGroupsTable.id, groupId)),
@@ -81,5 +86,6 @@ export async function GET(
       status: i.status,
     })),
     totalItems: Number(itemCountRows[0]?.count ?? 0),
+    serverTime,
   });
 }

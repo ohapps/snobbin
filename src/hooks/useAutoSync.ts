@@ -20,8 +20,9 @@ import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
  *  - **Idempotent.** A group already fully mirrored is skipped, and concurrent
  *    runs for the same group are deduped via a module-level map, so navigating
  *    back and forth does not restart a multi-second sync.
- *  - **Resumable.** A partially mirrored group resumes from `highestPageSynced`
- *    rather than restarting.
+ *  - **Incremental.** Once a group is fully mirrored, refreshes fetch only
+ *    the items changed since the last sync (`/changes`). A group that was never
+ *    completed (first visit, interrupted sync) is re-mirrored page by page.
  *  - **Cancellable.** Aborts when the page unmounts, so a pager is not left
  *    running against a group the user has left.
  *
@@ -38,10 +39,11 @@ let bootstrapSyncedAt = 0;
 let persistRequested = false;
 
 /**
- * How long a fully-mirrored group is considered fresh. After this we re-mirror
- * from page 1 in the background so offline data does not drift indefinitely.
+ * How long a fully-mirrored group is considered fresh. After this, the next
+ * visit applies an incremental `/changes` refresh — cheap (usually a handful of
+ * items), so this is short to keep the offline copy close to live.
  */
-const SYNC_TTL_MS = 24 * 60 * 60 * 1000;
+const SYNC_TTL_MS = 5 * 60 * 1000;
 
 /**
  * Ask the browser to keep our storage. Without this the mirror is "best effort"
@@ -117,7 +119,7 @@ async function mirrorGroup(
   const state = await getGroupSyncState(groupId);
 
   // Skip only if the mirror is complete *and* recent. A stale mirror is
-  // re-mirrored so offline data does not drift indefinitely.
+  // refreshed so offline data does not drift.
   const fresh =
     state?.complete === true &&
     state.lastSyncedAt !== null &&
@@ -127,8 +129,8 @@ async function mirrorGroup(
     requestPersistentStorage();
     await ensureBootstrap();
 
-    // A complete-but-stale group must restart from page 1: resuming would
-    // start past the last page and refresh nothing. An incomplete group resumes.
+    // Incremental when the group is complete and has a change cursor;
+    // otherwise a full paged re-mirror.
     await syncGroupDexie(groupId);
   }
 
