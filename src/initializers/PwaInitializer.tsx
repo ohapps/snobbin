@@ -56,6 +56,27 @@ export const PwaProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
+  // Register the service worker.
+  //
+  // Serwist's auto-register is off (`register: false` in next.config.mjs) so
+  // registration stays explicit and production-only. (The previous library,
+  // next-pwa, injected its register script into the Pages Router `main.js`
+  // entry, which the App Router never loads, so the worker never registered.)
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") return;
+    if (!("serviceWorker" in navigator)) return;
+
+    const register = async () => {
+      try {
+        await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      } catch (error) {
+        console.error("Service worker registration failed:", error);
+      }
+    };
+
+    void register();
+  }, []);
+
   return (
     <PwaContext.Provider value={{ deferredPrompt, setDeferredPrompt }}>
       {children}

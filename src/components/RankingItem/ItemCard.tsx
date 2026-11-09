@@ -48,7 +48,16 @@ export const AttributeValue = styled(Box)(({ theme }) => ({
   paddingLeft: theme.spacing(1),
 }));
 
-const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
+const ItemCard = ({
+  group,
+  item,
+  readOnly = false,
+}: {
+  group: SnobGroup;
+  item: RankingItem;
+  /** Offline read-only mode: no edit/copy/delete menu. */
+  readOnly?: boolean;
+}) => {
   const [expanded, setExpanded] = useState(false);
   const groupMember = useCurrentGroupMember(group);
   const canEdit =
@@ -65,17 +74,19 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
   return (
     <Card>
       <Grid container spacing={2}>
-        <Grid
-          size={{ xs: 12 }}
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: "-10px",
-            marginBottom: "-40px",
-          }}
-        >
-          <ItemCardMenu item={item} canEdit={canEdit} />
-        </Grid>
+        {!readOnly && (
+          <Grid
+            size={{ xs: 12 }}
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: "-10px",
+              marginBottom: "-40px",
+            }}
+          >
+            <ItemCardMenu item={item} canEdit={canEdit} />
+          </Grid>
+        )}
         <Grid
           size={{ xs: 12, md: 4 }}
           display={"flex"}
@@ -110,7 +121,7 @@ const ItemCard = ({ group, item }: { group: SnobGroup; item: RankingItem }) => {
               <Typography>Rankings</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <ItemRankings group={group} item={item} />
+              <ItemRankings group={group} item={item} readOnly={readOnly} />
             </AccordionDetails>
           </Accordion>
         </Grid>

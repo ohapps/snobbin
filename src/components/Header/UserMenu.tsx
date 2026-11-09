@@ -10,6 +10,7 @@ import { Link, styled } from "@mui/material";
 import ProfileAvatar from "@/components/Profile/ProfileAvatar";
 import { Snob } from "@/types/snob";
 import PwaInstallButton from "@/components/Header/PwaInstallButton";
+import { useOfflineLogout } from "@/hooks/useOfflineLogout";
 
 export const NavLink = styled(Link)(({ theme }) => ({
   textDecoration: "none",
@@ -28,6 +29,7 @@ export const Container = styled("div")(({ theme }) => ({
 
 const UserMenu = ({ snob }: { snob: Snob }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const onLogout = useOfflineLogout();
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -68,7 +70,9 @@ const UserMenu = ({ snob }: { snob: Snob }) => {
           <ListItemIcon>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
-          <NavLink href={AppRoutes.LOGOUT}>Logout</NavLink>
+          <NavLink href={AppRoutes.LOGOUT} onClick={onLogout}>
+            Logout
+          </NavLink>
         </MenuItem>
       </Menu>
     </Container>

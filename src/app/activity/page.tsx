@@ -1,23 +1,31 @@
-import PendingInvites from "@/components/Activity/PendingInvites";
-import RecentItems from "@/components/Activity/RecentItems";
 import PageContainer from "@/components/Page/PageContainer";
+import ActivityPageClient from "@/components/Activity/ActivityPageClient";
 import { getPendingInvites } from "@/server/utils/group/get-pending-invites";
 import { getRecentItems } from "@/server/utils/items/get-recent-items";
-import Grid from "@mui/material/Grid2";
+import { OFFLINE_ENABLED } from "@/config/offline";
+import type { RecentRankingItem } from "@/types/rankings";
+import type { SnobGroupInvite } from "@/types/snobGroup";
 
 const Page = async () => {
-  const invites = await getPendingInvites();
-  const recentItems = await getRecentItems();
+  let serverData: {
+    invites: SnobGroupInvite[];
+    recentItems: RecentRankingItem[];
+  } | null = null;
+
+  try {
+    const [invites, recentItems] = await Promise.all([
+      getPendingInvites(),
+      getRecentItems(),
+    ]);
+    serverData = { invites, recentItems };
+  } catch (error) {
+    // Offline: render from the local mirror instead of erroring.
+    if (!OFFLINE_ENABLED) throw error;
+  }
+
   return (
     <PageContainer>
-      <Grid container spacing={2} p={2}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <PendingInvites invites={invites} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <RecentItems recentItems={recentItems} />
-        </Grid>
-      </Grid>
+      <ActivityPageClient serverData={serverData} />
     </PageContainer>
   );
 };

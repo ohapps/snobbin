@@ -42,9 +42,11 @@ const CardLink = styled(Link)(({ theme }) => ({
 
 interface Props {
   group: SnobGroup;
+  /** Offline read-only mode: hide the edit/delete menu. */
+  readOnly?: boolean;
 }
 
-const GroupCard = ({ group }: Props) => {
+const GroupCard = ({ group, readOnly = false }: Props) => {
   const groupMember = useCurrentGroupMember(group);
   return (
     <Card>
@@ -52,7 +54,7 @@ const GroupCard = ({ group }: Props) => {
         <CardLink href={`${AppRoutes.GROUPS}/${group.id}`}>
           <GroupInfo group={group} expanded={false} />
         </CardLink>
-        {groupMember?.role === SnobGroupRole.ADMIN && (
+        {!readOnly && groupMember?.role === SnobGroupRole.ADMIN && (
           <GroupCardMenu group={group} />
         )}
       </CardContent>
