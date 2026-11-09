@@ -35,7 +35,7 @@ const OfflineIndicator = () => {
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-    // Loaded lazily so the SQLite client is not pulled into every page's bundle.
+    // Loaded lazily so Dexie is not pulled into every page's bundle.
     void import("@/data/local/repositories")
       .then(({ getAllGroupSyncStates }) => getAllGroupSyncStates())
       .then((states) => {

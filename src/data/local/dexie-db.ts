@@ -58,14 +58,9 @@ export function getDexieDb(name: string): SnobbinOfflineDB {
   return db;
 }
 
-/** IndexedDB name for a mirror (the legacy `.sqlite3` suffix becomes `.db`). */
-export function dexieDbNameFor(offlineDbName: string): string {
-  return offlineDbName.replace(/\.sqlite3$/, ".db");
-}
-
 /** The mirror for the currently remembered identity. */
 export function currentDexieDb(): SnobbinOfflineDB {
-  return getDexieDb(dexieDbNameFor(getOfflineDbName()));
+  return getDexieDb(getOfflineDbName());
 }
 
 /** Closes every open mirror so the next query (or a deleteDatabase) starts clean. */

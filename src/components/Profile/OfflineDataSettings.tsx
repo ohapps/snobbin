@@ -29,6 +29,13 @@ import { formatBytes, formatRelativeTime } from "@/utils/format-offline";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
 
+/** Error names meaning on-device storage itself is unavailable. */
+const STORAGE_UNAVAILABLE_ERRORS = new Set([
+  "MissingAPIError",
+  "SecurityError",
+  "InvalidStateError",
+]);
+
 const Section = styled(Card)(({ theme }) => ({
   maxWidth: theme.breakpoints.values.sm,
   marginTop: theme.spacing(2),
@@ -98,11 +105,13 @@ const OfflineDataSettings = () => {
         // No mirror yet, or the local database could not be opened.
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : String(err);
+          const name = err instanceof Error ? err.name : "";
+          // Dexie raises MissingAPIError when IndexedDB is absent; browsers
+          // raise SecurityError/InvalidStateError when storage is blocked
+          // (e.g. some private-browsing modes or disabled site data).
           setLoadError(
-            msg.includes("crossOriginIsolated") ||
-              msg.includes("OPFS") ||
-              msg.includes("VFS")
-              ? "Offline storage is not available in this browser/environment (missing secure context or storage permissions)."
+            STORAGE_UNAVAILABLE_ERRORS.has(name)
+              ? "Offline storage is not available in this browser (IndexedDB is missing or blocked)."
               : msg,
           );
         }

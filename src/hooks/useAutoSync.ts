@@ -11,7 +11,7 @@ import { useOfflineIdentity } from "@/hooks/useOfflineIdentity";
  * Background mirror fill.
  *
  * When a group page is viewed online we quietly mirror the whole group into the
- * local SQLite database so it is readable offline later, with no explicit user
+ * local IndexedDB database so it is readable offline later, with no explicit user
  * action. See docs/OFFLINE_PLAN.md › Sync.
  *
  * Properties that matter here:

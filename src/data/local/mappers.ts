@@ -1,9 +1,8 @@
 /**
  * Pure mapping helpers for the offline layer.
  *
- * Kept free of browser/worker dependencies so they can be unit-tested in Node
- * (the rest of `src/data/local` needs OPFS + a Worker, which vitest's node
- * environment cannot provide).
+ * Kept free of browser and database dependencies so they can be unit-tested
+ * without `fake-indexeddb`.
  */
 
 import type { SnobGroupSearchParams } from "@/types/snobGroup";

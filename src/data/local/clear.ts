@@ -3,16 +3,12 @@
  *
  * Used when logging out and when a different account signs in on the same
  * device, so a shared browser never exposes one user's cached groups to
- * another. The SQLite file itself stays on disk (OPFS file deletion is not
- * exposed by the worker), but every row is removed, which is what matters for
- * privacy.
+ * another. The whole IndexedDB database is deleted, along with runtime caches
+ * that hold user content.
  */
 
-// Using Dexie only now
-import { dexieDbNameFor, resetDexieDb } from "./dexie-db";
+import { resetDexieDb } from "./dexie-db";
 import { getOfflineDbName } from "./identity";
-
-/** Dependents first, so the wipe is safe even if FKs are ever enabled. */
 
 /** Runtime caches that hold user-specific content (e.g. Cloudinary images). */
 const RUNTIME_CACHES = [
@@ -29,7 +25,7 @@ export async function clearOfflineData(): Promise<void> {
   }
   if (typeof indexedDB !== "undefined") {
     try {
-      indexedDB.deleteDatabase(dexieDbNameFor(getOfflineDbName()));
+      indexedDB.deleteDatabase(getOfflineDbName());
     } catch {
       // ignore
     }
@@ -54,7 +50,7 @@ export async function clearOfflineDataFor(dbName: string): Promise<void> {
   }
   if (typeof indexedDB !== "undefined") {
     try {
-      indexedDB.deleteDatabase(dexieDbNameFor(dbName));
+      indexedDB.deleteDatabase(dbName);
     } catch {
       // ignore
     }

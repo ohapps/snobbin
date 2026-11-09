@@ -13,7 +13,7 @@ import { useConnectivity } from "@/hooks/useConnectivity";
  * Client shell for the group page.
  *
  * Receives the server-rendered data as `serverData` (the online fast path) and
- * transparently falls back to the local SQLite mirror when the server is
+ * transparently falls back to the local IndexedDB mirror when the server is
  * unreachable. The presentational components are reused unchanged because the
  * local repository returns identical shapes.
  */

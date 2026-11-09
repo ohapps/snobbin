@@ -143,14 +143,13 @@ outage.
 | `rankings`         | `id, itemId, groupMemberId`                                                                                    |
 | `sync_meta`        | `groupId` — `complete`, `highestPageSynced`, `totalItems`, `lastSyncedAt`, `state` (JSON: `{ changesCursor }`) |
 
-Row types come from `schema.ts`, which is a leftover Drizzle `sqliteTable` schema from
-the original SQLite design; it is used for types only.
+Row types are plain TypeScript interfaces in `schema.ts`; table names and indexes are
+declared in `dexie-db.ts`. The database for each user is named
+`snobbin-offline-<sub>.db` (`offlineDbNameFor` in `src/config/offline.ts`).
 
 > **History:** the first implementation used SQLite WASM (wa-sqlite over OPFS, with a
 > Drizzle `sqlite-proxy` driver). It was replaced by Dexie/IndexedDB, which needs no
-> worker, WASM asset, or vendored library and has no COOP/COEP concerns. Some comments
-> and names (e.g. `offlineDbNameFor` producing `.sqlite3`, mapped to `.db`) still
-> reflect that history. `src/vendor/` is an empty leftover directory.
+> worker, WASM asset, or vendored library and has no COOP/COEP concerns.
 
 ---
 

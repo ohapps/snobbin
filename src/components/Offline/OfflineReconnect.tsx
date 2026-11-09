@@ -13,7 +13,7 @@ const RECONCILE_COOLDOWN_MS = 10_000;
 /**
  * Reconciles with the server when connectivity returns.
  *
- * While offline the app is read-only and reads from the SQLite mirror (or from
+ * While offline the app is read-only and reads from the IndexedDB mirror (or from
  * cached RSC data). Without this, coming back online left the page showing that
  * stale snapshot until the user navigated: group lists/memberships were stale for
  * the whole tab session and the open group never re-fetched.

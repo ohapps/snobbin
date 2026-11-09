@@ -1,8 +1,8 @@
 /**
  * Remembers which user the on-device mirror belongs to.
  *
- * The identity is kept in `localStorage` rather than in SQLite because it is
- * needed *before* the database can be opened (the DB file name is derived from
+ * The identity is kept in `localStorage` rather than in IndexedDB because it is
+ * needed *before* the database can be opened (the database name is derived from
  * it) and because it must be readable with no network, when `/api/auth/me` is
  * unreachable. `localStorage` is synchronous and persists offline.
  *
@@ -56,7 +56,7 @@ export function subscribeIdentity(listener: () => void): () => void {
   };
 }
 
-/** The SQLite file name for the currently remembered identity. */
+/** The IndexedDB database name for the currently remembered identity. */
 export function getOfflineDbName(): string {
   return offlineDbNameFor(getRememberedSub());
 }
