@@ -13,6 +13,7 @@ import {
   MenuItem,
   styled,
   Typography,
+  TypographyProps,
 } from "@mui/material";
 import Settings from "@mui/icons-material/Settings";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -28,7 +29,11 @@ import { disableGroupMember } from "@/server/actions/group/disable-group-member"
 import { enableGroupMember } from "@/server/actions/group/enable-group-member";
 import ProfileAvatar from "../Profile/ProfileAvatar";
 
-export const Text = styled(Typography)(({ theme }) => ({
+// Rendered as a <div>: the line holds Chips, which render <div>s and are
+// invalid inside Typography's default <p> (a hydration error).
+export const Text = styled((props: TypographyProps) => (
+  <Typography component="div" {...props} />
+))(({ theme }) => ({
   padding: theme.spacing(1),
 }));
 

@@ -24,9 +24,11 @@ const PROBE_URL = "/api/health";
 const PROBE_INTERVAL_MS = 30_000;
 
 export function useConnectivity(): Connectivity {
-  const [browserOnline, setBrowserOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine,
-  );
+  // Start as online on both server and client, then read the real value after
+  // mounting. Reading `navigator.onLine` during render breaks hydration: Node
+  // 21+ has a global `navigator` without `onLine`, so the server would render
+  // the offline (read-only) UI while the browser renders the online one.
+  const [browserOnline, setBrowserOnline] = useState(true);
   const [apiReachable, setApiReachable] = useState(true);
   const [ready, setReady] = useState(false);
   // Bumped to re-run the probe immediately (don't wait for the next interval).
@@ -37,6 +39,7 @@ export function useConnectivity(): Connectivity {
       setBrowserOnline(navigator.onLine);
       if (navigator.onLine) setProbeToken((token) => token + 1);
     };
+    setBrowserOnline(navigator.onLine);
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
     return () => {

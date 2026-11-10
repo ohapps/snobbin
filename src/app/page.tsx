@@ -1,6 +1,7 @@
 import { getLastGroupId } from "@/server/utils/user/get-last-group-id";
 import { OFFLINE_ENABLED } from "@/config/offline";
 import OfflineHomeRedirect from "@/components/Offline/OfflineHomeRedirect";
+import { redirectIfNoSession } from "@/server/utils/user/get-current-user";
 
 /**
  * Landing route.
@@ -18,6 +19,8 @@ export default async function Home() {
     lastGroupId = (await getLastGroupId()) ?? null;
     resolved = true;
   } catch (error) {
+    // An expired session means log in again, not the offline fallback.
+    redirectIfNoSession(error);
     // Offline: fall back to the mirror's last group.
     if (!OFFLINE_ENABLED) throw error;
   }

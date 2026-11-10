@@ -6,6 +6,7 @@ import { SnobGroupSearchParams } from "@/types/snobGroup";
 import GroupPageClient from "@/components/Group/GroupPageClient";
 import { OFFLINE_ENABLED } from "@/config/offline";
 import type { GroupPageData } from "@/hooks/useGroupPageData";
+import { redirectIfNoSession } from "@/server/utils/user/get-current-user";
 
 /**
  * Group page. Fetches server data for the online fast path and hands it to the
@@ -57,6 +58,8 @@ const GroupPage = async ({
   try {
     serverData = await fetchServerData(params.groupId, searchParams);
   } catch (error) {
+    // An expired session means log in again, not the offline fallback.
+    redirectIfNoSession(error);
     // Offline features tolerate an unreachable server/DB; without the flag we
     // preserve the original behaviour (a thrown error surfaces as before).
     if (!OFFLINE_ENABLED) throw error;

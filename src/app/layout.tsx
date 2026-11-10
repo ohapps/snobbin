@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import "./globals.css";
 import AppInitializer from "@/initializers/AppInitializer";
 import PageContainer from "@/components/Page/PageContainer";
@@ -45,10 +46,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AppInitializer>
-          <TopHeader />
-          <PageContainer>{children}</PageContainer>
-        </AppInitializer>
+        {/* Collects MUI/Emotion styles into <head> during server rendering.
+            Without it Emotion writes <style> tags next to each component,
+            which don't exist on the client and break hydration. */}
+        <AppRouterCacheProvider>
+          <AppInitializer>
+            <TopHeader />
+            <PageContainer>{children}</PageContainer>
+          </AppInitializer>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
