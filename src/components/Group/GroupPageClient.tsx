@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import GroupDetails from "@/components/Group/GroupDetails";
 import ItemDrawer from "@/components/RankingItem/ItemDrawer";
@@ -8,6 +9,13 @@ import { SnobGroupSearchParams } from "@/types/snobGroup";
 import { useGroupPageData, type GroupPageData } from "@/hooks/useGroupPageData";
 import { useAutoSync } from "@/hooks/useAutoSync";
 import { useConnectivity } from "@/hooks/useConnectivity";
+import { getRememberedSub } from "@/data/local/identity";
+import {
+  activeFilters,
+  hasFilterParams,
+  loadRememberedFilters,
+  saveRememberedFilters,
+} from "@/utils/remembered-filters";
 
 /**
  * Client shell for the group page.
@@ -38,7 +46,9 @@ const GroupPageClient = ({
     localParams ?? searchParams,
     serverData,
   );
-  const { online } = useConnectivity();
+  const { online, ready } = useConnectivity();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Read-only covers both "reading from the mirror" and "the connection dropped
   // while this page still shows server-rendered data". The latter is why this
@@ -60,7 +70,12 @@ const GroupPageClient = ({
     [searchParams],
   );
 
+  // True while navigating to the remembered filter, to avoid flashing the
+  // unfiltered list.
+  const [restoring, setRestoring] = useState(false);
+
   // Once back online, drop the local overrides so the server path takes over.
+  // (A remembered filter that was applied locally is re-applied below.)
   useEffect(() => {
     if (source === "server" && localParams) {
       setLocalParams(null);
@@ -73,8 +88,71 @@ const GroupPageClient = ({
     [localParams, searchParams],
   );
 
-  if (!data) {
-    if (loading) {
+  const group = data?.group.id === groupId ? data.group : null;
+
+  // Re-apply the group's last filter whenever it is shown with no filter in
+  // the URL. A URL that states a filter (including RESET's explicit "all")
+  // wins. See src/utils/remembered-filters.ts.
+  useEffect(() => {
+    if (!ready || !group || restoring) return;
+    if (hasFilterParams(effectiveSearchParams)) return;
+
+    const saved = activeFilters(
+      loadRememberedFilters(getRememberedSub(), groupId),
+      group.attributes.map((attribute) => attribute.id),
+    );
+    if (Object.keys(saved).length === 0) return;
+
+    const next: SnobGroupSearchParams = {
+      ...effectiveSearchParams,
+      ...saved,
+      page: "1",
+    };
+    if (readOnly) {
+      // Router navigations fail offline; apply it to local state instead.
+      setLocalParams(next);
+      return;
+    }
+    const query = new URLSearchParams();
+    Object.entries(next).forEach(([key, value]) => {
+      if (value !== undefined) query.set(key, value);
+    });
+    setRestoring(true);
+    router.replace(`${pathname}?${query.toString()}`);
+  }, [
+    ready,
+    group,
+    groupId,
+    effectiveSearchParams,
+    readOnly,
+    restoring,
+    router,
+    pathname,
+  ]);
+
+  // Stop showing the spinner once the filtered page arrives, or if the
+  // connection drops mid-navigation (the offline path above takes over).
+  useEffect(() => {
+    if (restoring && (hasFilterParams(searchParams) || readOnly)) {
+      setRestoring(false);
+    }
+  }, [restoring, searchParams, readOnly]);
+
+  // Remember the filter whenever one is applied; RESET (all "all") forgets it.
+  useEffect(() => {
+    if (!group || !hasFilterParams(effectiveSearchParams)) return;
+    saveRememberedFilters(
+      getRememberedSub(),
+      groupId,
+      activeFilters(
+        effectiveSearchParams,
+        group.attributes.map((attribute) => attribute.id),
+      ),
+    );
+  }, [group, groupId, effectiveSearchParams]);
+
+  if (!data || restoring) {
+    if (loading || restoring) {
       return (
         <Box display="flex" justifyContent="center" py={6}>
           <CircularProgress />
