@@ -44,6 +44,7 @@ const SearchBox = ({
 
   return (
     <SearchTextField
+      id="item-search"
       placeholder="Search…"
       fullWidth
       size="small"

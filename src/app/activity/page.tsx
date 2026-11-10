@@ -5,6 +5,7 @@ import { getRecentItems } from "@/server/utils/items/get-recent-items";
 import { OFFLINE_ENABLED } from "@/config/offline";
 import type { RecentRankingItem } from "@/types/rankings";
 import type { SnobGroupInvite } from "@/types/snobGroup";
+import { redirectIfNoSession } from "@/server/utils/user/get-current-user";
 
 const Page = async () => {
   let serverData: {
@@ -19,6 +20,8 @@ const Page = async () => {
     ]);
     serverData = { invites, recentItems };
   } catch (error) {
+    // An expired session means log in again, not the offline fallback.
+    redirectIfNoSession(error);
     // Offline: render from the local mirror instead of erroring.
     if (!OFFLINE_ENABLED) throw error;
   }

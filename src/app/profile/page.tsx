@@ -1,4 +1,7 @@
-import { getCurrentUser } from "@/server/utils/user/get-current-user";
+import {
+  getCurrentUser,
+  redirectIfNoSession,
+} from "@/server/utils/user/get-current-user";
 import ProfilePageClient from "@/components/Profile/ProfilePageClient";
 import OfflineDataSettings from "@/components/Profile/OfflineDataSettings";
 import { OFFLINE_ENABLED } from "@/config/offline";
@@ -10,6 +13,8 @@ const Page = async () => {
   try {
     snob = await getCurrentUser();
   } catch (error) {
+    // An expired session means log in again, not the offline fallback.
+    redirectIfNoSession(error);
     // Offline: render the cached profile read-only instead of erroring.
     if (!OFFLINE_ENABLED) throw error;
   }
