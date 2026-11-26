@@ -11,7 +11,8 @@ import { saveItem } from "@/server/actions/items/save-item";
 import ImageUploadButton from "../Image/ImageUploadButton";
 import { getImageOrPlaceholder, placeholderImage } from "@/types/image";
 import ItemAttributes from "./ItemAttributes";
-import { useIdentifyItem } from "@/hooks/useIdentifyItem";
+import { ImageCandidate, useIdentifyItem } from "@/hooks/useIdentifyItem";
+import ImageCandidatePicker from "../Image/ImageCandidatePicker";
 import useCurrentGroupMember from "@/hooks/useCurrentGroupMember";
 import { LoadingButton } from "@mui/lab";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
@@ -57,6 +58,8 @@ const ItemForm = ({
     !!currentDescription && currentDescription.trim().length > 0;
   const canIdentify = hasImage || hasDescription;
 
+  const [imageCandidates, setImageCandidates] = useState<ImageCandidate[]>([]);
+
   const { identifyItem, isIdentifying } = useIdentifyItem(
     rankingGroup.name,
     rankingGroup.description,
@@ -85,7 +88,13 @@ const ItemForm = ({
       if (result.image) {
         setImage(result.image);
       }
-      enqueueSnackbar("Item identified successfully", { variant: "success" });
+      setImageCandidates(result.imageCandidates);
+      enqueueSnackbar(
+        result.imageCandidates.length
+          ? "Item identified. Pick an image below."
+          : "Item identified successfully",
+        { variant: "success" },
+      );
     } else {
       enqueueSnackbar("Failed to identify item", { variant: "error" });
     }
@@ -117,7 +126,24 @@ const ItemForm = ({
       >
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <ImageUploadButton image={image} setImage={setImage} />
+            <ImageUploadButton
+              image={image}
+              setImage={(picked) => {
+                setImage(picked);
+                setImageCandidates([]);
+              }}
+            />
+            <ImageCandidatePicker
+              candidates={imageCandidates}
+              onPicked={(picked) => {
+                setImage(picked);
+                setImageCandidates([]);
+              }}
+              onDismiss={() => setImageCandidates([])}
+              onError={(message) =>
+                enqueueSnackbar(message, { variant: "error" })
+              }
+            />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <ControlledTextField name="description" label="Description" />
