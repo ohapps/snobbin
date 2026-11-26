@@ -3,6 +3,7 @@ import {
   findImageCandidates,
   isCandidateImageUrl,
   isRelevant,
+  previewOf,
   significantWords,
   searchCommons,
   searchOpenLibrary,
@@ -43,7 +44,10 @@ const wikiPages = {
         title: "Stick (TV series)",
         index: 2,
         original: { source: "https://upload.wikimedia.org/x/stick.jpg" },
-        thumbnail: { source: "https://upload.wikimedia.org/x/400px-stick.jpg" },
+        thumbnail: {
+          source:
+            "https://thumb.wikimedia.org/x/thumb/stick.jpg/1920px-stick.jpg",
+        },
       },
       { title: "Stick figure", index: 3 },
     ],
@@ -55,15 +59,37 @@ describe("searchWikipedia", () => {
     const { impl, calls } = fakeFetch({ [WIKI]: wikiPages });
     expect(await searchWikipedia("Stick", 3, impl)).toEqual([
       {
-        url: "https://upload.wikimedia.org/x/stick.jpg",
-        thumbnailUrl: "https://upload.wikimedia.org/x/400px-stick.jpg",
+        // The ~1600px rendition, not the (possibly huge) original.
+        url: "https://thumb.wikimedia.org/x/thumb/stick.jpg/1920px-stick.jpg",
+        thumbnailUrl:
+          "https://thumb.wikimedia.org/x/thumb/stick.jpg/500px-stick.jpg",
         source: "wikipedia",
         label: "Stick (TV series)",
       },
     ]);
     expect(calls[0]).toContain("gsrsearch=Stick");
+    expect(calls[0]).toContain("pithumbsize=1600");
     // Posters/covers aren't freely licensed; without this they're missing.
     expect(calls[0]).toContain("pilicense=any");
+  });
+
+  it("uses the original when Wikipedia has no rendition", async () => {
+    const { impl } = fakeFetch({
+      [WIKI]: {
+        query: {
+          pages: [
+            {
+              title: "Small poster",
+              index: 1,
+              original: { source: "https://upload.wikimedia.org/x/small.jpg" },
+            },
+          ],
+        },
+      },
+    });
+    const [candidate] = await searchWikipedia("Small poster", 3, impl);
+    expect(candidate.url).toBe("https://upload.wikimedia.org/x/small.jpg");
+    expect(candidate.thumbnailUrl).toBe(candidate.url);
   });
 
   it("returns nothing when the request fails", async () => {
@@ -326,6 +352,7 @@ describe("findImageCandidates", () => {
 describe("isCandidateImageUrl", () => {
   it.each([
     ["https://upload.wikimedia.org/a.jpg", true],
+    ["https://thumb.wikimedia.org/x/thumb/a.jpg/1920px-a.jpg", true],
     ["https://covers.openlibrary.org/b/id/1-L.jpg", true],
     ["https://image.tmdb.org/t/p/original/a.jpg", true],
     ["http://upload.wikimedia.org/a.jpg", false],
@@ -334,6 +361,51 @@ describe("isCandidateImageUrl", () => {
     ["not a url", false],
   ])("%s → %s", (url, expected) => {
     expect(isCandidateImageUrl(url)).toBe(expected);
+  });
+});
+
+describe("previewOf", () => {
+  it("swaps a large Wikimedia rendition for the 500px one", () => {
+    expect(
+      previewOf("https://thumb.wikimedia.org/a/thumb/b.jpg/1920px-b.jpg"),
+    ).toBe("https://thumb.wikimedia.org/a/thumb/b.jpg/500px-b.jpg");
+  });
+
+  it("leaves small renditions and originals alone", () => {
+    const small = "https://thumb.wikimedia.org/a/thumb/b.jpg/330px-b.jpg";
+    const original = "https://upload.wikimedia.org/a/b.jpg";
+    expect(previewOf(small)).toBe(small);
+    expect(previewOf(original)).toBe(original);
+  });
+});
+
+describe("Wikipedia relevance uses the item's own name", () => {
+  it("drops an article that only matches a word from the AI's phrases", async () => {
+    const { impl } = fakeFetch({
+      [WIKI]: {
+        query: {
+          pages: [
+            {
+              title: "Stick (TV series)",
+              index: 1,
+              original: { source: "https://upload.wikimedia.org/w/stick.jpg" },
+            },
+            {
+              title: "Apple TV (device)",
+              index: 2,
+              original: {
+                source: "https://upload.wikimedia.org/w/appletv.jpg",
+              },
+            },
+          ],
+        },
+      },
+    });
+    const result = await findImageCandidates(
+      { kind: "tv", title: "Stick", queries: ["Stick Apple TV+"] },
+      impl,
+    );
+    expect(result.map((c) => c.label)).toEqual(["Stick (TV series)"]);
   });
 });
 

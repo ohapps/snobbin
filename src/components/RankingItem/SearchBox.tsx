@@ -49,7 +49,13 @@ const SearchBox = ({
   }, [defaultKeyword]);
 
   const handleSearch = useDebouncedCallback((keyword: string) => {
-    pendingKeywords.current.push(keyword);
+    // Sending the keyword already in effect, with nothing in flight, doesn't
+    // change it, so no echo comes back; remembering it would make a later
+    // Back to that keyword look like our own echo and be ignored.
+    const pending = pendingKeywords.current;
+    if (pending.length > 0 || keyword !== defaultKeyword) {
+      pending.push(keyword);
+    }
     updateQuery({ keyword, page: "1" });
   }, 300);
 

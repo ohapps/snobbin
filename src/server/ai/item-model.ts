@@ -16,11 +16,6 @@ import type { LanguageModel } from "ai";
 const DEFAULT_OPENROUTER_MODEL = "google/gemini-3.5-flash-lite";
 const DEFAULT_GOOGLE_MODEL = "gemini-3.5-flash-lite";
 
-export const isItemAiConfigured = (): boolean =>
-  !!(
-    process.env.OPENROUTER_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY
-  );
-
 export type WebSearchEngine = "exa" | "parallel" | "native";
 
 /**

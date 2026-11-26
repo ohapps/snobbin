@@ -170,8 +170,12 @@ export const toAiImageUrl = (imageUrl: string): string => {
   const prefix = url.pathname.slice(0, at + marker.length);
   const rest = url.pathname
     .slice(at + marker.length)
-    // Swap the extension, which also selects the delivered format.
-    .replace(/\.[a-z0-9]+$/i, "")
+    // Swap an image extension, which also selects the delivered format. Only
+    // known ones: a public ID can itself contain a dot ("beer.2024").
+    .replace(
+      /\.(jpe?g|png|gif|webp|avif|heic|heif|jxl|jp2|tiff?|bmp|svg|ico)$/i,
+      "",
+    )
     .concat(".jpg");
   url.pathname = `${prefix}f_jpg,q_auto,w_1600,c_limit/${rest}`;
   url.protocol = "https:";
@@ -207,6 +211,8 @@ export const identifyFromText = async (
   context: IdentifyContext,
 ): Promise<IdentifiedFromText> => {
   const prompt = buildTextPrompt(context, query);
+  // One deadline for both attempts, so a slow model can't double the wait.
+  const deadline = AbortSignal.timeout(25_000);
   const run = (
     providerOptions?: ReturnType<typeof getWebSearchProviderOptions>,
   ) =>
@@ -214,7 +220,7 @@ export const identifyFromText = async (
       model: getItemModel(),
       schema: TextSchema,
       prompt,
-      abortSignal: AbortSignal.timeout(20_000),
+      abortSignal: deadline,
       providerOptions: providerOptions as never,
     });
 
@@ -223,8 +229,9 @@ export const identifyFromText = async (
   try {
     result = await run(webSearch);
   } catch (err) {
-    // A web search hiccup shouldn't sink the whole lookup.
-    if (!webSearch) throw err;
+    // A web search hiccup shouldn't sink the whole lookup, but once the
+    // deadline has passed there's no time left to retry.
+    if (!webSearch || deadline.aborted) throw err;
     console.warn("Identify with web search failed, retrying without:", err);
     result = await run(undefined);
   }

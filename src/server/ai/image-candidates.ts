@@ -48,6 +48,7 @@ const HEADERS = { "User-Agent": "SnobbinApp/1.0 (contact@snobbin.com)" };
 /** Hosts whose images we offer, and so the only ones we'll copy to Cloudinary. */
 const CANDIDATE_HOSTS = [
   "upload.wikimedia.org",
+  "thumb.wikimedia.org",
   "covers.openlibrary.org",
   "image.tmdb.org",
 ];
@@ -60,6 +61,23 @@ export const isCandidateImageUrl = (raw: string): boolean => {
     return false;
   }
 };
+
+/**
+ * Wikimedia rendition width we save: big enough for any screen, and far
+ * smaller than camera originals, which can be tens of MB.
+ */
+const SAVE_WIDTH = "1600";
+
+/**
+ * Picker preview for a Wikimedia rendition: the 500px rendition of the same
+ * file (a standard Wikimedia size). Smaller images are used as they are.
+ */
+export const previewOf = (renditionUrl: string): string =>
+  renditionUrl.replace(
+    /\/(\d+)px-([^/]+)$/,
+    (match: string, width: string, name: string) =>
+      Number(width) > 500 ? `/500px-${name}` : match,
+  );
 
 const getJson = async <T>(
   url: string,
@@ -106,7 +124,8 @@ export const searchWikipedia = async (
     // Posters and covers are almost never freely licensed, and the API only
     // returns free images unless asked.
     pilicense: "any",
-    pithumbsize: "400",
+    // The thumbnail is the rendition we save (the original when smaller).
+    pithumbsize: SAVE_WIDTH,
     ppprop: "disambiguation",
     redirects: "1",
   });
@@ -117,16 +136,21 @@ export const searchWikipedia = async (
   );
   return (data?.query?.pages ?? [])
     .filter(
-      (page) => page.pageprops?.disambiguation === undefined && page.original,
+      (page) =>
+        page.pageprops?.disambiguation === undefined &&
+        !!(page.thumbnail ?? page.original),
     )
     .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
     .slice(0, limit)
-    .map((page) => ({
-      url: page.original!.source,
-      thumbnailUrl: page.thumbnail?.source ?? page.original!.source,
-      source: "wikipedia" as const,
-      label: page.title,
-    }));
+    .map((page) => {
+      const url = (page.thumbnail ?? page.original)!.source;
+      return {
+        url,
+        thumbnailUrl: previewOf(url),
+        source: "wikipedia" as const,
+        label: page.title,
+      };
+    });
 };
 
 // ---------------------------------------------------------------- Commons ---
@@ -152,7 +176,7 @@ export const searchCommons = async (
     gsrlimit: "6",
     prop: "imageinfo",
     iiprop: "url|mime",
-    iiurlwidth: "400",
+    iiurlwidth: SAVE_WIDTH,
   });
   const data = await getJson<{ query?: { pages?: CommonsPage[] } }>(
     `https://commons.wikimedia.org/w/api.php?${params}`,
@@ -167,9 +191,11 @@ export const searchCommons = async (
     .slice(0, limit)
     .map((page) => {
       const info = page.imageinfo![0];
+      // thumburl is the rendition we save (the original when smaller).
+      const url = info.thumburl ?? info.url;
       return {
-        url: info.url,
-        thumbnailUrl: info.thumburl ?? info.url,
+        url,
+        thumbnailUrl: previewOf(url),
         source: "commons" as const,
         label: page.title.replace(/^File:/, "").replace(/\.\w+$/, ""),
       };
@@ -388,7 +414,13 @@ export const findImageCandidates = async (
     if (
       !isCandidateImageUrl(candidate.url) ||
       seen.has(candidate.url) ||
-      !isRelevant(candidate, queries)
+      // Wikipedia must mention the item's own name: the AI's phrases can
+      // carry other words ("Stick Apple TV+" let in an Apple TV device).
+      // Commons file names vary more, so its photos may match a phrase.
+      !isRelevant(
+        candidate,
+        candidate.source === "wikipedia" ? [search.title] : queries,
+      )
     ) {
       continue;
     }

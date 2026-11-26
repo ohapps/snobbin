@@ -65,6 +65,14 @@ describe("toAiImageUrl", () => {
     );
   });
 
+  it("keeps a dot that is part of the public ID", () => {
+    expect(
+      toAiImageUrl("https://res.cloudinary.com/demo/image/upload/v1/beer.2024"),
+    ).toBe(
+      "https://res.cloudinary.com/demo/image/upload/f_jpg,q_auto,w_1600,c_limit/v1/beer.2024.jpg",
+    );
+  });
+
   it("leaves other URLs alone", () => {
     const wiki = "https://upload.wikimedia.org/wikipedia/en/a/ad/Cover.jpg";
     expect(toAiImageUrl(wiki)).toBe(wiki);

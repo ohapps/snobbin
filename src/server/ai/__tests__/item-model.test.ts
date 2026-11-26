@@ -1,9 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  getItemModel,
-  getWebSearchProviderOptions,
-  isItemAiConfigured,
-} from "../item-model";
+import { getItemModel, getWebSearchProviderOptions } from "../item-model";
 
 const describeModel = () => {
   const model = getItemModel() as { provider: string; modelId: string };
@@ -37,14 +33,6 @@ describe("getItemModel", () => {
     vi.stubEnv("OPENROUTER_API_KEY", "or-key");
     vi.stubEnv("AI_ITEM_MODEL", "google/gemini-3.8-flash");
     expect(describeModel().modelId).toBe("google/gemini-3.8-flash");
-  });
-
-  it("reports whether any key is configured", () => {
-    vi.stubEnv("OPENROUTER_API_KEY", "");
-    vi.stubEnv("GOOGLE_GENERATIVE_AI_API_KEY", "");
-    expect(isItemAiConfigured()).toBe(false);
-    vi.stubEnv("OPENROUTER_API_KEY", "or-key");
-    expect(isItemAiConfigured()).toBe(true);
   });
 });
 

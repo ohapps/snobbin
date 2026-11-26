@@ -84,7 +84,24 @@ const ItemForm = ({
       methods.setValue("description", result.description, {
         shouldValidate: true,
       });
-      setAttributes(result.attributes);
+      // Keep each existing attribute row's id so saving an existing item
+      // updates its values instead of inserting duplicate rows; attributes
+      // the AI left out keep their current values.
+      setAttributes((current) => {
+        const identified = new Map(
+          result.attributes.map((attr) => [attr.attributeId, attr]),
+        );
+        const updated = current.map((attr) => {
+          const match = identified.get(attr.attributeId);
+          return match
+            ? { ...attr, attributeValue: match.attributeValue }
+            : attr;
+        });
+        const added = result.attributes.filter(
+          (attr) => !current.some((c) => c.attributeId === attr.attributeId),
+        );
+        return [...updated, ...added];
+      });
       if (result.image) {
         setImage(result.image);
       }
