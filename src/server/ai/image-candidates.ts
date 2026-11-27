@@ -43,7 +43,7 @@ export interface ImageSearch {
 
 const MAX_CANDIDATES = 8;
 const SOURCE_TIMEOUT_MS = 5_000;
-const HEADERS = { "User-Agent": "SnobbinApp/1.0 (contact@snobbin.com)" };
+const HEADERS = { "User-Agent": "SnobbinApp/1.0 (https://snobbin.ohapps.com)" };
 
 /** Hosts whose images we offer, and so the only ones we'll copy to Cloudinary. */
 const CANDIDATE_HOSTS = [
