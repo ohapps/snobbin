@@ -12,10 +12,16 @@ interface UseIdentifyItemParams {
   description?: string;
 }
 
+export type ImageCandidate = NonNullable<
+  IdentifyItemResponse["imageCandidates"]
+>[number];
+
 interface IdentifyItemResultData {
   description: string;
   attributes: RankingItemAttribute[];
   image?: ItemImage | null;
+  /** Pictures to choose from (text lookups only). */
+  imageCandidates: ImageCandidate[];
 }
 
 interface UseIdentifyItemResult {
@@ -54,6 +60,7 @@ export const useIdentifyItem = (
       const requestBody: IdentifyItemRequest = {
         imageUrl: imageUrl || undefined,
         description: description || undefined,
+        pickImage: true,
         groupName,
         groupDescription,
         attributes,
@@ -85,6 +92,7 @@ export const useIdentifyItem = (
                 publicId: data.imagePublicId,
               }
             : null,
+        imageCandidates: data.imageCandidates ?? [],
       };
     } catch (err) {
       const message =
